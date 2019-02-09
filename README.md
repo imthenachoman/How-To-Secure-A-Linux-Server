@@ -1,4 +1,3 @@
-
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server.
@@ -55,7 +54,7 @@ This guide...
 - **...is** focused on **at-home** Linux servers. All of the concepts/recommendations here apply to larger/professional environments but those use-cases call for more advanced and specialized configurations that are out-of-scope for this guide.
 - **...does not** teach you about Linux, or how to use it.
 - **...does not** tell you how to [install Linux](#installing-linux).
-- **...does not** teach you everything you need to know about security.
+- **...does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. Physical security, for example, is out of scope for this guide.
 - **...does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities that will get you started. To learn more, read the documentation.
 - **...aims** to make it easy by providing code you and can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
 
@@ -129,7 +128,7 @@ Installing Linux is out-of-scope for this document. If you need help, start with
   - configuring mount points in `/etc/fstab` (like [mounting `/tmp` in RAM using `tmpfs`](#mount-tmp-in-ram-using-tmpfs))
   - creating the initial user accounts
   - etc...
-- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail as MTA](#configure-gmail-as-mta)..
+- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail as MTA](#configure-gmail-as-mta). 
 
 ([Table of Contents](#table-of-contents))
 
@@ -158,15 +157,16 @@ For SSH, a public and private key is created on the client. The public key is th
 
 - https://www.ssh.com/ssh/public-key-authentication
 - https://help.ubuntu.com/community/SSH/OpenSSH/Keys
+- https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/
 - `man ssh-keygen`
 - `man ssh-copy-id`
 
 #### Steps
 
-1. From the computer you're going to use to connect to your server, **the client**, not the server itself, create 4096 bit RSA keys:
+1. From the computer you're going to use to connect to your server, **the client**, not the server itself, create an [ed25519](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/) key:
 
     ``` bash
-    ssh-keygen -t rsa -b 4096
+    ssh-keygen -t ed25519
     ```
 
 1. Transfer it to your server:
@@ -279,6 +279,10 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 #### Goals
 
 - auto boot the default Debian install and require a password for anything else
+
+#### Notes
+
+- This will only protect GRUB and anything behind it like your operating systems. Check your motherboard's documentation for password protecting your BIOS to prevent a bad actor from circumventing GRUB.
 
 #### References
 
@@ -587,17 +591,17 @@ SSH is a door into your server. This is especially true if you are opening ports
    
 1. Then **find and edit or add** these settings, and set values as per your requirements:
 
-    |Setting|Valid Values|Example|Description|
-    |--|--|--|--|
-    |**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to|
-    |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response|
-    |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request|
-    |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on|
-    |**LoginGraceTime**|number of seconds|`LoginGraceTime 30`|time in seconds before login times-out|
-    |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login|
-    |**MaxSessions**|number|`MaxSessions 2`|maximum number of open sessions|
-    |**MaxStartups**|number|`MaxStartups 2`|maximum number of login sessions|
-    |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on|
+    |Setting|Valid Values|Example|Description|Notes|
+    |--|--|--|--|--|
+    |**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
+    |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response||
+    |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request||
+    |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on||
+    |**LoginGraceTime**|number of seconds|`LoginGraceTime 30`|time in seconds before login times-out||
+    |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login||
+    |**MaxSessions**|number|`MaxSessions 2`|maximum number of open sessions||
+    |**MaxStartups**|number|`MaxStartups 2`|maximum number of login sessions||
+    |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
     
     Check `man sshd_config` for more details what these settings mean.
 
@@ -1188,8 +1192,15 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 - [ ] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening-wip)
 - [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
 - [ ] full disk encryption
-- [ ] BIOS password
+- [x] BIOS password
 - [ ] Anti-Virus
+- [x] use ed25519 keys instead of RSA for SSH public/private keys
+
+([Table of Contents](#table-of-contents))
+
+### Additional References
+
+- [https://github.com/pratiktri/server_init_harden](https://github.com/pratiktri/server_init_harden) - Bash script that automates few of the tasks that you need to perform on a new Linux server to give it basic amount security.
 
 ([Table of Contents](#table-of-contents))
 
