@@ -581,7 +581,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     IgnoreRhosts yes
 
     # verify hostname matches IP
-    UseDNS yes
+    UseDNS no
 
     Compression no
     TCPKeepAlive no
