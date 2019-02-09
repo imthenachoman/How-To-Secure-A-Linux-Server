@@ -1,3 +1,4 @@
+
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server.
@@ -202,6 +203,10 @@ Now would be a good time to [perform any tasks specific to your setup](#post-ins
 
 When and if other accounts need access to a file/folder, you want to explicitly grant it using a combination of file/folder permissions and primary group.
 
+#### Why Not
+
+Changing the default `umask` can create unexpected problems.
+
 #### Goals
 
 - set default `umask` for **non-root** accounts to **0027**
@@ -225,8 +230,8 @@ When and if other accounts need access to a file/folder, you want to explicitly 
     [For the lazy](#for-the-lazy---editing-configuration-files):
     
     ``` bash
-    sudo cp /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
-    sudo cp /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
     
     echo -e "\numask 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/profile /etc/bash.bashrc
     ```
@@ -240,7 +245,7 @@ When and if other accounts need access to a file/folder, you want to explicitly 
     [For the lazy](#for-the-lazy---editing-configuration-files):
     
     ``` bash
-    sudo cp /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
     
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
     ```
@@ -254,7 +259,7 @@ When and if other accounts need access to a file/folder, you want to explicitly 
     [For the lazy](#for-the-lazy---editing-configuration-files):
     
     ``` bash
-    sudo cp /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
     
     echo -e "\numask 0077         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /root/.bashrc
     ```
@@ -334,7 +339,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 1. Make a backup of `/etc/grub.d/10_linux` and unset execute bit so `update-grub` doesn't try to run it:
 
     ``` bash
-    sudo cp /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
     sudo chmod a-x /etc/grub.d/10_linux.*
     ```
 
@@ -366,7 +371,9 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 
 #### Notes
 
-- Your installation may already have a special group intended for this purpose so check first. For example, on my Debian install, the installer created the `sudo` group.
+- Your installation may already have a special group intended for this purpose so check first.
+  - Debian creates the `sudo` group
+  - RedHat creates the `wheel` group
 
 #### Steps
 
@@ -389,7 +396,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 1. Edit `/etc/sudoers`:
 
     ``` bash
-    sudo cp /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
     sudo visudo
     ```
 
@@ -515,7 +522,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 1. Make a backup of `/etc/ssh/sshd_config`:
 
     ``` bash
-    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
     ```
     
 1. Edit `/etc/ssh/sshd_config` then **find and edit or add** these settings that should apply regardless of your configuration/setup:
@@ -622,7 +629,7 @@ Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/
 1. Make a backup of `/etc/ssh/moduli`:
 
     ``` bash
-    sudo cp /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Remove short moduli:
@@ -682,7 +689,7 @@ By default, accounts can use any password they want, including bad ones. [pwqual
     [For the lazy](#for-the-lazy---editing-configuration-files):
    
     ``` bash
-    sudo cp /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
     
     sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
     ```
@@ -979,7 +986,7 @@ Many folks might find the experience cumbersome or annoying. And, acesss to your
     [For the lazy](#for-the-lazy---editing-configuration-files):
     
     ``` bash
-    sudo cp /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
     
     echo -e "\nauth       required     pam_google_authenticator.so nullok         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/pam.d/sshd
     ```
@@ -993,7 +1000,7 @@ Many folks might find the experience cumbersome or annoying. And, acesss to your
     [For the lazy](#for-the-lazy---editing-configuration-files):
     
     ``` bash
-    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
     
     echo -e "\nChallengeResponseAuthentication yes         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ssh/sshd_config
     ```
@@ -1038,7 +1045,7 @@ Using `tmpfs` will consume RAM. If RAM fills up your system may become unstable.
     [For the lazy](#for-the-lazy---editing-configuration-files):
     
     ``` bash
-    sudo cp /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
     
     echo -e "\ntmpfs   /tmp    tmpfs   defaults,noatime,rw,nodev,nosuid,nodiratime,mode=1777,size=2G  0   0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
     ```
@@ -1180,6 +1187,9 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
 - [ ] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening-wip)
 - [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
+- [ ] full disk encryption
+- [ ] BIOS password
+- [ ] Anti-Virus
 
 ([Table of Contents](#table-of-contents))
 
