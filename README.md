@@ -56,7 +56,7 @@ This guide...
 - **...does not** tell you how to [install Linux](#installing-linux).
 - **...does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. Physical security, for example, is out of scope for this guide.
 - **...does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities that will get you started. To learn more, read the documentation.
-- **...aims** to make it easy by providing code you and can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
+- **...aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
 
 ([Table of Contents](#table-of-contents))
 
