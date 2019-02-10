@@ -1,23 +1,28 @@
+
+
 # How To Secure A Linux Server
 
-An evolving how-to guide for securing a Linux server.
+An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
 
 ## Table of Contents
 
 - [Introduction](#introduction)
   - [Document Objective](#document-objective)
+  - [Why Secure Your Server](#why-secure-your-server)
   - [Why Yet Another Guide](#why-yet-another-guide)
   - [Contributing](#contributing)
-  - [For The Lazy - Editing Configuration Files](#for-the-lazy---editing-configuration-files)
+  - [Editing Configuration Files - For The Lazy](#Editing-Configuration-Files---For-The-Lazy)
+  - [To Do / To Add](#to-do--to-add)
 - [Before You Start](#before-you-start)
-  - [Notes](#notes)
+  - [Identify Your Principals](#Identify-Your-Principals)
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation](#prepost-installation)
+  - [Important Advice For Using This Guide](#Important-Advice-For-Using-This-Guide)
 - [Securing Linux](#securing-linux)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
+  - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
   - [Change Default `umask`](#change-default-umask)
   - [Password Protect GRUB](#password-protect-grub)
-  - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
   - [Disable Root Login](#disable-root-login)
   - [Secure SSH](#secure-ssh)
     - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
@@ -27,13 +32,15 @@ An evolving how-to guide for securing a Linux server.
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [Fail2ban: Intrusion Detection And Prevention](#fail2ban-intrusion-detection-and-prevention)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
+  - [Apticron - Automatic Update Notifier](#Apticron---Automatic-Update-Notifier)
 - [Other Stuff](#other-stuff)
   - [Mount `/tmp` In RAM Using `tmpfs`](#mount-tmp-in-ram-using-tmpfs)
   - [Configure Gmail as MTA](#configure-gmail-as-mta)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
 - [Miscellaneous](#miscellaneous)
   - [Contacting Me](#contacting-me)
-  - [To Do / To Add](#to-do--to-add)
+  - [Additional References](#Additional-References)
+  - [Acknowledgments](#Acknowledgments)
   - [Disclaimer / Warranty](#disclaimer--warranty)
 
 ## Introduction
@@ -42,21 +49,28 @@ An evolving how-to guide for securing a Linux server.
 
 This guide's purpose is to teach you how to secure a Linux server. 
 
-Hopefully you already understand why good security is important. That is a heavy topic onto itself and answering it is out-of-scope for this document. If you don't know the answer to that question, I advise you research it.
-
-At a high level, the second a  device, like a server, is in the public domain -- i.e visible to the outside world -- it becomes a target for bad-actors. An unsecured device is a playground for bad-actors who want access to confidential data, or more nodes for their coordinated large-scale DDOS attacks.
-
-There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
+There are a lot of things you can do to secure a Linux server to prevent bad-actors from gaining access to your server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
 This guide...
 
 - **...is** a work in progress.
 - **...is** focused on **at-home** Linux servers. All of the concepts/recommendations here apply to larger/professional environments but those use-cases call for more advanced and specialized configurations that are out-of-scope for this guide.
-- **...does not** teach you about Linux, or how to use it.
-- **...does not** tell you how to [install Linux](#installing-linux).
+- **...does not** teach you about Linux, how to [install Linux](#installing-linux),or how to use it.
 - **...does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. Physical security, for example, is out of scope for this guide.
-- **...does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities that will get you started. To learn more, read the documentation.
+- **...does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to wet your appetite and make you hungry enough to go and learn more.
 - **...aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
+
+([Table of Contents](#table-of-contents))
+
+### Why Secure Your Server
+
+I assume you're using this guide becuase you, hopefully, already understand why good security is important. That is a heavy topic onto itself and breaking it down is out-of-scope for this document. If you don't know the answer to that question, I advise you research it first.
+
+At a high level, the second a  device, like a server, is in the public domain -- i.e visible to the outside world -- it becomes a target for bad-actors. An unsecured device is a playground for bad-actors who want access to confidential data, or to add nodes to their coordinated large-scale DDOS attacks.
+
+What's worse is, without good security, you may never know if your server has been compromised. A bad-actor may have gained unauthorized access to your server and copied your data without changing anything so you'd never know. Or your server may have been part of a DDOS attack and you wouldn't know. Look at many of the large scale data breaches in the news -- the companies often did not discover the data leak or intrusion until long after the bad-actors were gone.
+
+Contrary to popular, bad-actors don't always want to change something or lock you out of your data for money. Sometimes they just want your for their data warehouses (there is big money in big data) or to covertly use your server for their nefarious purposes.
 
 ([Table of Contents](#table-of-contents))
 
@@ -82,7 +96,7 @@ To contribute you can fork and submit a pull request or submit a [new issue](htt
 
 ([Table of Contents](#table-of-contents))
 
-### For The Lazy - Editing Configuration Files
+### Editing Configuration Files - For The Lazy
 
 I am very lazy and do not like to edit files by hand if I don't need to. I also assume everyone else is just like me. :)
 
@@ -96,13 +110,35 @@ Not all changes can be automated with `code` snippets. Those changes need good, 
 
 ([Table of Contents](#table-of-contents))
 
+### To Do / To Add
+
+- [ ] [Custom Jails for Fail2ban](#custom-jails)
+- [ ] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening-wip)
+- [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
+- [ ] full disk encryption
+- [x] BIOS password
+- [ ] Anti-Virus
+- [x] use ed25519 keys instead of RSA for SSH public/private keys
+- [ ] psad
+
+([Table of Contents](#table-of-contents))
+
 ## Before You Start
 
-### Notes
+### Identify Your Principals
 
-- Debian is my distribution of choice and what this guide was tested on. The lines below will, in most cases, work in other distributions -- although, file paths and settings may differ slightly. Check your distribution's documentation.
-- Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
-- Your use-case may call for a different configuration. You'll want to understand what each section does and apply as you deem appropriate. You may not, for example, want to [disable root login](#disable-root-login) because you have no means of recovering, or you may not want to [password protect GRUB](#password-protect-grub) because there is zero risk of a bad actor getting physical access to your server.
+Before you start you will want to identify what your principals are. What is your [threat model](https://en.wikipedia.org/wiki/Threat_model)? Some things to think about:
+
+- Why do you want to secure your server?
+- How much security do you want or not want?
+- How much convince are you willing to compromise for security and vice-versa?
+- What are the threats you want to protect against? What are the specifics to your situation? For example:
+  - Is physical access to your server/network a possible attack vector? 
+  - Will you be opening ports on your router so you can access your server from outside your home?
+  - Will you be hosting a file share on your server that will be mounted on a desktop class machine? What is the possibility of the desktop machine getting infected and, in turn, infecting the server?
+ - Do you have a means of recovering if your security implementation locks you out of your own server? For example, you [disabled root login](#disable-root-login) or [password protected GRUB](#password-protect-grub).
+
+These are just **a few things** to think about. Before you start securing your server you will want to understand what you're trying to protect against and why so you know what you need to do.
 
 ([Table of Contents](#table-of-contents))
 
@@ -115,12 +151,15 @@ Installing Linux is out-of-scope for this document. If you need help, start with
 1. boot your server from your install medium
 1. follow the prompts to install
 
+Where applicable, use the expert install option so you have tighter control of what is running on your server. **Only install what you absolutely need.** I, personally, do not install anything other than SSH.
+
+Debian is my distribution of choice and what this guide was written/tested on. Everything below should, in most cases, work on other distributions but file paths and settings may differ slightly. Check your distribution's documentation.
+
 ([Table of Contents](#table-of-contents))
 
 ### Pre/Post Installation
 
 - If you're opening ports on your router so you can access your server from the outside, disable the port forwarding until your system is up and secured. 
-- Where applicable, use the expert install option so you have tighter control of what is running on your server. **Only install what you absolutely need.** I, personally, do not install anything other than SSH.
 - Unless you're doing everything physically connected to your server, you'll need SSH access so be sure it is installed.
 - Be sure to keep your system up-to-date (i.e. `sudo apt update && sudo apt upgrade` on Debian based systems)
 - <a name="post-install"></a>At some point, like maybe right after configuring [SSH public/private keys](#ssh-publicprivate-keys), make sure you perform any tasks specific to your setup like:
@@ -132,6 +171,13 @@ Installing Linux is out-of-scope for this document. If you need help, start with
 
 ([Table of Contents](#table-of-contents))
 
+### Important Advice For Using This Guide
+
+- Read the whole guide before you start. Your use-case and/or principals may call for not doing something or for changing the order.
+- Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
+
+([Table of Contents](#table-of-contents))
+
 ## Securing Linux
 
 ### SSH Public/Private Keys
@@ -140,20 +186,32 @@ Installing Linux is out-of-scope for this document. If you need help, start with
 
 Using SSH public/private keys is more secure than using a password. It also makes it easier and faster, to connect to our server because you don't have to enter a password.
 
-At a high level, public/private keys work by using two keys to encrypt data:
+Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using two keys to verify identity.
 
 1. One key, the **public** key, **can only encrypt data**, not decrypt it
 1. The other key, the **private** key, can decrypt the data
 
-For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to establish a secure connection. 
+For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by encrypting and decrypting data that both the client and server know. If the data can't be decrypted, the identity can't be verified and a connection will not be established.
+
+They are considered more secure because you need the public key to establish an SSH connection. If you set [`PasswordAuthentication yes` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the public key. 
+
+You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts.
+
+We will be using Ed25519 keys which, according to [https://linux-audit.com/](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/):
+
+> It is using an elliptic curve signature scheme, which offers better security than ECDSA and DSA. At the same time, it also has good performance.
 
 #### Goals
 
-- 4096 bit RSA public/private SSH keys
-- private key on your client
-- public key on your server
+- Ed25519 public/private SSH keys:
+  - private key on your client
+  - public key on your server
 
-#### References
+#### Notes
+
+- You'll need to do this step for every computer and account you'll be connecting to your server from/as.
+
+#### <a name="ssh-key-references"></a>References
 
 - https://www.ssh.com/ssh/public-key-authentication
 - https://help.ubuntu.com/community/SSH/OpenSSH/Keys
@@ -163,21 +221,71 @@ For SSH, a public and private key is created on the client. The public key is th
 
 #### Steps
 
-1. From the computer you're going to use to connect to your server, **the client**, not the server itself, create an [ed25519](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/) key:
+1. From the computer you're going to use to connect to your server, **the client**, not the server itself, create an [Ed25519](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/) key:
 
     ``` bash
     ssh-keygen -t ed25519
     ```
+    
+    - Use the default options for all of the questions
+    - If you set a passphrase, you'll need to enter it every time you connect to your server using this key.
 
-1. Transfer it to your server:
+1. Now you need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the public key gives access to your server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is nobody listening between the client you're on and your server, you can use `ssh-copy-id` to transfer and append the public key:
 
     ``` bash
     ssh-copy-id user@server 
     ```
-    
-    You'll need to do this for every computer and account you'll be connecting to your server from/as.
 
 Now would be a good time to [perform any tasks specific to your setup](#post-install).
+
+([Table of Contents](#table-of-contents))
+
+### Limit Who Can Use `sudo`
+
+#### Why
+
+`sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
+
+#### Goals
+
+- `sudo` privileges limited to those who are in a group we specify
+
+#### Notes
+
+- Your installation may already have a special group intended for this purpose so check first.
+  - Debian creates the `sudo` group
+  - RedHat creates the `wheel` group
+
+#### Steps
+
+1. Create a group:
+
+    ``` bash
+    sudo groupadd sudo
+    ```
+
+1. Add account(s) to the group:
+
+    ``` bash
+    sudo usermod -a -G sudo user1
+    sudo usermod -a -G sudo user2
+    sudo usermod -a -G sudo ...
+    ```
+    
+    You'll need to do this for every account on your server that needs SSH access.
+
+1. Edit `/etc/sudoers`:
+
+    ``` bash
+    sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
+    sudo visudo
+    ```
+
+1. Add this line if it is not already there:
+
+    ```
+    %sudo   ALL=(ALL:ALL) ALL
+    ```
 
 ([Table of Contents](#table-of-contents))
 
@@ -227,7 +335,7 @@ Changing the default `umask` can create unexpected problems.
     umask 0027
     ```
     
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
@@ -242,7 +350,7 @@ Changing the default `umask` can create unexpected problems.
     UMASK 0027
     ```
     
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
@@ -256,7 +364,7 @@ Changing the default `umask` can create unexpected problems.
     umask 0077
     ```
     
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
@@ -349,7 +457,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 
 1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and **add** `--unrestricted` to the `CLASS` variable.
  
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo sed -i -r -e "/^CLASS=/ a CLASS=\"\${CLASS} --unrestricted\"         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" /etc/grub.d/10_linux
@@ -359,55 +467,6 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 
     ``` bash
     sudo update-grub
-    ```
-
-([Table of Contents](#table-of-contents))
-
-### Limit Who Can Use `sudo`
-
-#### Why
-
-`sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
-
-#### Goals
-
-- `sudo` privileges limited to those who are in a group we specify
-
-#### Notes
-
-- Your installation may already have a special group intended for this purpose so check first.
-  - Debian creates the `sudo` group
-  - RedHat creates the `wheel` group
-
-#### Steps
-
-1. Create a group:
-
-    ``` bash
-    sudo groupadd sudo
-    ```
-
-1. Add account(s) to the group:
-
-    ``` bash
-    sudo usermod -a -G sudo user1
-    sudo usermod -a -G sudo user2
-    sudo usermod -a -G sudo ...
-    ```
-    
-    You'll need to do this for every account on your server that needs SSH access.
-
-1. Edit `/etc/sudoers`:
-
-    ``` bash
-    sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
-    sudo visudo
-    ```
-
-1. Add this line if it is not already there:
-
-    ```
-    %sudo   ALL=(ALL:ALL) ALL
     ```
 
 ([Table of Contents](#table-of-contents))
@@ -431,6 +490,8 @@ If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like
     Press Enter to continue.
 
 To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
+
+An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
 
 #### Goal
 
@@ -601,6 +662,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login||
     |**MaxSessions**|number|`MaxSessions 2`|maximum number of open sessions||
     |**MaxStartups**|number|`MaxStartups 2`|maximum number of login sessions||
+    |<a name="PasswordAuthentication"></a>**PasswordAuthentication**|`yes` or `no`|`PasswordAuthentication no`|if login with a password is allowed||
     |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
     
     Check `man sshd_config` for more details what these settings mean.
@@ -690,7 +752,7 @@ By default, accounts can use any password they want, including bad ones. [pwqual
      - `gecoschec` = do not allow passwords with the account's name
 
 
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
    
     ``` bash
     sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
@@ -987,7 +1049,7 @@ Many folks might find the experience cumbersome or annoying. And, acesss to your
     
     Check [here](https://github.com/google/google-authenticator-libpam/blob/master/README.md#nullok) for what `nullok` means.
     
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
@@ -1001,7 +1063,7 @@ Many folks might find the experience cumbersome or annoying. And, acesss to your
     ChallengeResponseAuthentication yes
     ```
     
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
@@ -1014,6 +1076,42 @@ Many folks might find the experience cumbersome or annoying. And, acesss to your
     ``` bash
     sudo service sshd restart
     ```
+
+([Table of Contents](#table-of-contents))
+
+### Apticron - Automatic Update Notifier
+
+#### Why
+
+It is important to keep your server up-to-date with all security patches. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
+
+You have two options:
+
+- Configure your server for unattended updates
+- Be notified when updates are available
+
+Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
+
+#### Notes
+
+- Your server will need a way to send e-mails for this to work
+
+#### References
+
+- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
+- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
+- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
+
+#### Steps
+
+1. Install `apticron`.
+    
+    For Debian based systems:
+    
+    ``` bash
+    sudo apt install apticron
+    ```
+1. Set the value of `EMAIL` in `/etc/apticron/apticron.conf` to your e-mail address. 
 
 ([Table of Contents](#table-of-contents))
 
@@ -1046,7 +1144,7 @@ Using `tmpfs` will consume RAM. If RAM fills up your system may become unstable.
     
     Change the value of `size` to suit your needs. If you remove the `size` option then it will default to using half of your RAM.
     
-    [For the lazy](#for-the-lazy---editing-configuration-files):
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
     sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
@@ -1186,21 +1284,16 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ([Table of Contents](#table-of-contents))
 
-### To Do / To Add
-
-- [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [ ] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening-wip)
-- [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
-- [ ] full disk encryption
-- [x] BIOS password
-- [ ] Anti-Virus
-- [x] use ed25519 keys instead of RSA for SSH public/private keys
-
-([Table of Contents](#table-of-contents))
-
 ### Additional References
 
 - [https://github.com/pratiktri/server_init_harden](https://github.com/pratiktri/server_init_harden) - Bash script that automates few of the tasks that you need to perform on a new Linux server to give it basic amount security.
+
+([Table of Contents](#table-of-contents))
+
+### Acknowledgments
+
+- everyone from [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide
+- everyone from [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide  
 
 ([Table of Contents](#table-of-contents))
 
