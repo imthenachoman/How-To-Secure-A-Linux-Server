@@ -596,7 +596,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     |**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
     |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response||
     |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request||
-    |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on||
+    |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on|[Bug in `systemd` prevents SSH from starting at boot if using `ListenAddress`](https://unix.stackexchange.com/questions/499688/ssh-service-will-not-start-at-boot-if-using-listenaddress-in-sshd-config-but-it/499712#499712).|
     |**LoginGraceTime**|number of seconds|`LoginGraceTime 30`|time in seconds before login times-out||
     |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login||
     |**MaxSessions**|number|`MaxSessions 2`|maximum number of open sessions||
