@@ -1,5 +1,3 @@
-
-
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
@@ -33,10 +31,12 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Fail2ban: Intrusion Detection And Prevention](#fail2ban-intrusion-detection-and-prevention)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
   - [Apticron - Automatic Update Notifier](#Apticron---Automatic-Update-Notifier)
+  - [Orphaned Software](#orphaned-software)
 - [Other Stuff](#other-stuff)
-  - [Mount `/tmp` In RAM Using `tmpfs`](#mount-tmp-in-ram-using-tmpfs)
   - [Configure Gmail as MTA](#configure-gmail-as-mta)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
+- [Not Security](#not-security)
+  - [Mount `/tmp` In RAM Using `tmpfs`](#mount-tmp-in-ram-using-tmpfs)
 - [Miscellaneous](#miscellaneous)
   - [Contacting Me](#contacting-me)
   - [Additional References](#Additional-References)
@@ -120,6 +120,7 @@ Not all changes can be automated with `code` snippets. Those changes need good, 
 - [ ] Anti-Virus
 - [x] use ed25519 keys instead of RSA for SSH public/private keys
 - [ ] psad
+- [ ] unattended upgrades for critical security updates
 
 ([Table of Contents](#table-of-contents))
 
@@ -272,7 +273,7 @@ Now would be a good time to [perform any tasks specific to your setup](#post-ins
     sudo usermod -a -G sudo ...
     ```
     
-    You'll need to do this for every account on your server that needs SSH access.
+    You'll need to do this for every account on your server that needs `sudo` privileges.
 
 1. Edit `/etc/sudoers`:
 
@@ -311,9 +312,11 @@ Now would be a good time to [perform any tasks specific to your setup](#post-ins
 
 When and if other accounts need access to a file/folder, you want to explicitly grant it using a combination of file/folder permissions and primary group.
 
-#### Why Not
+#### <a name="umask-root"></a>Why Not
 
-Changing the default `umask` can create unexpected problems.
+Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications.
+
+**USE WITH CAUTION.**
 
 #### Goals
 
@@ -358,7 +361,7 @@ Changing the default `umask` can create unexpected problems.
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
     ```
 
-1. Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
+1. [**USE WITH CAUTION.**](#umask-root) Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
     
     ```
     umask 0077
@@ -806,6 +809,12 @@ You can create rules by explicitly specifying the ports or with application conf
     sudo ufw default deny outgoing comment 'deny all outgoing traffic'
     ```
     
+    If you are not as paranoid as me, and don't want to deny all outgoing traffic, you can allow it instead:
+    
+    ``` bash
+    sudo ufw default allow outgoing comment 'allow all outgoing traffic'
+    ```
+   
 1. Deny all incoming traffic:
     
     ``` bash
@@ -1115,44 +1124,54 @@ Which option you pick is up to you but I prefer being notified by e-mail when up
 
 ([Table of Contents](#table-of-contents))
 
-## Other Stuff
-
-### Mount `/tmp` In RAM Using `tmpfs`
+### Orphaned Software
 
 #### Why
 
-RAM is faster than disk, even SSD. By mounting `/tmp` in RAM using `tmpfs`, you may notice a performance increase.
+As you use your system, and you install and uninstall software, you'll eventually end up with orphaned, or unused software/packages/libraries. You don't need to remove them, but if you don't need them, why keep them? When security is a priority, anything not explicitly needed is a potential security threat. You want to keep your server as trimmed and lean as possible.
 
-#### Why Not
+#### Notes
 
-Using `tmpfs` will consume RAM. If RAM fills up your system may become unstable. `tmpfs` may resort to using swap.
-
-#### References
-
-- https://wiki.archlinux.org/index.php/Tmpfs
-- https://wiki.centos.org/TipsAndTricks/TmpOnTmpfs
-- `man mount`
-- `man tmpfs`
+- Each distribution manages software/packages/libraries differently so how you find and remove orphaned packages will be different.
+- So far I only have steps for Debian; I will add for other distributions as I learn how.
 
 #### Steps
 
-1. **Add** this line to `/etc/fstab`:
+##### Debian
 
+For Debian based distributions, you can use [deborphan](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages. 
+ 
+1. Install `deborphan`:
+       
+    ``` bash
+   sudo apt install deborphan
+   ```
+       
+1. Run `deborphan` as **root** to see a list of orphaned packages:
+
+    ``` bash
+    sudo deborphan
     ```
-    tmpfs   /tmp    tmpfs   defaults,noatime,rw,nodev,nosuid,nodiratime,mode=1777,size=2GB  0   0
+       
+1. Pass it's output to `apt` to remove them:
+       
+    ``` bash
+    sudo apt --autoremove purge $(deborphan)
     ```
     
-    Change the value of `size` to suit your needs. If you remove the `size` option then it will default to using half of your RAM.
+    You will want to repeatedly run this command until `deborphan` no longer returns any orphaned packages.
     
     [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
     
     ``` bash
-    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
-    
-    echo -e "\ntmpfs   /tmp    tmpfs   defaults,noatime,rw,nodev,nosuid,nodiratime,mode=1777,size=2G  0   0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
+    while [[ $(deborphan | wc -l) != 0 ]] ; do
+        sudo apt --autoremove purge $(deborphan)
+    done
     ```
 
 ([Table of Contents](#table-of-contents))
+
+## Other Stuff
 
 ### Configure Gmail as MTA
 
@@ -1246,10 +1265,14 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 #### Notes
 
 - We will install it from it's [GitHub](https://github.com/CISOfy/lynis) page so we have the latest and greatest.
+- CISOFY also offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specfic installation instructions.
 
 #### References
 
 - https://cisofy.com/documentation/lynis/get-started/
+- https://packages.cisofy.com/community/#debian-ubuntu
+- https://thelinuxcode.com/audit-lynis-ubuntu-server/
+- https://www.vultr.com/docs/install-lynis-on-debian-8
 
 #### Steps
 
@@ -1273,6 +1296,45 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     ```
     
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
+
+([Table of Contents](#table-of-contents))
+
+## Not Security
+
+### Mount `/tmp` In RAM Using `tmpfs`
+
+#### Why
+
+RAM is faster than disk, even SSD. By mounting `/tmp` in RAM using `tmpfs`, you may notice a performance increase.
+
+#### Why Not
+
+Using `tmpfs` will consume RAM. If RAM fills up your system may become unstable. `tmpfs` may resort to using swap.
+
+#### References
+
+- https://wiki.archlinux.org/index.php/Tmpfs
+- https://wiki.centos.org/TipsAndTricks/TmpOnTmpfs
+- `man mount`
+- `man tmpfs`
+
+#### Steps
+
+1. **Add** this line to `/etc/fstab`:
+
+    ```
+    tmpfs   /tmp    tmpfs   defaults,noatime,rw,nodev,nosuid,nodiratime,mode=1777,size=2GB  0   0
+    ```
+    
+    Change the value of `size` to suit your needs. If you remove the `size` option then it will default to using half of your RAM.
+    
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
+    
+    ``` bash
+    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
+    
+    echo -e "\ntmpfs   /tmp    tmpfs   defaults,noatime,rw,nodev,nosuid,nodiratime,mode=1777,size=2G  0   0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
+    ```
 
 ([Table of Contents](#table-of-contents))
 
