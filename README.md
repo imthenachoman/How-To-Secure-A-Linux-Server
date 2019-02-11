@@ -321,6 +321,10 @@ Changing the default `umask` can create unexpected problems. For example, if you
 - set default `umask` for **non-root** accounts to **0027**
 - set default `umask` for the **root** account to **0077**
 
+#### Notes
+
+- `umask` is a Bash built-in which means a user can change their own `umask` setting. 
+
 #### References
 
 - https://www.linuxnix.com/umask-define-linuxunix/
@@ -1347,6 +1351,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 ### Additional References
 
 - [https://github.com/pratiktri/server_init_harden](https://github.com/pratiktri/server_init_harden) - Bash script that automates few of the tasks that you need to perform on a new Linux server to give it basic amount security.
+- https://security.utexas.edu/os-hardening-checklist/linux-7
 
 ([Table of Contents](#table-of-contents))
 
