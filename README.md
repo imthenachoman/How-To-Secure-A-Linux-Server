@@ -132,7 +132,7 @@ Before you start you will want to identify what your principals are. What is you
 
 - Why do you want to secure your server?
 - How much security do you want or not want?
-- How much convince are you willing to compromise for security and vice-versa?
+- How much convenience are you willing to compromise for security and vice-versa?
 - What are the threats you want to protect against? What are the specifics to your situation? For example:
   - Is physical access to your server/network a possible attack vector? 
   - Will you be opening ports on your router so you can access your server from outside your home?
