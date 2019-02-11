@@ -361,7 +361,7 @@ Changing the default `umask` can create unexpected problems. For example, if you
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
     ```
 
-1. [**USE WITH CAUTION.**](#umask-root) Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
+1. [**USE WITH CAUTION.**](#umask-root) -- Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
     
     ```
     umask 0077
@@ -480,7 +480,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 
 If you have `sudo` [configured properly](#limit-who-can-use-sudo), then the **root** account will mostly never need to log in directly -- either at the terminal or remotely.
 
-#### Why Not
+#### <a name="root-password-disable"></a>Why Not
 
 **Be warned, this can cause issues with some configurations!**
 
@@ -514,7 +514,7 @@ An alternative to locking the **root** acount is set a long/complicated **root**
 
 #### Steps
 
-1. Lock the **root** account:
+1. [**USE WITH CAUTION**](#root-password-disable) -- Lock the **root** account:
 
     ``` bash
     sudo passwd -l root
