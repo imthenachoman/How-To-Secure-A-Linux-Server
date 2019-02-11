@@ -316,8 +316,6 @@ When and if other accounts need access to a file/folder, you want to explicitly 
 
 Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications.
 
-**USE WITH CAUTION.**
-
 #### Goals
 
 - set default `umask` for **non-root** accounts to **0027**
@@ -361,7 +359,7 @@ Changing the default `umask` can create unexpected problems. For example, if you
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
     ```
 
-1. [**USE WITH CAUTION.**](#umask-root) -- Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
+1. [**!! USE WITH CAUTION !!**](#umask-root) -- Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
     
     ```
     umask 0077
@@ -514,7 +512,7 @@ An alternative to locking the **root** acount is set a long/complicated **root**
 
 #### Steps
 
-1. [**USE WITH CAUTION**](#root-password-disable) -- Lock the **root** account:
+1. [**!! USE WITH CAUTION !!**](#root-password-disable) -- Lock the **root** account:
 
     ``` bash
     sudo passwd -l root
