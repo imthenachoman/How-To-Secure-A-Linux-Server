@@ -13,7 +13,6 @@ Documentation for **most** of these keys can be found at https://github.com/torv
 |`fs.protected_symlinks = 1`||[/sysctl/fs.txt](https://github.com/torvalds/linux/blob/master/Documentation/sysctl/fs.txt)|
 |`kernel.core_uses_pid = 1`||[/sysctl/kernel.txt](https://github.com/torvalds/linux/blob/master/Documentation/sysctl/kernel.txt)|
 |`kernel.ctrl-alt-del = 0`||[/sysctl/kernel.txt](https://github.com/torvalds/linux/blob/master/Documentation/sysctl/kernel.txt)|
-|`kernel.exec-shield = 1`|this key is invalid on my Debian install||
 |`kernel.kptr_restrict = 2`||[/sysctl/kernel.txt](https://github.com/torvalds/linux/blob/master/Documentation/sysctl/kernel.txt)|
 |`kernel.pid_max = 65536`||[/sysctl/kernel.txt](https://github.com/torvalds/linux/blob/master/Documentation/sysctl/kernel.txt)|
 |`kernel.randomize_va_space = 2`||[/sysctl/kernel.txt](https://github.com/torvalds/linux/blob/master/Documentation/sysctl/kernel.txt)|
@@ -92,8 +91,6 @@ Documentation for **most** of these keys can be found at https://github.com/torv
 
     kernel.core_uses_pid = 1
     kernel.ctrl-alt-del = 0
-    # this key is invalid on my Debian install
-    kernel.exec-shield = 1
     kernel.kptr_restrict = 2
     kernel.pid_max = 65536
     kernel.randomize_va_space = 2
