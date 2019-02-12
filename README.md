@@ -1,3 +1,4 @@
+
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
@@ -9,38 +10,44 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Why Secure Your Server](#why-secure-your-server)
   - [Why Yet Another Guide](#why-yet-another-guide)
   - [Contributing](#contributing)
-  - [Editing Configuration Files - For The Lazy](#Editing-Configuration-Files---For-The-Lazy)
+  - [Editing Configuration Files - For The Lazy](#editing-configuration-files---for-the-lazy)
   - [To Do / To Add](#to-do--to-add)
 - [Before You Start](#before-you-start)
-  - [Identify Your Principals](#Identify-Your-Principals)
+  - [Identify Your Principals](#identify-your-principals)
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation](#prepost-installation)
-  - [Important Advice For Using This Guide](#Important-Advice-For-Using-This-Guide)
-- [Securing Linux](#securing-linux)
+  - [Important Advice For Using This Guide](#important-advice-for-using-this-guide)
+- [Securing Linux - Safe To Do](#securing-linux---safe-to-do)
+  - [Overview](#overview)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
-  - [Change Default `umask`](#change-default-umask)
-  - [Password Protect GRUB](#password-protect-grub)
-  - [Disable Root Login](#disable-root-login)
   - [Secure SSH](#secure-ssh)
     - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
-    - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
+    - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshdconfig)
     - [Deactivate Short Moduli](#deactivate-short-moduli)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
+  - [NTP Client](#ntp-client)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [Fail2ban: Intrusion Detection And Prevention](#fail2ban-intrusion-detection-and-prevention)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
-  - [Apticron - Automatic Update Notifier](#Apticron---Automatic-Update-Notifier)
+  - [Apticron - Automatic Update Notifier](#apticron---automatic-update-notifier)
   - [Orphaned Software](#orphaned-software)
+- [Securing Linux - DANGER ZONE](#securing-linux---danger-zone)
+  - [Section Overivew](#section-overivew)
+  - [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
+  - [Change Default `umask`](#change-default-umask)
+  - [Password Protect GRUB](#password-protect-grub)
+  - [Disable Root Login](#disable-root-login)
 - [Other Stuff](#other-stuff)
   - [Configure Gmail as MTA](#configure-gmail-as-mta)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
+  - [Separate iptables Log File](#separate-iptables-log-file)
 - [Not Security](#not-security)
   - [Mount `/tmp` In RAM Using `tmpfs`](#mount-tmp-in-ram-using-tmpfs)
 - [Miscellaneous](#miscellaneous)
   - [Contacting Me](#contacting-me)
-  - [Additional References](#Additional-References)
-  - [Acknowledgments](#Acknowledgments)
+  - [Additional References](#additional-references)
+  - [Acknowledgments](#acknowledgments)
   - [Disclaimer / Warranty](#disclaimer--warranty)
 
 ## Introduction
@@ -113,14 +120,14 @@ Not all changes can be automated with `code` snippets. Those changes need good, 
 ### To Do / To Add
 
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [ ] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening-wip)
+- [x] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
 - [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
-- [ ] full disk encryption
+- [ ] disk encryption
 - [x] BIOS password
 - [ ] Anti-Virus
 - [x] use ed25519 keys instead of RSA for SSH public/private keys
 - [ ] psad
-- [ ] unattended upgrades for critical security updates
+- [ ] unattended upgrades for critical security updates and patches
 
 ([Table of Contents](#table-of-contents))
 
@@ -154,8 +161,6 @@ Installing Linux is out-of-scope for this document. If you need help, start with
 
 Where applicable, use the expert install option so you have tighter control of what is running on your server. **Only install what you absolutely need.** I, personally, do not install anything other than SSH.
 
-Debian is my distribution of choice and what this guide was written/tested on. Everything below should, in most cases, work on other distributions but file paths and settings may differ slightly. Check your distribution's documentation.
-
 ([Table of Contents](#table-of-contents))
 
 ### Pre/Post Installation
@@ -174,12 +179,19 @@ Debian is my distribution of choice and what this guide was written/tested on. E
 
 ### Important Advice For Using This Guide
 
+- Debian is my distribution of choice and what this guide was written/tested on. Everything below, except installing software (`apt`) should, in most cases, work on other distributions. File paths and settings may differ slightly so you'll want to check your distribution's documentation.
 - Read the whole guide before you start. Your use-case and/or principals may call for not doing something or for changing the order.
 - Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
 
 ([Table of Contents](#table-of-contents))
 
-## Securing Linux
+## Securing Linux - Safe To Do
+
+### Overview
+
+This section covers things you can do that are generally considered safe and shouldn't make your system unusable. **However**, as is with **anything** in this guide, **use with caution and proceed at your own risk**.
+
+([Table of Contents](#table-of-contents))
 
 ### SSH Public/Private Keys
 
@@ -253,7 +265,7 @@ Now would be a good time to [perform any tasks specific to your setup](#post-ins
 
 #### Notes
 
-- Your installation may already have a special group intended for this purpose so check first.
+- Your installation may have already done this, or may already have a special group intended for this purpose so check first.
   - Debian creates the `sudo` group
   - RedHat creates the `wheel` group
 
@@ -288,240 +300,6 @@ Now would be a good time to [perform any tasks specific to your setup](#post-ins
     %sudo   ALL=(ALL:ALL) ALL
     ```
 
-([Table of Contents](#table-of-contents))
-
-### Linux Kernel `sysctl` Hardening (WIP)
-
-#### References
-
-- https://geektnt.com/sysctl-conf-hardening.html
-- https://linoxide.com/how-tos/linux-server-protection/
-- https://www.cyberciti.biz/faq/linux-kernel-etcsysctl-conf-security-hardening/
-- https://github.com/klaver/sysctl/blob/master/sysctl.conf
-
-([Table of Contents](#table-of-contents))
-
-### Change Default `umask`
-
-#### Why
-
-`umask` controls the **default** permissions of files/folders when they are created. Insecure file/folder permissions give other accounts potentially unauthorized access to your data. This may include the ability to make configuration changes.
-
-- For **non-root** accounts, there is no need for other accounts to get any access to the account's files/folders **by default**.
-- For the **root** account, there is no need for the file/folder primary group or other accounts to have any access to **root**'s files/folders **by default**.
-
-When and if other accounts need access to a file/folder, you want to explicitly grant it using a combination of file/folder permissions and primary group.
-
-#### <a name="umask-root"></a>Why Not
-
-Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications.
-
-#### Goals
-
-- set default `umask` for **non-root** accounts to **0027**
-- set default `umask` for the **root** account to **0077**
-
-#### Notes
-
-- `umask` is a Bash built-in which means a user can change their own `umask` setting. 
-
-#### References
-
-- https://www.linuxnix.com/umask-define-linuxunix/
-- https://serverfault.com/questions/818783/which-umask-is-more-secure-in-linux-022-or-027
-- https://www.cyberciti.biz/tips/understanding-linux-unix-umask-value-usage.html
-- `man umask`
-
-#### Steps
-
-1. Set default `umask` for **non-root** accounts to **0027** by **adding** this line to `/etc/profile` and `/etc/bash.bashrc`:
-    
-    ```
-    umask 0027
-    ```
-    
-    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
-    
-    ``` bash
-    sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
-    
-    echo -e "\numask 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/profile /etc/bash.bashrc
-    ```
-
-1. We also need to **add** this line to `/etc/login.defs`:
-    
-    ```
-    UMASK 0027
-    ```
-    
-    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
-    
-    ``` bash
-    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
-    
-    echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
-    ```
-
-1. [**!! USE WITH CAUTION !!**](#umask-root) -- Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
-    
-    ```
-    umask 0077
-    ```
-    
-    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
-    
-    ``` bash
-    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
-    
-    echo -e "\numask 0077         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /root/.bashrc
-    ```
-
-([Table of Contents](#table-of-contents))
-
-### Password Protect GRUB
-
-#### Why
-
-If a bad actor has physical access to your server, they could use GRUB to gain unauthorized access to your system.
-
-#### Why Not
-
-If you forget the password, you'll have to go through [some work](https://www.cyberciti.biz/tips/howto-recovering-grub-boot-loader-password.html) to recover the password.
-
-#### Goals
-
-- auto boot the default Debian install and require a password for anything else
-
-#### Notes
-
-- This will only protect GRUB and anything behind it like your operating systems. Check your motherboard's documentation for password protecting your BIOS to prevent a bad actor from circumventing GRUB.
-
-#### References
-
-- https://selivan.github.io/2017/12/21/grub2-password-for-all-but-default-menu-entries.html
-- https://help.ubuntu.com/community/Grub2/Passwords
-- https://computingforgeeks.com/how-to-protect-grub-with-password-on-debian-ubuntu-and-kali-linux/
-- `man grub`
-- `man grub-mkpasswd-pbkdf2`
-
-#### Steps
-
-1. Create a [Password-Based Key Derivation Function 2 (PBKDF2)](https://en.wikipedia.org/wiki/PBKDF2) hash of your password:
-
-    ``` bash
-    grub-mkpasswd-pbkdf2 -c 100000
-    ```
-
-   The below output is from using `password` as the password:
-
-    ```
-    Enter password:
-    Reenter password:
-    PBKDF2 hash of your password is grub.pbkdf2.sha512.100000.2812C233DFC899EFC3D5991D8CA74068C99D6D786A54F603E9A1EFE7BAEDDB6AA89672F92589FAF98DB9364143E7A1156C9936328971A02A483A84C3D028C4FF.C255442F9C98E1F3C500C373FE195DCF16C56EEBDC55ABDD332DD36A92865FA8FC4C90433757D743776AB186BD3AE5580F63EF445472CC1D151FA03906D08A6D
-    ```
-
-1. Copy everything **after** `PBKDF2 hash of your password is `, **starting from and including** `grub.pbkdf2.sha512...` to the end. You'll need this in the next step.
-
-1. Create the file `/etc/grub.d/01_password` and **add** the below code after replacing `[hash]` with the hash you copied from the first step:
-
-    ``` bash
-    #!/bin/sh
-    set -e
-    
-    cat << EOF
-    set superusers="grub"
-    password_pbkdf2 grub [hash]
-    EOF
-    ```
-    
-    For example:
-    
-    ``` bash
-    #!/bin/sh
-    set -e
-    
-    cat << EOF
-    set superusers="grub"
-    password_pbkdf2 grub grub.pbkdf2.sha512.100000.2812C233DFC899EFC3D5991D8CA74068C99D6D786A54F603E9A1EFE7BAEDDB6AA89672F92589FAF98DB9364143E7A1156C9936328971A02A483A84C3D028C4FF.C255442F9C98E1F3C500C373FE195DCF16C56EEBDC55ABDD332DD36A92865FA8FC4C90433757D743776AB186BD3AE5580F63EF445472CC1D151FA03906D08A6D
-    EOF
-    ```
-
-1. Set the file's execute bit so `update-grub` includes it when it updates GRUB's configuration:
-
-   ``` bash
-   sudo chmod a+x /etc/grub.d/01_password
-   ```
-
-1. Make a backup of `/etc/grub.d/10_linux` and unset execute bit so `update-grub` doesn't try to run it:
-
-    ``` bash
-    sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
-    sudo chmod a-x /etc/grub.d/10_linux.*
-    ```
-
-1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and **add** `--unrestricted` to the `CLASS` variable.
- 
-    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
-    
-    ``` bash
-    sudo sed -i -r -e "/^CLASS=/ a CLASS=\"\${CLASS} --unrestricted\"         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" /etc/grub.d/10_linux
-    ```
-
-1. Update GRUB with `update-grub`:
-
-    ``` bash
-    sudo update-grub
-    ```
-
-([Table of Contents](#table-of-contents))
-
-### Disable Root Login
-
-#### Why
-
-If you have `sudo` [configured properly](#limit-who-can-use-sudo), then the **root** account will mostly never need to log in directly -- either at the terminal or remotely.
-
-#### <a name="root-password-disable"></a>Why Not
-
-**Be warned, this can cause issues with some configurations!**
-
-If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like Debian) to drop to a **root** console during boot failures, then locking the **root** account will prevent `sulogin` from opening the **root** shell and you will get this error:
-
-    Cannot open access to console, the root account is locked.
-    
-    See sulogin(8) man page for more details.
-    
-    Press Enter to continue.
-
-To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
-
-An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
-
-#### Goal
-
-- locked **root** account that nobody can use to log in as **root**
-
-#### Notes
-
-- Some distributions disable **root** login by default (e.g. Ubuntu) so you may not need to do this step. Check with your distribution's documentation.
-
-#### References
-
-- https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=806852
-- https://github.com/systemd/systemd/issues/7115
-- https://github.com/karelzak/util-linux/commit/7ff1162e67164cb4ece19dd809c26272461aa254
-- https://github.com/systemd/systemd/issues/11596
-- `man systemd`
-
-#### Steps
-
-1. [**!! USE WITH CAUTION !!**](#root-password-disable) -- Lock the **root** account:
-
-    ``` bash
-    sudo passwd -l root
-    ```
-    
 ([Table of Contents](#table-of-contents))
 
 ### Secure SSH
@@ -767,13 +545,44 @@ By default, accounts can use any password they want, including bad ones. [pwqual
 
 ([Table of Contents](#table-of-contents))
 
+### NTP Client
+
+#### Why
+
+Many security protocols leverage the time. If your system time is incorrect, it could have negative impacts to your server. An NTP client can solve that problem by keeping your system time in-sync with [global NTP servers](https://www.pool.ntp.org/en/).
+
+#### Goals
+
+- NTP client installed and keeping server time in-sync
+
+#### References
+
+- https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/
+
+#### Steps
+
+1. Install `ntp`.
+
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install ntp
+    ```
+
+Check https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/ for instructions on how to check if its running.
+
+
+([Table of Contents](#table-of-contents))
+
 ### UFW: Uncomplicated Firewall
 
 #### Why
 
-Call me paranoid but I want to deny all traffic in and out of my server except what I explicitly allow. Why would my server be sending traffic out that I don't know about? And why would external traffic be trying to access my server if I don't know who or what it is? When it comes to good security, reject/deny by default, and allow by exception.
+Call me paranoid, and you don't have to agree, but I want to deny all traffic in and out of my server except what I explicitly allow. Why would my server be sending traffic out that I don't know about? And why would external traffic be trying to access my server if I don't know who or what it is? When it comes to good security, my opinion is to reject/deny by default, and allow by exception.
 
-Ensuring that only traffic we explicitly allow is the job of a firewall. On Linux, the most common firewall is [iptables](https://en.wikipedia.org/wiki/Iptables). iptables, however, is rather complicated and confusing (IMHO). This is where UFW comes in. UFW simplifies the process of creating and managing iptables rules. 
+Of course, if you disagree, that is totally fine and can configure UFW to suit your needs.
+
+Either way, ensuring that only traffic we explicitly allow is the job of a firewall. On Linux, the most common firewall is [iptables](https://en.wikipedia.org/wiki/Iptables). iptables, however, is rather complicated and confusing (IMHO). This is where UFW comes in. UFW simplifies the process of creating and managing iptables rules. 
 
 UFW works by letting you configure rules that:
 
@@ -915,6 +724,18 @@ Then you can enable it like any other app:
 ```bash
 sudo ufw allow plexmediaserver
 ```
+
+([Table of Contents](#table-of-contents))
+
+### PSAD
+
+#### References
+
+- http://www.cipherdyne.org/psad/
+- https://www.thefanclub.co.za/how-to/how-install-psad-intrusion-detection-ubuntu-1204-lts-server
+- https://serverfault.com/questions/447578/do-we-need-psad-if-we-already-have-fail2ban#447604
+- https://serverfault.com/questions/421087/how-to-set-iptables-log-rules-for-psad-with-ufw
+- https://gist.github.com/netson/c45b2dc4e835761fbccc
 
 ([Table of Contents](#table-of-contents))
 
@@ -1173,6 +994,308 @@ For Debian based distributions, you can use [deborphan](http://freshmeat.sourcef
 
 ([Table of Contents](#table-of-contents))
 
+## Securing Linux - DANGER ZONE
+
+### Section Overivew
+
+This section covers things that are either high risk because there is a possibility they can make your system unusable, or are considered unnecessary by many because the risks outweigh any rewards. 
+
+**!! PROCEED WITH CAUTION !!**
+
+([Table of Contents](#table-of-contents))
+
+### Linux Kernel `sysctl` Hardening
+
+#### Why
+
+The kernel is the brains of a Linux system. Securing it just makes sense. 
+
+#### Why Not
+
+Changing kernel settings with `sysctl` is risky and could break your server. If you don't know what you are doing, don't have the time to debug issues, or just don't want to take the risks, I would advise from not following these steps.
+
+#### Disclaimer
+
+I am not as knowledgeable about hardening/securing a Linux kernel as I'd like. As much as I hate to admit it, I do not know what all of these settings do. My understanding is that most of them are general kernel hardening and performance, and the others are to protect against spoofing and DOS attacks. 
+
+In fact, since I am not 100% sure exactly what each setting does, I took recommended settings from numerous sites (all linked [below](#sysctl-references)) and combined them to figure out what should be set. I figure if multiple reputable sites mention the same setting, it's probably safe.
+
+If you have a better understanding of what these settings do, or have any other feedback/advice on them, please [let me know](#contacting-me).
+
+I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code in this section.
+
+#### Notes
+
+- Documentation on all the `sysctl` settings/keys is severely lacking. The [documentation I can find](https://github.com/torvalds/linux/tree/master/Documentation) seems to reference the 2.2 version kernel. I could not find anything newer. If you know where I can, please [let me know](#contacting-me).
+
+#### <a name="sysctl-references"></a>References
+
+- https://github.com/torvalds/linux/tree/master/Documentation
+- https://www.cyberciti.biz/faq/linux-kernel-etcsysctl-conf-security-hardening/
+- https://geektnt.com/sysctl-conf-hardening.html
+- https://linoxide.com/how-tos/linux-server-protection/
+- https://github.com/klaver/sysctl/blob/master/sysctl.conf
+- https://cloudpro.zone/index.php/2018/01/30/debian-9-3-server-setup-guide-part-5/ 
+
+#### Steps
+
+1. The `sysctl` settings can be found in the [sysctl.md](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/sysctl.md) file in this repo.
+
+1. Before you make a kernel `sysctl` change permanent, you can test it with the `sysctl` command:
+    
+    ``` bash
+    sudo sysctl -w [key=value]
+    ```
+    
+    Example:
+    
+    ``` bash
+    sudo sysctl -w kernel.exec-shield=1
+    ```
+    
+    **Note**: There are no spaces in `key=value`, including before and after the space.
+
+1. Once you have tested a setting, and made sure it works without breaking your server, you can make it permanent by adding the values to `/etc/sysctl.conf`. For example:
+
+    ``` bash
+    $ sudo cat /etc/sysctl.conf
+    kernel.exec-shield = 1
+    fs.file-max = 65535
+    ...
+    kernel.ctrl-alt-del = 0
+    ```
+
+1. After updating the file you can reload the settings or reboot. To reload:
+
+    ``` bash
+    sudo sysctl -p
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Change Default `umask`
+
+#### Why
+
+`umask` controls the **default** permissions of files/folders when they are created. Insecure file/folder permissions give other accounts potentially unauthorized access to your data. This may include the ability to make configuration changes.
+
+- For **non-root** accounts, there is no need for other accounts to get any access to the account's files/folders **by default**.
+- For the **root** account, there is no need for the file/folder primary group or other accounts to have any access to **root**'s files/folders **by default**.
+
+When and if other accounts need access to a file/folder, you want to explicitly grant it using a combination of file/folder permissions and primary group.
+
+#### <a name="umask-root"></a>Why Not
+
+Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications that do not run with **root** privileges.
+
+#### Goals
+
+- set default `umask` for **non-root** accounts to **0027**
+- set default `umask` for the **root** account to **0077**
+
+#### Notes
+
+- `umask` is a Bash built-in which means a user can change their own `umask` setting. 
+
+#### References
+
+- https://www.linuxnix.com/umask-define-linuxunix/
+- https://serverfault.com/questions/818783/which-umask-is-more-secure-in-linux-022-or-027
+- https://www.cyberciti.biz/tips/understanding-linux-unix-umask-value-usage.html
+- `man umask`
+
+#### Steps
+
+1. Set default `umask` for **non-root** accounts to **0027** by **adding** this line to `/etc/profile` and `/etc/bash.bashrc`:
+    
+    ```
+    umask 0027
+    ```
+    
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
+    
+    ``` bash
+    sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
+    
+    echo -e "\numask 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/profile /etc/bash.bashrc
+    ```
+
+1. We also need to **add** this line to `/etc/login.defs`:
+    
+    ```
+    UMASK 0027
+    ```
+    
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
+    
+    ``` bash
+    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
+    
+    echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
+    ```
+
+1. [**!! USE WITH CAUTION !!**](#umask-root) -- Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
+    
+    ```
+    umask 0077
+    ```
+    
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
+    
+    ``` bash
+    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
+    
+    echo -e "\numask 0077         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /root/.bashrc
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Password Protect GRUB
+
+#### Why
+
+If a bad actor has physical access to your server, they could use GRUB to gain unauthorized access to your system.
+
+#### Why Not
+
+If you forget the password, you'll have to go through [some work](https://www.cyberciti.biz/tips/howto-recovering-grub-boot-loader-password.html) to recover the password.
+
+#### Goals
+
+- auto boot the default Debian install and require a password for anything else
+
+#### Notes
+
+- This will only protect GRUB and anything behind it like your operating systems. Check your motherboard's documentation for password protecting your BIOS to prevent a bad actor from circumventing GRUB.
+
+#### References
+
+- https://selivan.github.io/2017/12/21/grub2-password-for-all-but-default-menu-entries.html
+- https://help.ubuntu.com/community/Grub2/Passwords
+- https://computingforgeeks.com/how-to-protect-grub-with-password-on-debian-ubuntu-and-kali-linux/
+- `man grub`
+- `man grub-mkpasswd-pbkdf2`
+
+#### Steps
+
+1. Create a [Password-Based Key Derivation Function 2 (PBKDF2)](https://en.wikipedia.org/wiki/PBKDF2) hash of your password:
+
+    ``` bash
+    grub-mkpasswd-pbkdf2 -c 100000
+    ```
+
+   The below output is from using `password` as the password:
+
+    ```
+    Enter password:
+    Reenter password:
+    PBKDF2 hash of your password is grub.pbkdf2.sha512.100000.2812C233DFC899EFC3D5991D8CA74068C99D6D786A54F603E9A1EFE7BAEDDB6AA89672F92589FAF98DB9364143E7A1156C9936328971A02A483A84C3D028C4FF.C255442F9C98E1F3C500C373FE195DCF16C56EEBDC55ABDD332DD36A92865FA8FC4C90433757D743776AB186BD3AE5580F63EF445472CC1D151FA03906D08A6D
+    ```
+
+1. Copy everything **after** `PBKDF2 hash of your password is `, **starting from and including** `grub.pbkdf2.sha512...` to the end. You'll need this in the next step.
+
+1. Create the file `/etc/grub.d/01_password` and **add** the below code after replacing `[hash]` with the hash you copied from the first step:
+
+    ``` bash
+    #!/bin/sh
+    set -e
+    
+    cat << EOF
+    set superusers="grub"
+    password_pbkdf2 grub [hash]
+    EOF
+    ```
+    
+    For example:
+    
+    ``` bash
+    #!/bin/sh
+    set -e
+    
+    cat << EOF
+    set superusers="grub"
+    password_pbkdf2 grub grub.pbkdf2.sha512.100000.2812C233DFC899EFC3D5991D8CA74068C99D6D786A54F603E9A1EFE7BAEDDB6AA89672F92589FAF98DB9364143E7A1156C9936328971A02A483A84C3D028C4FF.C255442F9C98E1F3C500C373FE195DCF16C56EEBDC55ABDD332DD36A92865FA8FC4C90433757D743776AB186BD3AE5580F63EF445472CC1D151FA03906D08A6D
+    EOF
+    ```
+
+1. Set the file's execute bit so `update-grub` includes it when it updates GRUB's configuration:
+
+   ``` bash
+   sudo chmod a+x /etc/grub.d/01_password
+   ```
+
+1. Make a backup of `/etc/grub.d/10_linux` and unset execute bit so `update-grub` doesn't try to run it:
+
+    ``` bash
+    sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
+    sudo chmod a-x /etc/grub.d/10_linux.*
+    ```
+
+1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and **add** `--unrestricted` to the `CLASS` variable.
+ 
+    [For the lazy](#Editing-Configuration-Files---For-The-Lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "/^CLASS=/ a CLASS=\"\${CLASS} --unrestricted\"         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" /etc/grub.d/10_linux
+    ```
+
+1. Update GRUB with `update-grub`:
+
+    ``` bash
+    sudo update-grub
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Disable Root Login
+
+#### Why
+
+If you have `sudo` [configured properly](#limit-who-can-use-sudo), then the **root** account will mostly never need to log in directly -- either at the terminal or remotely.
+
+#### <a name="root-password-disable"></a>Why Not
+
+**Be warned, this can cause issues with some configurations!**
+
+If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like Debian) to drop to a **root** console during boot failures, then locking the **root** account will prevent `sulogin` from opening the **root** shell and you will get this error:
+
+    Cannot open access to console, the root account is locked.
+    
+    See sulogin(8) man page for more details.
+    
+    Press Enter to continue.
+
+To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
+
+An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
+
+#### Goal
+
+- locked **root** account that nobody can use to log in as **root**
+
+#### Notes
+
+- Some distributions disable **root** login by default (e.g. Ubuntu) so you may not need to do this step. Check with your distribution's documentation.
+
+#### References
+
+- https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=806852
+- https://github.com/systemd/systemd/issues/7115
+- https://github.com/karelzak/util-linux/commit/7ff1162e67164cb4ece19dd809c26272461aa254
+- https://github.com/systemd/systemd/issues/11596
+- `man systemd`
+
+#### Steps
+
+1. [**!! USE WITH CAUTION !!**](#root-password-disable) -- Lock the **root** account:
+
+    ``` bash
+    sudo passwd -l root
+    ```
+
+([Table of Contents](#table-of-contents))
+
 ## Other Stuff
 
 ### Configure Gmail as MTA
@@ -1301,6 +1424,13 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
 ([Table of Contents](#table-of-contents))
 
+### Separate iptables Log File
+
+#### References
+
+- https://blog.shadypixel.com/log-iptables-messages-to-a-separate-file-with-rsyslog/
+- https://gist.github.com/netson/c45b2dc4e835761fbccc
+
 ## Not Security
 
 ### Mount `/tmp` In RAM Using `tmpfs`
@@ -1351,7 +1481,8 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 ### Additional References
 
 - [https://github.com/pratiktri/server_init_harden](https://github.com/pratiktri/server_init_harden) - Bash script that automates few of the tasks that you need to perform on a new Linux server to give it basic amount security.
-- https://security.utexas.edu/os-hardening-checklist/linux-7
+- https://security.utexas.edu/os-hardening-checklist/linux-7 -  Red Hat Enterprise Linux 7 Hardening Checklist
+- https://cloudpro.zone/index.php/2018/01/18/debian-9-3-server-setup-guide-part-1/ - # Debian 9.3 server setup guide
 
 ([Table of Contents](#table-of-contents))
 
@@ -1364,6 +1495,6 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ### Disclaimer / Warranty
 
-This guide comes with ABSOLUTELY NO WARRANTY. Use with caution.
+This guide comes with ABSOLUTELY NO WARRANTY. Use with caution. I take no responsibility for anything, related to or not related to this guide. 
  
 ([Table of Contents](#table-of-contents))
