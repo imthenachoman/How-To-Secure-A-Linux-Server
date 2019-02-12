@@ -1,9 +1,11 @@
+
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Document Objective](#document-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -13,6 +15,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [To Do / To Add](#to-do--to-add)
 - [Before You Start](#before-you-start)
   - [Identify Your Principals](#identify-your-principals)
+  - [Picking A Linux Distribution](#picking-a-linux-distribution)
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation](#prepost-installation)
   - [Important Advice For Using This Guide](#important-advice-for-using-this-guide)
@@ -40,7 +43,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 - [Other Stuff](#other-stuff)
   - [Configure Gmail as MTA](#configure-gmail-as-mta)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
-  - [Separate iptables Log File](#separate-iptables-log-file)
 - [Not Security](#not-security)
   - [Mount `/tmp` In RAM Using `tmpfs`](#mount-tmp-in-ram-using-tmpfs)
 - [Miscellaneous](#miscellaneous)
@@ -48,6 +50,8 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Additional References](#additional-references)
   - [Acknowledgments](#acknowledgments)
   - [Disclaimer / Warranty](#disclaimer--warranty)
+
+(TOC made with [nGitHubTOC](https://imthenachoman.github.io/nGitHubTOC/))
 
 ## Introduction
 
@@ -59,12 +63,13 @@ There are a lot of things you can do to secure a Linux server to prevent bad-act
 
 This guide...
 
-- **...is** a work in progress.
-- **...is** focused on **at-home** Linux servers. All of the concepts/recommendations here apply to larger/professional environments but those use-cases call for more advanced and specialized configurations that are out-of-scope for this guide.
-- **...does not** teach you about Linux, how to [install Linux](#installing-linux),or how to use it.
-- **...does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. Physical security, for example, is out of scope for this guide.
-- **...does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to wet your appetite and make you hungry enough to go and learn more.
-- **...aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
+- ...**is** a work in progress.
+- ...**is** focused on **at-home** Linux servers. All of the concepts/recommendations here apply to larger/professional environments but those use-cases call for more advanced and specialized configurations that are out-of-scope for this guide.
+- ...**does not** teach you about Linux, how to [install Linux](#installing-linux), or how to use it.
+- ...**is** meant to be [Linux distribution agnostic](#distribution-agnostic).
+- ...**does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. Physical security, for example, is out of scope for this guide.
+- ...**does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to wet your appetite and make you hungry enough to go and learn more.
+- ...**aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
 
 ([Table of Contents](#table-of-contents))
 
@@ -149,9 +154,22 @@ These are just **a few things** to think about. Before you start securing your s
 
 ([Table of Contents](#table-of-contents))
 
+### Picking A Linux Distribution
+
+<a name="distribution-agnostic"></a>This guide is intended to be distribution agnostic so users can use [any distribution](https://distrowatch.com/) they want. With that said, there are a few things to keep in mind:
+
+You want a distribution that...
+
+- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#wip), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software. 
+- ...**stays up-to-date with security patches**. You can secure everything on your server, but if the core OS or applications you're running have known vulnerabilities, you'll never be safe.
+- ...**you're familiar with.** If you don't know Linux, I would advise you play around with one before you try to secure it. You should be comfortable with it and know your way around, like how to install software, where configuration files are, etc...
+- ...**is well supported.** Even the most seasoned admin needs help every now and then. Having a place to go for help will save your sanity.
+
+([Table of Contents](#table-of-contents))
+
 ### Installing Linux
 
-Installing Linux is out-of-scope for this document. If you need help, start with your distribution's documentation. Regardless of the distribution, the high-level process usually goes like so:
+Installing Linux is out-of-scope for this document because each distribution does it differently and the installation instructions are usually well documented. If you need help, start with your distribution's documentation. Regardless of the distribution, the high-level process usually goes like so:
 
 1. download the ISO
 1. burn/copy/transfer it to your install medium (e.g. a CD or USB stick)
@@ -178,7 +196,8 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ### Important Advice For Using This Guide
 
-- Debian is my distribution of choice and what this guide was written/tested on. Everything below, except installing software (`apt`) should, in most cases, work on other distributions. File paths and settings may differ slightly so you'll want to check your distribution's documentation.
+- This guide is being written and tested on Debian. Most things below should work on other distributions. If you find something that does not, please [contact me](#contacting-me). The main thing that separates each distribution will be its package management system. Since I use Debian, I will provide the appropriate `apt` commands that should work on all [Debian based distributions](https://www.debian.org/derivatives/). If someone is willing to [provide](#contributing) the respective commands for other distributions, I will add them.
+- File paths and settings also may differ slightly -- check with your distribution's documentation if you have issues.
 - Read the whole guide before you start. Your use-case and/or principals may call for not doing something or for changing the order.
 - Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
 
@@ -1429,7 +1448,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
 ([Table of Contents](#table-of-contents))
 
-### Separate iptables Log File
+### Separate iptables Log File (WIP)
 
 #### References
 
