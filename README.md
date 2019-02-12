@@ -1070,6 +1070,12 @@ I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code
     ``` bash
     sudo sysctl -p
     ```
+    
+**Note**: If `sysctl` has trouble writing any settings then `sysctl -w` or `sysctl -p` will write an error to `stderr`. You can use this to quickly find invalid settings in  your `/etc/sysctl.conf` file:
+
+    ``` bash
+    sudo sysctl -p >/dev/null
+    ```
 
 ([Table of Contents](#table-of-contents))
 
