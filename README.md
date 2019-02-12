@@ -1050,7 +1050,7 @@ I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code
     Example:
     
     ``` bash
-    sudo sysctl -w kernel.exec-shield=1
+    sudo sysctl -w kernel.ctrl-alt-del=0
     ```
     
     **Note**: There are no spaces in `key=value`, including before and after the space.
@@ -1059,10 +1059,10 @@ I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code
 
     ``` bash
     $ sudo cat /etc/sysctl.conf
-    kernel.exec-shield = 1
+    kernel.ctrl-alt-del = 0
     fs.file-max = 65535
     ...
-    kernel.ctrl-alt-del = 0
+    kernel.sysrq = 0
     ```
 
 1. After updating the file you can reload the settings or reboot. To reload:
