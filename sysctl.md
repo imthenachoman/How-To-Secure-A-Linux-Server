@@ -40,9 +40,9 @@ Documentation for **most** of these keys can be found at https://github.com/torv
 |`net.ipv4.conf.lo.rp_filter = 1`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv4.icmp_echo_ignore_all = 1`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv4.icmp_echo_ignore_broadcasts = 1`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
-|`net.ipv4.icmp_ignore_bogus_error_messages = 1`|||
+|`net.ipv4.icmp_ignore_bogus_error_responses = 1`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv4.ip_forward = 0`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
-|`net.ipv4.ip_local_port_range = 2000 65536`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
+|`net.ipv4.ip_local_port_range = 2000 65000`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv4.tcp_fin_timeout = 15`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv4.tcp_keepalive_time = 1800`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv4.tcp_max_syn_backlog = 2048`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
@@ -132,9 +132,9 @@ Documentation for **most** of these keys can be found at https://github.com/torv
     net.ipv4.conf.lo.rp_filter = 1
     net.ipv4.icmp_echo_ignore_all = 1
     net.ipv4.icmp_echo_ignore_broadcasts = 1
-    net.ipv4.icmp_ignore_bogus_error_messages = 1
+    net.ipv4.icmp_ignore_bogus_error_responses = 1
     net.ipv4.ip_forward = 0
-    net.ipv4.ip_local_port_range = 2000 65536
+    net.ipv4.ip_local_port_range = 2000 65000
     net.ipv4.tcp_fin_timeout = 15
     net.ipv4.tcp_keepalive_time = 1800
     net.ipv4.tcp_max_syn_backlog = 2048
