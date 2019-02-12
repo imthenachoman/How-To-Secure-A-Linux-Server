@@ -1,4 +1,3 @@
-
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
@@ -727,7 +726,7 @@ sudo ufw allow plexmediaserver
 
 ([Table of Contents](#table-of-contents))
 
-### PSAD
+### PSAD (WIP)
 
 #### References
 
