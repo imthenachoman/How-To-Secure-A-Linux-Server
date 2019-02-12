@@ -120,7 +120,13 @@ Documentation for **most** of these keys can be found at https://github.com/torv
     net.ipv4.conf.default.secure_redirects = 0
     net.ipv4.conf.default.send_redirects = 0
 
-    # change eth0 to your network interface
+    ##
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #
+    # remember to change eth0 to your network interface
+    #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ##
     net.ipv4.conf.eth0.accept_redirects = 0
     net.ipv4.conf.eth0.accept_source_route = 0
     net.ipv4.conf.eth0.log_martians = 0
