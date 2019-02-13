@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Documentation](#documentation)
 - [Disclaimer](#disclaimer)
 - [Keys](#keys)
   - [Table View](#table-view)
@@ -17,11 +18,13 @@ This is a combined list of all the `sysctl` hardening recommendations I could fi
 - https://linoxide.com/how-tos/linux-server-protection/
 - https://cloudpro.zone/index.php/2018/01/30/debian-9-3-server-setup-guide-part-5/
 
-Documentation for **most** of these keys can be found at https://github.com/torvalds/linux/blob/master/Documentation.
+## Documentation
+
+Documentation for **most** of these keys can be found at https://github.com/torvalds/linux/blob/master/Documentation. However, the documentation seems to be for the 2.2 kernel. I cannot find any newer documentation. If you know where I can find newer documentation please submit a [new issue](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/new).
 
 ## Disclaimer
 
-I do not know what most of these settings do. This list is being provided just as reference material. I take no responsibility for them, what they do, or any issues/damage they do or may cause. 
+I do not know what most of these settings do. This list is being provided just as reference material. I take no responsibility for anything.
 
 ## Keys
 
