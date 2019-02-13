@@ -74,7 +74,7 @@ This guide...
 
 ### Why Secure Your Server
 
-I assume you're using this guide becuase you, hopefully, already understand why good security is important. That is a heavy topic onto itself and breaking it down is out-of-scope for this document. If you don't know the answer to that question, I advise you research it first.
+I assume you're using this guide because you, hopefully, already understand why good security is important. That is a heavy topic onto itself and breaking it down is out-of-scope for this document. If you don't know the answer to that question, I advise you research it first.
 
 At a high level, the second a  device, like a server, is in the public domain -- i.e visible to the outside world -- it becomes a target for bad-actors. An unsecured device is a playground for bad-actors who want access to confidential data, or to add nodes to their coordinated large-scale DDOS attacks.
 
@@ -1414,7 +1414,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 #### Notes
 
 - We will install it from it's [GitHub](https://github.com/CISOfy/lynis) page so we have the latest and greatest.
-- CISOFY also offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specfic installation instructions.
+- CISOFY also offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specific installation instructions.
 
 #### References
 
