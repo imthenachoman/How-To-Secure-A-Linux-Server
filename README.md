@@ -1045,6 +1045,7 @@ I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code
 #### Notes
 
 - Documentation on all the `sysctl` settings/keys is severely lacking. The [documentation I can find](https://github.com/torvalds/linux/tree/master/Documentation) seems to reference the 2.2 version kernel. I could not find anything newer. If you know where I can, please [let me know](#contacting-me).
+- The reference sites listed [below](#sysctl-reference) have more comments on what each setting does.
 
 #### <a name="sysctl-references"></a>References
 
@@ -1057,7 +1058,7 @@ I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code
 
 #### Steps
 
-1. The `sysctl` settings can be found in the [sysctl.md](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/sysctl.md) file in this repo.
+1. The `sysctl` settings can be found in the [linux-kernel-sysctl-hardening.md](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/linux-kernel-sysctl-hardening.md) file in this repo.
 
 1. Before you make a kernel `sysctl` change permanent, you can test it with the `sysctl` command:
     
