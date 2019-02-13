@@ -15,6 +15,7 @@ This is a combined list of all the `sysctl` hardening recommendations I could fi
 - https://geektnt.com/sysctl-conf-hardening.html
 - https://linoxide.com/how-tos/linux-server-protection/
 - https://cloudpro.zone/index.php/2018/01/30/debian-9-3-server-setup-guide-part-5/
+- https://github.com/klaver/sysctl/blob/master/sysctl.conf
 
 ## Documentation
 
