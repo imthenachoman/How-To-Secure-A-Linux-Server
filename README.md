@@ -1414,7 +1414,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 #### Notes
 
 - We will install it from it's [GitHub](https://github.com/CISOfy/lynis) page so we have the latest and greatest.
-- CISOFY also offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specfic installation instructions.
+- CISOFY also offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specific installation instructions.
 
 #### References
 
