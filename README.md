@@ -1,4 +1,3 @@
-
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
@@ -1045,7 +1044,7 @@ I won't provide [For the lazy](#Editing-Configuration-Files---For-The-Lazy) code
 #### Notes
 
 - Documentation on all the `sysctl` settings/keys is severely lacking. The [documentation I can find](https://github.com/torvalds/linux/tree/master/Documentation) seems to reference the 2.2 version kernel. I could not find anything newer. If you know where I can, please [let me know](#contacting-me).
-- The reference sites listed [below](#sysctl-reference) have more comments on what each setting does.
+- The reference sites listed [below](#sysctl-references) have more comments on what each setting does.
 
 #### <a name="sysctl-references"></a>References
 
