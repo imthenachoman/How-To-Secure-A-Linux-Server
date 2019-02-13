@@ -223,7 +223,7 @@ Check the [references](#ssh-key-references) below for more details but, at a hig
 
 For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by encrypting and decrypting data that both the client and server know. If the data can't be decrypted, the identity can't be verified and a connection will not be established.
 
-They are considered more secure because you need the public key to establish an SSH connection. If you set [`PasswordAuthentication yes` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the public key. 
+They are considered more secure because you need the public key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the public key. 
 
 You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts.
 
