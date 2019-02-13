@@ -1,10 +1,31 @@
-# Linux Kernel `sysctl` Settings
+# Linux Kernel `sysctl` Hardening
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Disclaimer](#disclaimer)
+- [Keys](#keys)
+  - [Table View](#table-view)
+  - [Flat File View](#flat-file-view)
 
 ## Overview
 
+This is a combined list of all the `sysctl` hardening recommendations I could find across multiple sites:
+
+- https://www.cyberciti.biz/faq/linux-kernel-etcsysctl-conf-security-hardening/
+- https://geektnt.com/sysctl-conf-hardening.html
+- https://linoxide.com/how-tos/linux-server-protection/
+- https://cloudpro.zone/index.php/2018/01/30/debian-9-3-server-setup-guide-part-5/
+
 Documentation for **most** of these keys can be found at https://github.com/torvalds/linux/blob/master/Documentation.
 
-## Table
+## Disclaimer
+
+I do not know what most of these settings do. This list is being provided just as reference material. I take no responsibility for them, what they do, or any issues/damage they do or may cause. 
+
+## Keys
+
+### Table View
 
 |`key=value`|Note|[Documentation|
 |--|--|--|
@@ -65,7 +86,7 @@ Documentation for **most** of these keys can be found at https://github.com/torv
 |`net.ipv6.conf.default.max_addresses = 1`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 |`net.ipv6.conf.default.router_solicitations = 0`||[/networking/ip-sysctl.txt](https://github.com/torvalds/linux/blob/master/Documentation/networking/ip-sysctl.txt)|
 
-## Flat File
+### Flat File View
 
     ###
     # start from https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/
