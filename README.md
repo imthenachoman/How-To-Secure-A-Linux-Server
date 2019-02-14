@@ -122,15 +122,17 @@ Not all changes can be automated with `code` snippets. Those changes need good, 
 
 ### To Do / To Add
 
-- [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [x] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
+- [ ] [Custom Jails for Fail2ban](#tbd)
+- [ ] [Linux Kernel `sysctl` Hardening](#tbd)
 - [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
 - [ ] disk encryption
 - [x] BIOS password
 - [ ] Anti-Virus
 - [x] use ed25519 keys instead of RSA for SSH public/private keys
-- [ ] psad
+- [ ] `psad`
 - [ ] unattended upgrades for critical security updates and patches
+- [ ] `logwatch`
+
 
 ([Table of Contents](#table-of-contents))
 
