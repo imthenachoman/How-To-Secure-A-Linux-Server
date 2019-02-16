@@ -237,7 +237,7 @@ For SSH, a public and private key is created on the client. The public key is th
 
 They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
 
-You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. There are tools that hold decrypted private keys in memory called SSH agents that can remove this limitation.
+You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. `ssh-agent` is a program that is shipped in many Linux distros (and usually already running) that will allow you to hold your unencrypted private key in memory for a configurable duration. Simply run `ssh-add` and it will prompt you for your passphrase. You will not be prompted for your passphrase again until the configurable duration has passed.
 
 We will be using Ed25519 keys which, according to [https://linux-audit.com/](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/):
 
@@ -259,8 +259,10 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
 - https://help.ubuntu.com/community/SSH/OpenSSH/Keys
 - https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/
 - https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process
+- https://wiki.archlinux.org/index.php/SSH_Keys
 - `man ssh-keygen`
 - `man ssh-copy-id`
+- `man ssh-add`
 
 #### Steps
 
@@ -294,7 +296,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
     > +----[SHA256]-----+
     > ```
     
-    **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key.
+    **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key, unless you're using `ssh-agent`.
 
 1. When you SSH to your server, your server will look for your public key in the `.ssh/authorized_keys` file **in your home directory**. So we need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` from the machine you're on (the client) to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the public key gives access to your server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key:
 
