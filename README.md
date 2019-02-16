@@ -436,7 +436,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 ##### Steps
 
-1. Make a backup of `/etc/ssh/sshd_config` and remove default comments to make it eaiser to read:
+1. Make a backup of `/etc/ssh/sshd_config` and remove default comments to make it easier to read:
 
     ``` bash
     sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
