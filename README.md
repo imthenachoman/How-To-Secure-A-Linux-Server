@@ -218,16 +218,16 @@ This section covers things you can do that are generally considered safe and sho
 
 Using SSH public/private keys is more secure than using a password. It also makes it easier and faster, to connect to our server because you don't have to enter a password.
 
-Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using two keys to verify identity.
+Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using a pair .
 
 1. One key, the **public** key, **can only encrypt data**, not decrypt it
 1. The other key, the **private** key, can decrypt the data
 
-For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by encrypting and decrypting data that both the client and server know. If the data can't be decrypted, the identity can't be verified and a connection will not be established.
+For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge, the identity can't be verified and a connection will not be established.
 
-They are considered more secure because you need the public key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the public key. 
+They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
 
-You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts.
+You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. There are tools that hold decrypted private keys in memory called SSH agents that can remove this limitation.
 
 We will be using Ed25519 keys which, according to [https://linux-audit.com/](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/):
 
@@ -248,6 +248,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
 - https://www.ssh.com/ssh/public-key-authentication
 - https://help.ubuntu.com/community/SSH/OpenSSH/Keys
 - https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/
+- https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process
 - `man ssh-keygen`
 - `man ssh-copy-id`
 
