@@ -138,9 +138,9 @@ Not all changes can be automated with `code` snippets. Those changes need good, 
 
 ## Before You Start
 
-### Identify Your Principals
+### Identify Your Principles
 
-Before you start you will want to identify what your principals are. What is your [threat model](https://en.wikipedia.org/wiki/Threat_model)? Some things to think about:
+Before you start you will want to identify what your principles are. What is your [threat model](https://en.wikipedia.org/wiki/Threat_model)? Some things to think about:
 
 - Why do you want to secure your server?
 - How much security do you want or not want?
