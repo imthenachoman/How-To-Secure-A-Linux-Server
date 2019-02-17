@@ -299,7 +299,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
     
     **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key, unless you're using `ssh-agent`.
 
-1. When you SSH to your server, your server will look for your public key in the `.ssh/authorized_keys` file **in your home directory**. So we need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` from the machine you're on (the client) to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the public key gives access to your server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key:
+1. When you SSH to your server, your server will look for your public key in the `.ssh/authorized_keys` file **in your home directory**. So we need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` from the machine you're on (the client) to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the added public key gives its corresponding private key access to the target server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key:
 
     ``` bash
     ssh-copy-id user@server    
