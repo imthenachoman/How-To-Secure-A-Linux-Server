@@ -98,6 +98,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [x] `psad`
 - [ ] unattended upgrades for critical security updates and patches
 - [ ] `logwatch`
+- [ ] Rkhunter and chrootkit
 
 ([Table of Contents](#table-of-contents))
 
