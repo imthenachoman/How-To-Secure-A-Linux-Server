@@ -68,7 +68,7 @@ At a high level, the second a  device, like a server, is in the public domain --
 
 What's worse is, without good security, you may never know if your server has been compromised. A bad-actor may have gained unauthorized access to your server and copied your data without changing anything so you'd never know. Or your server may have been part of a DDOS attack and you wouldn't know. Look at many of the large scale data breaches in the news -- the companies often did not discover the data leak or intrusion until long after the bad-actors were gone.
 
-Contrary to popular, bad-actors don't always want to change something or [lock you out of your data for money](). Sometimes they just want your for their data warehouses (there is big money in big data) or to covertly use your server for their nefarious purposes.
+Contrary to popular belief, bad-actors don't always want to change something or [lock you out of your data for money](). Sometimes they just want your server for their data warehouses (there is big money in big data) or to covertly use your server for their nefarious purposes.
 
 ([Table of Contents](#table-of-contents))
 
