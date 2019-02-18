@@ -101,6 +101,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] `logwatch`
 - [ ] Rkhunter and chrootkit
 - [ ] AppArmor
+- [ ] port knockers for SSH
 
 ([Table of Contents](#table-of-contents))
 
