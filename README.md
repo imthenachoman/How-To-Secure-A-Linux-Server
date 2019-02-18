@@ -11,6 +11,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [To Do / To Add](#to-do--to-add)
 - [Guide Overview](#guide-overview)
   - [About This Guide](#about-this-guide)
+  - [My Use-Case](#my-use-case)
   - [Safe vs. DANGER ZONE](#safe-vs-danger-zone)
   - [Editing Configuration Files - For The Lazy](#editing-configuration-files---for-the-lazy)
   - [Contributing](#contributing)
@@ -116,6 +117,22 @@ This guide...
 - ...**does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to wet your appetite and make you hungry enough to want to go and learn more.
 - ...**aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
 - ...**is** organized in an order that makes logical sense to me -- i.e. securing SSH before installing a firewall. As such, this guide is intended to be followed in the order it is presented but it is not necessary to do so. Just be careful if you do things in a different order -- some sections require previous sections to be completed. 
+
+([Table of Contents](#table-of-contents))
+
+### My Use-Case
+
+There are many types of servers and different use-cases. While I want this guide to be as generic as possible, there will be some things that may not apply to all/other use-cases. Use your best judgement when going through this guide.
+
+To help put context to many of the topics covered in this guide, my use-case/configuration is:
+
+- A desktop class computer...
+- With a single NIC...
+- Connected to a consumer grade router...
+- Getting a dynamic WAN IP provided by the ISP...
+- With WAN+LAN on IPV4...
+- And LAN using [NAT](https://en.wikipedia.org/wiki/Network_address_translation)...
+- That I want to be able to SSH to remotely from unknown computers and unknown locations (i.e. a friend's house).
 
 ([Table of Contents](#table-of-contents))
 
