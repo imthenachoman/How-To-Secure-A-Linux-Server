@@ -1724,7 +1724,7 @@ Without both keys, they won't be able to get in.
 
 #### Why Not
 
-Many folks might find the experience cumbersome or annoying. And, acesss to your system is dependent on the accompanying authenticator app that generates the code.
+Many folks might find the experience cumbersome or annoying. And, access to your system is dependent on the accompanying authenticator app that generates the code.
 
 #### Goals
 
@@ -1734,7 +1734,7 @@ Many folks might find the experience cumbersome or annoying. And, acesss to your
 
 - Before you do this, you should have an idea of how 2FA/MFA works and you'll need an authenticator app on your phone to continue. 
 - We'll use [google-authenticator-libpam](https://github.com/google/google-authenticator-libpam).
-- With the below configuration, a user will only need to enter their 2FA/MFA code if they are logging on with their password but not **not** if they are using [SSH public/private keys](#ssh-publicprivate-keys). Check the documentation on how to change this behavior to suite your requirements.
+- With the below configuration, a user will only need to enter their 2FA/MFA code if they are logging on with their password but **not** if they are using [SSH public/private keys](#ssh-publicprivate-keys). Check the documentation on how to change this behavior to suite your requirements.
 
 #### References
 
