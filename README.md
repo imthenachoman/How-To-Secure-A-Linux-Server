@@ -41,7 +41,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
   - [Apticron - Automatic Update Notifier](#apticron---automatic-update-notifier)
-  - [Orphaned Software](#orphaned-software)
+  - [`[DZ]` Orphaned Software](#dz-orphaned-software)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
 - [Miscellaneous](#miscellaneous)
   - [Contacting Me](#contacting-me)
@@ -100,6 +100,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] unattended upgrades for critical security updates and patches
 - [ ] `logwatch`
 - [ ] Rkhunter and chrootkit
+- [ ] AppArmor
 
 ([Table of Contents](#table-of-contents))
 
@@ -2012,9 +2013,8 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ### Acknowledgments
 
-- [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/)
-- [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/)
-- [Hacker News](https://news.ycombinator.com/item?id=19177435#19178618)
+- everyone from [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide
+- everyone from [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide  
 
 ([Table of Contents](#table-of-contents))
 
