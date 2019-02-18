@@ -2013,8 +2013,9 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ### Acknowledgments
 
-- everyone from [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide
-- everyone from [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide  
+- [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/)
+- [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/)
+- [Hacker News](https://news.ycombinator.com/item?id=19177435#19178618)
 
 ([Table of Contents](#table-of-contents))
 
