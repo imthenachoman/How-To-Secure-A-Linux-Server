@@ -104,6 +104,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] port knockers for SSH
 - [ ] https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
 - [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
+- [ ] shipping/backing up logs
 
 ([Table of Contents](#table-of-contents))
 
