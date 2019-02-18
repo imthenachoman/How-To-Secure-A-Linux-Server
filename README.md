@@ -662,6 +662,8 @@ Many security protocols leverage the time. If your system time is incorrect, it 
 
 Unless you're planning on setting up your own mail server, you'll need a way to send e-mails from your server. This will be important for system alerts/messages.
 
+You can use any Gmail account but I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password but why take the risk?
+
 #### Goals
 
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
@@ -1888,11 +1890,17 @@ Which option you pick is up to you but I prefer being notified by e-mail when up
 
 ([Table of Contents](#table-of-contents))
 
-### Orphaned Software
+### `[DZ]` Orphaned Software
+
+<details><summary>!! PROCEED AT YOUR OWN RISK !!</summary>
 
 #### Why
 
 As you use your system, and you install and uninstall software, you'll eventually end up with orphaned, or unused software/packages/libraries. You don't need to remove them, but if you don't need them, why keep them? When security is a priority, anything not explicitly needed is a potential security threat. You want to keep your server as trimmed and lean as possible.
+
+#### <a name="orphaned-software-why-not"></a>Why Not
+
+Keep in mind, `deborphan` finds packages that have **no package dependencies**. That does not mean they are not used. You could very well have a package you use every day that has no dependencies that you wouldn't want to remove. And, if `deborphan` gets anything wrong, then removing critical packages may break your system.
 
 #### Notes
 
@@ -1903,7 +1911,7 @@ As you use your system, and you install and uninstall software, you'll eventuall
 
 ##### Debian
 
-For Debian based distributions, you can use [deborphan](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages. 
+For Debian based distributions, you can use [`deborphan`](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages. 
  
 1. Install `deborphan`.
        
@@ -1922,21 +1930,13 @@ For Debian based distributions, you can use [deborphan](http://freshmeat.sourcef
     > libpipeline1
     > ```
        
-1. Pass it's output to `apt` to remove them:
+1. [Assuming you want to remove all of the packages `deborphan` finds](#orphaned-software-why-not), you can pass it's output to `apt` to remove them:
        
     ``` bash
     sudo apt --autoremove purge $(deborphan)
     ```
-    
-    You will want to repeatedly run this command until `deborphan` no longer returns any orphaned packages.
-    
-    [For the lazy](#editing-configuration-files---for-the-lazy):
-    
-    ``` bash
-    while [[ $(deborphan | wc -l) != 0 ]] ; do
-        sudo apt --autoremove purge $(deborphan)
-    done
-    ```
+
+</details>
 
 ([Table of Contents](#table-of-contents))
 
@@ -2012,8 +2012,9 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ### Acknowledgments
 
-- everyone from [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide
-- everyone from [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/) who provided feedback on this guide  
+- [/r/linuxquestions](https://www.reddit.com/r/linuxquestions/comments/aopzl7/new_guide_created_by_me_how_to_secure_a_linux/)
+- [/r/selfhosted](https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/)
+- [Hacker News](https://news.ycombinator.com/item?id=19177435#19178618)
 
 ([Table of Contents](#table-of-contents))
 
