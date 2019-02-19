@@ -75,7 +75,7 @@ Contrary to popular belief, bad-actors don't always want to change something or 
 
 ### Why Yet Another Guide
 
-This guide may appear duplicative/unnecessary because there are countless articles online that tell you how to [how to secure Linux](https://duckduckgo.com/?q=how+to+secure+linux&t=ffab&atb=v151-7&ia=web) but the information is spread across different articles, that cover different things, and in different ways. Who has time to scour through hundreds of articles?
+This guide may appear duplicative/unnecessary because there are countless articles online that tell you [how to secure Linux](https://duckduckgo.com/?q=how+to+secure+linux&t=ffab&atb=v151-7&ia=web), but the information is spread across different articles, that cover different things, and in different ways. Who has time to scour through hundreds of articles?
 
 As I was going through research for my Debian build, I kept notes. At the end I realized that, along with what I already knew, and what I was learning, I had the makings of a how-to guide. I figured I'd put it online to hopefully help others **learn**, and **save time**. 
 
