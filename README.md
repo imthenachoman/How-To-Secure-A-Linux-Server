@@ -4,6 +4,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -21,16 +22,16 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
 - [The Basics](#the-basics)
-  - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
-  - [Secure SSH](#secure-ssh)
-    - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
-    - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
-    - [Deactivate Short Moduli](#deactivate-short-moduli)
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
-  - [2FA/MFA for SSH](#2famfa-for-ssh)
   - [Apticron - Automatic Update Notifier](#apticron---automatic-update-notifier)
+- [The SSH](#the-ssh)
+  - [SSH Public/Private Keys](#ssh-publicprivate-keys)
+  - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
+  - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
+  - [Deactivate Short Moduli](#deactivate-short-moduli)
+  - [2FA/MFA for SSH](#2famfa-for-ssh)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: `iptables` Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -240,107 +241,6 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ## The Basics
 
-### SSH Public/Private Keys
-
-#### Why
-
-Using SSH public/private keys is more secure than using a password. It also makes it easier and faster, to connect to our server because you don't have to enter a password.
-
-Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using a pair of keys to verify identity.
-
-1. One key, the **public** key, **can only encrypt data**, not decrypt it
-1. The other key, the **private** key, can decrypt the data
-
-For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
-
-They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
-
-You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. `ssh-agent` is a program that is shipped in many Linux distros (and usually already running) that will allow you to hold your unencrypted private key in memory for a configurable duration. Simply run `ssh-add` and it will prompt you for your passphrase. You will not be prompted for your passphrase again until the configurable duration has passed.
-
-We will be using Ed25519 keys which, according to [https://linux-audit.com/](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/):
-
-> It is using an elliptic curve signature scheme, which offers better security than ECDSA and DSA. At the same time, it also has good performance.
-
-#### Goals
-
-- Ed25519 public/private SSH keys:
-  - private key on your client
-  - public key on your server
-
-#### Notes
-
-- You'll need to do this step for every computer and account you'll be connecting to your server from/as.
-
-#### <a name="ssh-key-references"></a>References
-
-- https://www.ssh.com/ssh/public-key-authentication
-- https://help.ubuntu.com/community/SSH/OpenSSH/Keys
-- https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/
-- https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process
-- https://wiki.archlinux.org/index.php/SSH_Keys
-- `man ssh-keygen`
-- `man ssh-copy-id`
-- `man ssh-add`
-
-#### Steps
-
-1. From the computer you're going to use to connect to your server, **the client**, not the server itself, create an [Ed25519](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/) key with `ssh-keygen`:
-
-    ``` bash
-    ssh-keygen -t ed25519
-    ```
-
-    > ```
-    > Generating public/private ed25519 key pair.
-    > Enter file in which to save the key (/home/user/.ssh/id_ed25519):
-    > Created directory '/home/user/.ssh'.
-    > Enter passphrase (empty for no passphrase):
-    > Enter same passphrase again:
-    > Your identification has been saved in /home/user/.ssh/id_ed25519.
-    > Your public key has been saved in /home/user/.ssh/id_ed25519.pub.
-    > The key fingerprint is:
-    > SHA256:F44D4dr2zoHqgj0i2iVIHQ32uk/Lx4P+raayEAQjlcs user@client
-    > The key's randomart image is:
-    > +--[ED25519 256]--+
-    > |xxxx  x          |
-    > |o.o +. .         |
-    > | o o oo   .      |
-    > |. E oo . o .     |
-    > | o o. o S o      |
-    > |... .. o o       |
-    > |.+....+ o        |
-    > |+.=++o.B..       |
-    > |+..=**=o=.       |
-    > +----[SHA256]-----+
-    > ```
-    
-    **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key, unless you're using `ssh-agent`.
-
-1. When you SSH to your server, your server will look for your public key in the `.ssh/authorized_keys` file **in your home directory**. So we need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` from the machine you're on (the client) to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the added public key gives its corresponding private key access to the target server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key:
-
-    ``` bash
-    ssh-copy-id user@server    
-    ```
-    
-    > ```
-    > /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/user/.ssh/id_ed25519.pub"
-    > The authenticity of host 'host (192.168.1.96)' can't be established.
-    > ECDSA key fingerprint is SHA256:QaDQb/X0XyVlogh87sDXE7MR8YIK7ko4wS5hXjRySJE.
-    > Are you sure you want to continue connecting (yes/no)? yes
-    > /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
-    > /usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
-    > user@host's password:
-    > 
-    > Number of key(s) added: 1
-    > 
-    > Now try logging into the machine, with:   "ssh 'user@host'"
-    > and check to make sure that only the key(s) you wanted were added.
-    > ```
-
-Now would be a good time to [perform any tasks specific to your setup](#prepost-installation).
-
-([Table of Contents](#table-of-contents))
-
 ### Limit Who Can Use `sudo`
 
 #### Why
@@ -387,198 +287,6 @@ Now would be a good time to [perform any tasks specific to your setup](#prepost-
     ```
     %sudousers   ALL=(ALL:ALL) ALL
     ```
-
-([Table of Contents](#table-of-contents))
-
-### Secure SSH
-
-#### Create SSH Group For `AllowGroups`
-
-##### Why
-
-To make it easy to control who can SSH to the server. By using a group, we can quickly add/remove accounts to the group to quickly allow or not allow SSH access to the server.
-
-##### Goals
-
-- a UNIX group that we'll use in [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config) to limit who can SSH to the server
-
-##### Notes
-
-- This is a per-requisite step to support the `AllowGroup` setting set in [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config).
-
-##### References
-
-- `man groupadd`
-- `man usermod`
-
-##### Steps
-
-1. Create a group:
-
-    ``` bash
-    sudo groupadd sshusers
-    ```
-
-1. Add account(s) to the group:
-
-    ``` bash
-    sudo usermod -a -G sshusers user1
-    sudo usermod -a -G sshusers user2
-    sudo usermod -a -G sshusers ...
-    ```
-    
-    You'll need to do this for every account on your server that needs SSH access.
-
-([Table of Contents](#table-of-contents))
-
-#### Secure `/etc/ssh/sshd_config`
-
-##### Why
-
-SSH is a door into your server. This is especially true if you are opening ports on your router so you can SSH to your server from outside your home network. If it is not secured properly, a bad-actor could use it to gain unauthorized access to your system.
-
-##### Goal
-
-- a secure SSH configuration
-
-##### Notes
-
-- Make sure you've completed [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups) first.
-
-##### References
-
-- Mozilla's OpenSSH guidelines for OpenSSH 6.7+ at https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67
-- https://linux-audit.com/audit-and-harden-your-ssh-configuration/
-- https://www.ssh.com/ssh/sshd_config/
-- https://www.techbrown.com/harden-ssh-secure-linux-vps-server/
-- https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server/660325
-- `man sshd_config`
-
-##### Steps
-
-1. Make a backup of `/etc/ssh/sshd_config` and remove default comments to make it easier to read:
-
-    ``` bash
-    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
-    sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
-    ```
-    
-1. Edit `/etc/ssh/sshd_config` then **find and edit or add** these settings that should apply regardless of your configuration/setup:
-    
-    **Note**: Your `/etc/ssh/sshd_config` file may already have some of these settings/lines. You will want to remove those and replace them with the ones below.
-    
-    ```
-    ########################################################################################################
-    # start settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
-    ########################################################################################################
-
-    # Supported HostKey algorithms by order of preference.
-    HostKey /etc/ssh/ssh_host_ed25519_key
-    HostKey /etc/ssh/ssh_host_rsa_key
-    HostKey /etc/ssh/ssh_host_ecdsa_key
-
-    KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
-
-    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
-
-    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
-
-    # LogLevel VERBOSE logs user's key fingerprint on login. Needed to have a clear audit track of which key was using to log in.
-    LogLevel VERBOSE
-
-    # Use kernel sandbox mechanisms where possible in unprivileged processes
-    # Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
-    UsePrivilegeSeparation sandbox
-
-    ########################################################################################################
-    # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
-    ########################################################################################################
-    
-    # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
-    Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
-    
-    # only use the newer, more secure protocl
-    Protocol 2
-
-    # disable X11 forwarding as X11 is very insecure
-    # you really shouldn't be running X on a server anyway
-    X11Forwarding no
-
-    # disable port forwarding
-    AllowTcpForwarding no
-    AllowStreamLocalForwarding no
-    GatewayPorts no
-    PermitTunnel no
-
-    # don't allow login if the account has an empty password
-    PermitEmptyPasswords no
-
-    # ignore .rhosts and .shosts
-    IgnoreRhosts yes
-
-    # verify hostname matches IP
-    UseDNS no
-
-    Compression no
-    TCPKeepAlive no
-    AllowAgentForwarding no
-    PermitRootLogin no
-    ```
-   
-1. Then **find and edit or add** these settings, and set values as per your requirements:
-
-    |Setting|Valid Values|Example|Description|Notes|
-    |--|--|--|--|--|
-    |**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
-    |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response||
-    |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request||
-    |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on|See [Issue #1](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/1) for important details.|
-    |**LoginGraceTime**|number of seconds|`LoginGraceTime 30`|time in seconds before login times-out||
-    |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login||
-    |**MaxSessions**|number|`MaxSessions 2`|maximum number of open sessions||
-    |**MaxStartups**|number|`MaxStartups 2`|maximum number of login sessions||
-    |<a name="PasswordAuthentication"></a>**PasswordAuthentication**|`yes` or `no`|`PasswordAuthentication no`|if login with a password is allowed||
-    |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
-    
-    Check `man sshd_config` for more details what these settings mean.
-
-1. Restart ssh:
-
-    ``` bash
-    sudo service sshd restart
-    ```
-
-([Table of Contents](#table-of-contents))
-
-#### Deactivate Short Moduli
-
-##### Why
-
-Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67), "all Diffie-Hellman moduli in use should be at least 3072-bit-long".
-
-##### Goal
-
-- deactivate short moduli
-
-##### References
-
-- Mozilla's OpenSSH guidelines for OpenSSH 6.7+ at https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67
-- `man moduli`
-
-##### Steps
-
-1. Make a backup of `/etc/ssh/moduli`:
-
-    ``` bash
-    sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
-    ```
-
-1. Remove short moduli:
-
-    ``` bash
-    sudo awk '$5 >= 3071' /etc/ssh/moduli | sudo tee /etc/ssh/moduli.tmp
-    sudo mv /etc/ssh/moduli.tmp /etc/ssh/moduli
-    ````
 
 ([Table of Contents](#table-of-contents))
 
@@ -709,6 +417,335 @@ By default, accounts can use any password they want, including bad ones. [pwqual
 
 ([Table of Contents](#table-of-contents))
 
+### Apticron - Automatic Update Notifier
+
+#### Why
+
+It is important to keep your server up-to-date with all security patches. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
+
+You have two options:
+
+- Configure your server for unattended updates
+- Be notified when updates are available
+
+Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
+
+#### Notes
+
+- Your server will need a way to send e-mails for this to work
+
+#### References
+
+- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
+- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
+- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
+
+#### Steps
+
+1. Install `apticron`.
+    
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install apticron
+    ```
+1. Set the value of `EMAIL` in `/etc/apticron/apticron.conf` to your e-mail address. 
+
+([Table of Contents](#table-of-contents))
+
+## The SSH
+
+### SSH Public/Private Keys
+
+#### Why
+
+Using SSH public/private keys is more secure than using a password. It also makes it easier and faster, to connect to our server because you don't have to enter a password.
+
+Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using a pair of keys to verify identity.
+
+1. One key, the **public** key, **can only encrypt data**, not decrypt it
+1. The other key, the **private** key, can decrypt the data
+
+For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
+
+They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
+
+You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. `ssh-agent` is a program that is shipped in many Linux distros (and usually already running) that will allow you to hold your unencrypted private key in memory for a configurable duration. Simply run `ssh-add` and it will prompt you for your passphrase. You will not be prompted for your passphrase again until the configurable duration has passed.
+
+We will be using Ed25519 keys which, according to [https://linux-audit.com/](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/):
+
+> It is using an elliptic curve signature scheme, which offers better security than ECDSA and DSA. At the same time, it also has good performance.
+
+#### Goals
+
+- Ed25519 public/private SSH keys:
+  - private key on your client
+  - public key on your server
+
+#### Notes
+
+- You'll need to do this step for every computer and account you'll be connecting to your server from/as.
+
+#### <a name="ssh-key-references"></a>References
+
+- https://www.ssh.com/ssh/public-key-authentication
+- https://help.ubuntu.com/community/SSH/OpenSSH/Keys
+- https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/
+- https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process
+- https://wiki.archlinux.org/index.php/SSH_Keys
+- `man ssh-keygen`
+- `man ssh-copy-id`
+- `man ssh-add`
+
+#### Steps
+
+1. From the computer you're going to use to connect to your server, **the client**, not the server itself, create an [Ed25519](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/) key with `ssh-keygen`:
+
+    ``` bash
+    ssh-keygen -t ed25519
+    ```
+
+    > ```
+    > Generating public/private ed25519 key pair.
+    > Enter file in which to save the key (/home/user/.ssh/id_ed25519):
+    > Created directory '/home/user/.ssh'.
+    > Enter passphrase (empty for no passphrase):
+    > Enter same passphrase again:
+    > Your identification has been saved in /home/user/.ssh/id_ed25519.
+    > Your public key has been saved in /home/user/.ssh/id_ed25519.pub.
+    > The key fingerprint is:
+    > SHA256:F44D4dr2zoHqgj0i2iVIHQ32uk/Lx4P+raayEAQjlcs user@client
+    > The key's randomart image is:
+    > +--[ED25519 256]--+
+    > |xxxx  x          |
+    > |o.o +. .         |
+    > | o o oo   .      |
+    > |. E oo . o .     |
+    > | o o. o S o      |
+    > |... .. o o       |
+    > |.+....+ o        |
+    > |+.=++o.B..       |
+    > |+..=**=o=.       |
+    > +----[SHA256]-----+
+    > ```
+    
+    **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key, unless you're using `ssh-agent`.
+
+1. When you SSH to your server, your server will look for your public key in the `.ssh/authorized_keys` file **in your home directory**. So we need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` from the machine you're on (the client) to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the added public key gives its corresponding private key access to the target server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key:
+
+    ``` bash
+    ssh-copy-id user@server    
+    ```
+    
+    > ```
+    > /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/user/.ssh/id_ed25519.pub"
+    > The authenticity of host 'host (192.168.1.96)' can't be established.
+    > ECDSA key fingerprint is SHA256:QaDQb/X0XyVlogh87sDXE7MR8YIK7ko4wS5hXjRySJE.
+    > Are you sure you want to continue connecting (yes/no)? yes
+    > /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+    > /usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+    > user@host's password:
+    > 
+    > Number of key(s) added: 1
+    > 
+    > Now try logging into the machine, with:   "ssh 'user@host'"
+    > and check to make sure that only the key(s) you wanted were added.
+    > ```
+
+Now would be a good time to [perform any tasks specific to your setup](#prepost-installation).
+
+([Table of Contents](#table-of-contents))
+
+### Create SSH Group For `AllowGroups`
+
+#### Why
+
+To make it easy to control who can SSH to the server. By using a group, we can quickly add/remove accounts to the group to quickly allow or not allow SSH access to the server.
+
+#### Goals
+
+- a UNIX group that we'll use in [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config) to limit who can SSH to the server
+
+#### Notes
+
+- This is a per-requisite step to support the `AllowGroup` setting set in [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config).
+
+#### References
+
+- `man groupadd`
+- `man usermod`
+
+#### Steps
+
+1. Create a group:
+
+    ``` bash
+    sudo groupadd sshusers
+    ```
+
+1. Add account(s) to the group:
+
+    ``` bash
+    sudo usermod -a -G sshusers user1
+    sudo usermod -a -G sshusers user2
+    sudo usermod -a -G sshusers ...
+    ```
+    
+    You'll need to do this for every account on your server that needs SSH access.
+
+([Table of Contents](#table-of-contents))
+
+### Secure `/etc/ssh/sshd_config`
+
+#### Why
+
+SSH is a door into your server. This is especially true if you are opening ports on your router so you can SSH to your server from outside your home network. If it is not secured properly, a bad-actor could use it to gain unauthorized access to your system.
+
+#### Goal
+
+- a secure SSH configuration
+
+#### Notes
+
+- Make sure you've completed [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups) first.
+
+#### References
+
+- Mozilla's OpenSSH guidelines for OpenSSH 6.7+ at https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67
+- https://linux-audit.com/audit-and-harden-your-ssh-configuration/
+- https://www.ssh.com/ssh/sshd_config/
+- https://www.techbrown.com/harden-ssh-secure-linux-vps-server/
+- https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server/660325
+- `man sshd_config`
+
+#### Steps
+
+1. Make a backup of `/etc/ssh/sshd_config` and remove default comments to make it easier to read:
+
+    ``` bash
+    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
+    sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
+    ```
+    
+1. Edit `/etc/ssh/sshd_config` then **find and edit or add** these settings that should apply regardless of your configuration/setup:
+    
+    **Note**: Your `/etc/ssh/sshd_config` file may already have some of these settings/lines. You will want to remove those and replace them with the ones below.
+    
+    ```
+    ########################################################################################################
+    # start settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
+    ########################################################################################################
+
+    # Supported HostKey algorithms by order of preference.
+    HostKey /etc/ssh/ssh_host_ed25519_key
+    HostKey /etc/ssh/ssh_host_rsa_key
+    HostKey /etc/ssh/ssh_host_ecdsa_key
+
+    KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+
+    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+
+    # LogLevel VERBOSE logs user's key fingerprint on login. Needed to have a clear audit track of which key was using to log in.
+    LogLevel VERBOSE
+
+    # Use kernel sandbox mechanisms where possible in unprivileged processes
+    # Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
+    UsePrivilegeSeparation sandbox
+
+    ########################################################################################################
+    # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
+    ########################################################################################################
+    
+    # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
+    Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
+    
+    # only use the newer, more secure protocl
+    Protocol 2
+
+    # disable X11 forwarding as X11 is very insecure
+    # you really shouldn't be running X on a server anyway
+    X11Forwarding no
+
+    # disable port forwarding
+    AllowTcpForwarding no
+    AllowStreamLocalForwarding no
+    GatewayPorts no
+    PermitTunnel no
+
+    # don't allow login if the account has an empty password
+    PermitEmptyPasswords no
+
+    # ignore .rhosts and .shosts
+    IgnoreRhosts yes
+
+    # verify hostname matches IP
+    UseDNS no
+
+    Compression no
+    TCPKeepAlive no
+    AllowAgentForwarding no
+    PermitRootLogin no
+    ```
+   
+1. Then **find and edit or add** these settings, and set values as per your requirements:
+
+    |Setting|Valid Values|Example|Description|Notes|
+    |--|--|--|--|--|
+    |**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
+    |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response||
+    |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request||
+    |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on|See [Issue #1](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/1) for important details.|
+    |**LoginGraceTime**|number of seconds|`LoginGraceTime 30`|time in seconds before login times-out||
+    |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login||
+    |**MaxSessions**|number|`MaxSessions 2`|maximum number of open sessions||
+    |**MaxStartups**|number|`MaxStartups 2`|maximum number of login sessions||
+    |<a name="PasswordAuthentication"></a>**PasswordAuthentication**|`yes` or `no`|`PasswordAuthentication no`|if login with a password is allowed||
+    |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
+    
+    Check `man sshd_config` for more details what these settings mean.
+
+1. Restart ssh:
+
+    ``` bash
+    sudo service sshd restart
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Deactivate Short Moduli
+
+#### Why
+
+Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67), "all Diffie-Hellman moduli in use should be at least 3072-bit-long".
+
+#### Goal
+
+- deactivate short moduli
+
+#### References
+
+- Mozilla's OpenSSH guidelines for OpenSSH 6.7+ at https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67
+- `man moduli`
+
+#### Steps
+
+1. Make a backup of `/etc/ssh/moduli`:
+
+    ``` bash
+    sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Remove short moduli:
+
+    ``` bash
+    sudo awk '$5 >= 3071' /etc/ssh/moduli | sudo tee /etc/ssh/moduli.tmp
+    sudo mv /etc/ssh/moduli.tmp /etc/ssh/moduli
+    ````
+
+([Table of Contents](#table-of-contents))
+
 ### 2FA/MFA for SSH
 
 #### Why
@@ -832,42 +869,6 @@ Many folks might find the experience cumbersome or annoying. And, access to your
     ``` bash
     sudo service sshd restart
     ```
-
-([Table of Contents](#table-of-contents))
-
-### Apticron - Automatic Update Notifier
-
-#### Why
-
-It is important to keep your server up-to-date with all security patches. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
-
-You have two options:
-
-- Configure your server for unattended updates
-- Be notified when updates are available
-
-Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
-
-#### Notes
-
-- Your server will need a way to send e-mails for this to work
-
-#### References
-
-- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
-- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
-- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
-
-#### Steps
-
-1. Install `apticron`.
-    
-    On Debian based systems:
-    
-    ``` bash
-    sudo apt install apticron
-    ```
-1. Set the value of `EMAIL` in `/etc/apticron/apticron.conf` to your e-mail address. 
 
 ([Table of Contents](#table-of-contents))
 
