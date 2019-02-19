@@ -106,6 +106,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
 - [ ] shipping/backing up logs
 - [ ] Tripwire
+- [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
 
 ([Table of Contents](#table-of-contents))
 
