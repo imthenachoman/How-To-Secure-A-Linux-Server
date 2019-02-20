@@ -257,9 +257,9 @@ Check the [references](#ssh-key-references) below for more details but, at a hig
 
 For SSH, a public and private key is created on the client. You want to keep both keys secure, especially the private key. Even though the public key is meant to be public, it is wise to make sure neither keys fall fall in the wrong hands.
 
-When you connect to an SSH server, SSH will look for a public key that matches the client you're conneting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Or, if you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key.
+When you connect to an SSH server, SSH will look for a public key that matches the client you're connecting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Or, if you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key.
 
-After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice writeup of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
+After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice write-up of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
 
 They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
 
@@ -463,7 +463,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
     Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
     
-    # only use the newer, more secure protocl
+    # only use the newer, more secure protocol
     Protocol 2
 
     # disable X11 forwarding as X11 is very insecure
@@ -659,7 +659,7 @@ WIP
     echo -e "\nauth       required     pam_google_authenticator.so nullok         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/pam.d/sshd
     ```
     
-1. Tell SSH to levearage it by **adding** this line in `/etc/ssh/sshd_config`:
+1. Tell SSH to leverage it by **adding** this line in `/etc/ssh/sshd_config`:
     
     ```
     ChallengeResponseAuthentication yes
