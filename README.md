@@ -550,12 +550,6 @@ The Diffie-Hellman algorithm is used by SSH to establish a secure connection. Th
 
 Even though SSH is a pretty good security guard for your doors and windows, it is still a visible door that bad-actors can see and try to brute-force in. [Fail2ban](#fail2ban-application-intrusion-detection-and-prevention) will monitor for these brute-force attempts but there is no such thing as being too secure. Requiring two factors adds an extra layer of security.
 
-#### Why Not
-
-Many folks might find the experience cumbersome or annoying. And, access to your system is dependent on the accompanying authenticator app that generates the code.
-
-#### How It work
-
 Using Two Factor Authentication (2FA) / Multi Factor Authentication (MFA) requires anyone entering to have **two** keys to enter which makes it harder for bad actors. The two keys are:
 
 1. Their password 
@@ -563,7 +557,19 @@ Using Two Factor Authentication (2FA) / Multi Factor Authentication (MFA) requir
 
 Without both keys, they won't be able to get in.
 
-WIP
+#### Why Not
+
+Many folks might find the experience cumbersome or annoying. And, access to your system is dependent on the accompanying authenticator app that generates the code.
+
+#### How It Works
+
+On Linux, PAM is responsible for authentication. When you log into a server, be it directly from the console or via SSH, the door you came through will send the request PAM and PAM will ask for and verify your password. You can customize the rules each doors use. For example, you could have one set of rules when logging in directly from the console and another set of rules for when logging in via SSH.
+
+This section will alter the authentication rules for when logging in via SSH to require both a password and a 6 digit code.
+
+We will use Google's `libpam-google-authenticator` PAM module to create and verify a [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_algorithm) key. https://fastmail.blog/2016/07/22/how-totp-authenticator-apps-work/ and https://jemurai.com/2018/10/11/how-it-works-totp-based-mfa/ have very good writeups of how TOTP works.
+
+What we will do is tell the server's SSH PAM configuration to ask the user for their password and then their numeric token. PAM will then verify the user's password and, if it is correct, then it will route the authentication request to `libpam-google-authenticator` which will ask for and verify your 6 digit token. If, and only if, everything is good will the authentication succeed and user be allowed to log in.
 
 #### Goals
 
@@ -578,6 +584,10 @@ WIP
 #### References
 
 - https://github.com/google/google-authenticator-libpam
+- https://en.wikipedia.org/wiki/Linux_PAM
+- https://en.wikipedia.org/wiki/Time-based_One-time_Password_algorithm
+- https://fastmail.blog/2016/07/22/how-totp-authenticator-apps-work/
+- https://jemurai.com/2018/10/11/how-it-works-totp-based-mfa/
 
 #### Steps
 
