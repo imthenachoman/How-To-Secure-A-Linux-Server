@@ -117,7 +117,7 @@ This guide...
 
 - ...**is** a work in progress.
 - ...**is** focused on **at-home** Linux servers. All of the concepts/recommendations here apply to larger/professional environments but those use-cases call for more advanced and specialized configurations that are out-of-scope for this guide.
-- ...**does not** teach you about Linux, how to [install Linux](#installing-linux), or how to use it.
+- ...**does not** teach you about Linux, how to [install Linux](#installing-linux), or how to use it. Check https://linuxjourney.com/ if you're new to Linux.
 - ...**is** meant to be [Linux distribution agnostic](#picking-a-linux-distribution).
 - ...**does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. For example, physical security is out of scope for this guide.
 - ...**does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to wet your appetite and make you hungry enough to want to go and learn more.
