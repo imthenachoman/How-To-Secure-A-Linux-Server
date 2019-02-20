@@ -4,7 +4,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -32,7 +31,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts (INCOMPLETE)](#automatic-security-updates-and-alerts-incomplete)
-  - [Apticron - Automatic Update Notifier (INCOMPLETE)](#apticron---automatic-update-notifier-incomplete)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: `iptables` Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -103,7 +101,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] Anti-Virus
 - [x] use ed25519 keys instead of RSA for SSH public/private keys
 - [x] `psad`
-- [ ] unattended upgrades for critical security updates and patches
+- [x] unattended upgrades for critical security updates and patches
 - [ ] `logwatch`
 - [ ] Rkhunter and chrootkit
 - [ ] AppArmor
@@ -196,7 +194,7 @@ These are just **a few things** to think about. Before you start securing your s
 
 You want a distribution that...
 
-- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#tbd), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software. 
+- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#automatic-security-updates-and-alerts-incomplete), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software. 
 - ...**stays up-to-date with security patches**. You can secure everything on your server, but if the core OS or applications you're running have known vulnerabilities, you'll never be safe.
 - ...**you're familiar with.** If you don't know Linux, I would advise you play around with one before you try to secure it. You should be comfortable with it and know your way around, like how to install software, where configuration files are, etc...
 - ...**is well supported.** Even the most seasoned admin needs help every now and then. Having a place to go for help will save your sanity.
@@ -257,13 +255,13 @@ Check the [references](#ssh-key-references) below for more details but, at a hig
 
 For SSH, a public and private key is created on the client. You want to keep both keys secure, especially the private key. Even though the public key is meant to be public, it is wise to make sure neither keys fall fall in the wrong hands.
 
-When you connect to an SSH server, SSH will look for a public key that matches the client you're conneting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Or, if you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key.
+When you connect to an SSH server, SSH will look for a public key that matches the client you're connecting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Or, if you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key.
 
-After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice writeup of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
+After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice write-up of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
 
 They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
 
-You can also set a passphrase for the keys which would require you to enter the key passphrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. `ssh-agent` is a program that is shipped in many Linux distros (and usually already running) that will allow you to hold your unencrypted private key in memory for a configurable duration. Simply run `ssh-add` and it will prompt you for your passphrase. You will not be prompted for your passphrase again until the configurable duration has passed.
+You can also set a pass-phrase for the keys which would require you to enter the key pass-phrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. `ssh-agent` is a program that is shipped in many Linux distros (and usually already running) that will allow you to hold your unencrypted private key in memory for a configurable duration. Simply run `ssh-add` and it will prompt you for your passphrase. You will not be prompted for your passphrase again until the configurable duration has passed.
 
 We will be using Ed25519 keys which, according to [https://linux-audit.com/](https://linux-audit.com/using-ed25519-openssh-keys-instead-of-dsa-rsa-ecdsa/):
 
@@ -463,7 +461,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
     Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
     
-    # only use the newer, more secure protocl
+    # only use the newer, more secure protocol
     Protocol 2
 
     # disable X11 forwarding as X11 is very insecure
@@ -659,7 +657,7 @@ WIP
     echo -e "\nauth       required     pam_google_authenticator.so nullok         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/pam.d/sshd
     ```
     
-1. Tell SSH to levearage it by **adding** this line in `/etc/ssh/sshd_config`:
+1. Tell SSH to leverage it by **adding** this line in `/etc/ssh/sshd_config`:
     
     ```
     ChallengeResponseAuthentication yes
@@ -875,7 +873,11 @@ WIP
 
 #### Why
 
-It is important to keep a server updated with the latest security patches and updates. You can do this manually or have it automated. 
+It is important to keep a server updated with the latest **critical security patches and updates**. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
+
+Unless you plan on checking your server every day, you'll want a way to automatically update the system and/or get emails about available updates.
+
+You don't want to do all updates because with every update there is a risk of something breaking. It is important to do the critical updates but everything else can wait until you have time to do it manually.
 
 #### Why Not
 
@@ -884,6 +886,7 @@ Automatic and unattended updates may break your system and you may not be near y
 #### Notes
 
 - Each distribution manages packages and updates differently. So far I only have steps for Debian based systems.
+- Your server will need a way to send e-mails for this to work
 
 #### Goals
 
@@ -897,16 +900,22 @@ Automatic and unattended updates may break your system and you may not be near y
 On Debian based systems you can use:
 
 - `unattended-upgrades` to automatically do system updates you want (i.e. critical security updates)
-- `apt-listchanges` to get emails about package changes
+- `apt-listchanges` to get details about package changes before they are installed/upgraded
 - `apticron` to get emails for pending package updates
+
+We will use `unattended-upgrades` to apply **critical security patches**. We can also apply stable updates since they've already been thoroughly tested by the Debian community.
 
 ##### References
 
 - https://wiki.debian.org/UnattendedUpgrades
 - https://debian-handbook.info/browse/stable/sect.regular-upgrades.html
 - https://blog.sleeplessbeastie.eu/2015/01/02/how-to-perform-unattended-upgrades/
-- https://github.com/mvo5/unattended-upgrades
 - https://www.vultr.com/docs/how-to-set-up-unattended-upgrades-on-debian-9-stretch
+- https://github.com/mvo5/unattended-upgrades
+- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
+- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
+- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
+- `/etc/apt/apt.conf.d/50unattended-upgrades`
 
 ##### Steps
 
@@ -916,79 +925,93 @@ On Debian based systems you can use:
     sudo apt install unattended-upgrades apt-listchanges apticron
     ```
 
-1. Now we need to configure `unattended-upgrades` to automatically apply critical security patches. This is typically done by editing the file `/etc/apt/apt.conf.d/50unattended-upgrades` that was created by the package. However, because this file may get overwritten with a future update, we'll create a new file instead. **Create** the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
+1. Now we need to configure `unattended-upgrades` to automatically apply the updates. This is typically done by editing the files `/etc/apt/apt.conf.d/20auto-upgrades` and `/etc/apt/apt.conf.d/50unattended-upgrades` that were created by the packages. However, because these file may get overwritten with a future update, we'll create a new file instead. **Create** the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
 
     ```
+    // Enable the update/upgrade script (0=disable)
+    APT::Periodic::Enable "1";
+    
+    // Do "apt-get update" automatically every n-days (0=disable)
     APT::Periodic::Update-Package-Lists "1";
+    
+    // Do "apt-get upgrade --download-only" every n-days (0=disable)
     APT::Periodic::Download-Upgradeable-Packages "1";
+    
+    // Do "apt-get autoclean" every n-days (0=disable)
     APT::Periodic::AutocleanInterval "7";
+    
+    // Send report mail to root
+    //     0:  no report             (or null string)
+    //     1:  progress report       (actually any string)
+    //     2:  + command outputs     (remove -qq, remove 2>/dev/null, add -d)
+    //     3:  + trace on    APT::Periodic::Verbose "2";    
     APT::Periodic::Unattended-Upgrade "1";
-    Unattended-Upgrade::Mail "root";
-
+    
     // Automatically upgrade packages from these 
     Unattended-Upgrade::Origins-Pattern {
           "o=Debian,a=stable";
           "o=Debian,a=stable-updates";
-          "o=Debian,a=proposed-updates";
           "origin=Debian,codename=${distro_codename},label=Debian-Security";
     };
 
     // You can specify your own packages to NOT automatically upgrade here
     Unattended-Upgrade::Package-Blacklist {
-    //      "vim";
-    //      "libc6";
-    //      "libc6-dev";
-    //      "libc6-i686";
-
     };
-
-    Unattended-Upgrade::MailOnlyOnError "true";
-    Unattended-Upgrade::Automatic-Reboot "false";
+    
+    // Run dpkg --force-confold --configure -a if a unclean dpkg state is detected to true to ensure that updates get installed even when the system got interrupted during a previous run
+    Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+    
+    //Perform the upgrade when the machine is running because we wont be shutting our server down often
+    Unattended-Upgrade::InstallOnShutdown "false";
+    
+    // Send an email to this address with information about the packages upgraded.
+    Unattended-Upgrade::Mail "root";
+    
+    // Always send an e-mail
+    Unattended-Upgrade::MailOnlyOnError "false";
+    
+    // Remove all unused dependencies after the upgrade has finished
+    Unattended-Upgrade::Remove-Unused-Dependencies "true";
+    
+    // Remove any new unused dependencies after the upgrade has finished
+    Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+    
+    // Automatically reboot WITHOUT CONFIRMATION if the file /var/run/reboot-required is found after the upgrade.
+    Unattended-Upgrade::Automatic-Reboot "true";
+    
+    // Automatically reboot even if users are logged in.
+    Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
     ```
     
-    **Notes**
+    **Note**: Check `/usr/lib/apt/apt.systemd.daily` for details on the `APT::Periodic` options and check https://github.com/mvo5/unattended-upgrades for details on the `Unattended-Upgrade` options.
     
-    - Your server will need to be able to send e-mails so letting you when it has updated the system and when packages are avi
-    - Check `/etc/apt/apt.conf.d/50unattended-upgrades`
+1. Run a dry-run of `unattended-upgrades` to make sure your configuration file is okay:
 
-### Apticron - Automatic Update Notifier (INCOMPLETE)
-
-#### Why
-
-It is important to keep your server up-to-date with all security patches. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
-
-You have two options:
-
-- Configure your server for unattended updates
-- Be notified when updates are available
-
-Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
-
-#### How It Works
-
-WIP
-
-#### Notes
-
-- Your server will need a way to send e-mails for this to work
-
-#### References
-
-- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
-- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
-- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
-
-#### Steps
-
-1. Install `apticron`.
+    ``` bash
+    sudo unattended-upgrade -d --dry-run
+    ```
     
-    On Debian based systems:
+    If everything is okay, you can let it run whenever it's scheduled to or force a run with `unattended-upgrade -d`.
+
+1. Configure `apt-listchanges` to your liking:
+
+    ``` bash
+    sudo dpkg-reconfigure apt-listchanges
+    ```
+
+1. Install `apticron`:
     
     ``` bash
     sudo apt install apticron
     ```
-1. Set the value of `EMAIL` in `/etc/apticron/apticron.conf` to your e-mail address. 
-
+    
+    The default settings are good enough but you can check them in `/etc/apticron/apticron.conf` if you want to change them. For example, my configuration looks like this:
+    
+    > ```
+    > EMAIL="root"
+    > NOTIFY_NO_UPDATES="1"
+    > ```
+    
 ([Table of Contents](#table-of-contents))
 
 ## The Firewall
