@@ -30,7 +30,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
-  - [Automatic Security Updates and Alerts (INCOMPLETE)](#automatic-security-updates-and-alerts-incomplete)
+  - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: `iptables` Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -189,7 +189,7 @@ These are just **a few things** to think about. Before you start securing your s
 
 You want a distribution that...
 
-- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#automatic-security-updates-and-alerts-incomplete), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software. 
+- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#automatic-security-updates-and-alerts), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software. 
 - ...**stays up-to-date with security patches**. You can secure everything on your server, but if the core OS or applications you're running have known vulnerabilities, you'll never be safe.
 - ...**you're familiar with.** If you don't know Linux, I would advise you play around with one before you try to secure it. You should be comfortable with it and know your way around, like how to install software, where configuration files are, etc...
 - ...**is well supported.** Even the most seasoned admin needs help every now and then. Having a place to go for help will save your sanity.
@@ -864,7 +864,7 @@ WIP
 
 ([Table of Contents](#table-of-contents))
 
-### Automatic Security Updates and Alerts (INCOMPLETE)
+### Automatic Security Updates and Alerts
 
 #### Why
 
