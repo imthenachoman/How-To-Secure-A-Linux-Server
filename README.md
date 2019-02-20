@@ -21,17 +21,18 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
-- [The SSH](#the-ssh)
+- [The SSH Server](#the-ssh-server)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
-  - [Deactivate Short Moduli](#deactivate-short-moduli)
+  - [Remove Short Diffie-Hellman Keys](#remove-short-diffie-hellman-keys)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
 - [The Basics](#the-basics)
   - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
-  - [Apticron - Automatic Update Notifier](#apticron---automatic-update-notifier)
+  - [Automatic Security Updates and Alerts (INCOMPLETE)](#automatic-security-updates-and-alerts-incomplete)
+  - [Apticron - Automatic Update Notifier (INCOMPLETE)](#apticron---automatic-update-notifier-incomplete)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: `iptables` Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -239,7 +240,7 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ([Table of Contents](#table-of-contents))
 
-## The SSH
+## The SSH Server
 
 ### SSH Public/Private Keys
 
@@ -247,12 +248,18 @@ Where applicable, use the expert install option so you have tighter control of w
 
 Using SSH public/private keys is more secure than using a password. It also makes it easier and faster, to connect to our server because you don't have to enter a password.
 
+#### How It Works
+
 Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using a pair of keys to verify identity.
 
 1. One key, the **public** key, **can only encrypt data**, not decrypt it
 1. The other key, the **private** key, can decrypt the data
 
-For SSH, a public and private key is created on the client. The public key is then securely transferred to the server you want to connect to. After this is done, SSH uses the public and private keys to verify identity and then establishing a secure connection. Identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
+For SSH, a public and private key is created on the client. You want to keep both keys secure, especially the private key. Even though the public key is meant to be public, it is wise to make sure neither keys fall fall in the wrong hands.
+
+When you connect to an SSH server, SSH will look for a public key that matches the client you're conneting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Or, if you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key.
+
+After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice writeup of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
 
 They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
 
@@ -317,7 +324,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
     
     **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key, unless you're using `ssh-agent`.
 
-1. When you SSH to your server, your server will look for your public key in the `.ssh/authorized_keys` file **in your home directory**. So we need to **append** the contents of the public key `~/.ssh/id_ed25519.pub` from the machine you're on (the client) to the `~/.ssh/authorized_keys` file on the **target server**. You'll want to do this in a secure way since the added public key gives its corresponding private key access to the target server. One approach is to copy it to a USB stick and physically transfer it to the server. If you're sure there is [nobody listening between the client you're on and your server](https://en.wikipedia.org/wiki/Man-in-the-middle_attack), you can use `ssh-copy-id` to transfer and append the public key:
+1. Now you need to **append** the public key `~/.ssh/id_ed25519.pub` from your client to the `~/.ssh/authorized_keys` file on your server. Since we're presumable still at home on the LAN, we're probably safe from [MIM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) attacks, so we will use `ssh-copy-id` to transfer and append the public key:
 
     ``` bash
     ssh-copy-id user@server    
@@ -347,6 +354,10 @@ Now would be a good time to [perform any tasks specific to your setup](#prepost-
 #### Why
 
 To make it easy to control who can SSH to the server. By using a group, we can quickly add/remove accounts to the group to quickly allow or not allow SSH access to the server.
+
+#### How It Works
+
+We will use the [`AllowGroups` option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config). to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in. 
 
 #### Goals
 
@@ -386,6 +397,10 @@ To make it easy to control who can SSH to the server. By using a group, we can q
 #### Why
 
 SSH is a door into your server. This is especially true if you are opening ports on your router so you can SSH to your server from outside your home network. If it is not secured properly, a bad-actor could use it to gain unauthorized access to your system.
+
+#### How It Works
+
+`/etc/ssh/sshd_config` is the default configuration file that the SSH server uses. We will use this file to tell what options the SSH server should use.
 
 #### Goal
 
@@ -480,7 +495,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
     |Setting|Valid Values|Example|Description|Notes|
     |--|--|--|--|--|
-    |**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
+    |<a name="AllowGroups"></a>**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
     |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response||
     |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request||
     |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on|See [Issue #1](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/1) for important details.|
@@ -501,19 +516,22 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 ([Table of Contents](#table-of-contents))
 
-### Deactivate Short Moduli
+### Remove Short Diffie-Hellman Keys
 
 #### Why
 
 Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67), "all Diffie-Hellman moduli in use should be at least 3072-bit-long".
 
+The Diffie-Hellman algorithm is used by SSH to establish a secure connection. The larger the moduli (key size) the stronger the encryption. 
+
 #### Goal
 
-- deactivate short moduli
+- remove all Diffie-Hellman keys that are less than 3072 bits long
 
 #### References
 
 - Mozilla's OpenSSH guidelines for OpenSSH 6.7+ at https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67
+- https://infosec.mozilla.org/guidelines/key_management
 - `man moduli`
 
 #### Steps
@@ -537,7 +555,13 @@ Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/
 
 #### Why
 
-Even though SSH is a pretty good security guard for your doors and windows, it is still a visible door that bad-actors can see and try to brute-force in. [Fail2ban](#fail2ban-application-intrusion-detection-and-prevention) will monitor for these brute-force attempts but there is no such thing as being too secure.
+Even though SSH is a pretty good security guard for your doors and windows, it is still a visible door that bad-actors can see and try to brute-force in. [Fail2ban](#fail2ban-application-intrusion-detection-and-prevention) will monitor for these brute-force attempts but there is no such thing as being too secure. Requiring two factors adds an extra layer of security.
+
+#### Why Not
+
+Many folks might find the experience cumbersome or annoying. And, access to your system is dependent on the accompanying authenticator app that generates the code.
+
+#### How It work
 
 Using Two Factor Authentication (2FA) / Multi Factor Authentication (MFA) requires anyone entering to have **two** keys to enter which makes it harder for bad actors. The two keys are:
 
@@ -546,9 +570,7 @@ Using Two Factor Authentication (2FA) / Multi Factor Authentication (MFA) requir
 
 Without both keys, they won't be able to get in.
 
-#### Why Not
-
-Many folks might find the experience cumbersome or annoying. And, access to your system is dependent on the accompanying authenticator app that generates the code.
+WIP
 
 #### Goals
 
@@ -667,6 +689,10 @@ Many folks might find the experience cumbersome or annoying. And, access to your
 
 `sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
 
+#### How It Works
+
+WIP
+
 #### Goals
 
 - `sudo` privileges limited to those who are in a group we specify
@@ -715,6 +741,10 @@ Many folks might find the experience cumbersome or annoying. And, access to your
 #### Why
 
 Many security protocols leverage the time. If your system time is incorrect, it could have negative impacts to your server. An NTP client can solve that problem by keeping your system time in-sync with [global NTP servers](https://www.pool.ntp.org/en/).
+
+#### How It Works
+
+WIP
 
 #### Goals
 
@@ -788,6 +818,10 @@ Many security protocols leverage the time. If your system time is incorrect, it 
 
 By default, accounts can use any password they want, including bad ones. [pwquality](https://linux.die.net/man/5/pwquality.conf)/[pam_pwquality](https://linux.die.net/man/8/pam_pwquality) addresses this security gap by providing "a way to configure the default password quality requirements for the system passwords" and checking "its strength against a system dictionary and a set of rules for identifying poor choices."
 
+#### How It Works
+
+WIP
+
 #### Goal
 
 - enforced strong passwords
@@ -837,7 +871,87 @@ By default, accounts can use any password they want, including bad ones. [pwqual
 
 ([Table of Contents](#table-of-contents))
 
-### Apticron - Automatic Update Notifier
+### Automatic Security Updates and Alerts (INCOMPLETE)
+
+#### Why
+
+It is important to keep a server updated with the latest security patches and updates. You can do this manually or have it automated. 
+
+#### Why Not
+
+Automatic and unattended updates may break your system and you may not be near your server to fix it. This would be especially problematic if it broke your SSH access.
+
+#### Notes
+
+- Each distribution manages packages and updates differently. So far I only have steps for Debian based systems.
+
+#### Goals
+
+- Automatic, unattended, updates of critical security patches
+- Automatic emails of remaining pending updates 
+
+#### Debian Based Systems
+
+##### How It Works
+
+On Debian based systems you can use:
+
+- `unattended-upgrades` to automatically do system updates you want (i.e. critical security updates)
+- `apt-listchanges` to get emails about package changes
+- `apticron` to get emails for pending package updates
+
+##### References
+
+- https://wiki.debian.org/UnattendedUpgrades
+- https://debian-handbook.info/browse/stable/sect.regular-upgrades.html
+- https://blog.sleeplessbeastie.eu/2015/01/02/how-to-perform-unattended-upgrades/
+- https://github.com/mvo5/unattended-upgrades
+- https://www.vultr.com/docs/how-to-set-up-unattended-upgrades-on-debian-9-stretch
+
+##### Steps
+
+1. Install `unattended-upgrades`, `apt-listchanges`, and `apticron`:
+
+    ``` bash
+    sudo apt install unattended-upgrades apt-listchanges apticron
+    ```
+
+1. Now we need to configure `unattended-upgrades` to automatically apply critical security patches. This is typically done by editing the file `/etc/apt/apt.conf.d/50unattended-upgrades` that was created by the package. However, because this file may get overwritten with a future update, we'll create a new file instead. **Create** the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
+
+    ```
+    APT::Periodic::Update-Package-Lists "1";
+    APT::Periodic::Download-Upgradeable-Packages "1";
+    APT::Periodic::AutocleanInterval "7";
+    APT::Periodic::Unattended-Upgrade "1";
+    Unattended-Upgrade::Mail "root";
+
+    // Automatically upgrade packages from these 
+    Unattended-Upgrade::Origins-Pattern {
+          "o=Debian,a=stable";
+          "o=Debian,a=stable-updates";
+          "o=Debian,a=proposed-updates";
+          "origin=Debian,codename=${distro_codename},label=Debian-Security";
+    };
+
+    // You can specify your own packages to NOT automatically upgrade here
+    Unattended-Upgrade::Package-Blacklist {
+    //      "vim";
+    //      "libc6";
+    //      "libc6-dev";
+    //      "libc6-i686";
+
+    };
+
+    Unattended-Upgrade::MailOnlyOnError "true";
+    Unattended-Upgrade::Automatic-Reboot "false";
+    ```
+    
+    **Notes**
+    
+    - Your server will need to be able to send e-mails so letting you when it has updated the system and when packages are avi
+    - Check `/etc/apt/apt.conf.d/50unattended-upgrades`
+
+### Apticron - Automatic Update Notifier (INCOMPLETE)
 
 #### Why
 
@@ -849,6 +963,10 @@ You have two options:
 - Be notified when updates are available
 
 Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
+
+#### How It Works
+
+WIP
 
 #### Notes
 
@@ -892,6 +1010,10 @@ Either way, ensuring that only traffic we explicitly allow is the job of a firew
 - **to** or **from** ports
 
 You can create rules by explicitly specifying the ports or with application configurations that specify the ports.
+
+#### How It Works
+
+WIP
 
 #### Goal
 
@@ -1154,6 +1276,10 @@ I can't explain it any better than user [FINESEC](https://serverfault.com/users/
 
 And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follow the awesome instructions by [netson](https://gist.github.com/netson) at https://gist.github.com/netson/c45b2dc4e835761fbccc to make PSAD work with UFW.
 
+#### How It Works
+
+WIP
+
 #### References
 
 - http://www.cipherdyne.org/psad/
@@ -1307,6 +1433,10 @@ A firewall will board up all the doors and windows you don't want anyone using s
 
 That is where **Fail2ban** comes in. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
 
+#### How It Works
+
+WIP
+
 #### Goal
 
 - network monitoring for suspicious activity with automatic banning of offending IPs
@@ -1353,7 +1483,7 @@ That is where **Fail2ban** comes in. It will monitor network traffic/logs and pr
     action = %(action_mwl)s
     ```
     
-    Note: Your server will need to be able to send e-mails so Fail2ban can let you know of suspicious activity and when it banned an IP.
+    **Note**: Your server will need to be able to send e-mails so Fail2ban can let you know of suspicious activity and when it banned an IP.
 
 1. We need to create a jail for `ssh` that tells `fail2ban` to look at `ssh` logs and use `ufw` to ban/unban IPs as needed. Create a jail for `ssh` by **adding** this to `/etc/fail2ban/jail.d/ssh.local`:
 
@@ -1447,6 +1577,10 @@ The kernel is the brains of a Linux system. Securing it just makes sense.
 
 Changing kernel settings with `sysctl` is risky and could break your server. If you don't know what you are doing, don't have the time to debug issues, or just don't want to take the risks, I would advise from not following these steps.
 
+#### How It Works
+
+WIP
+
 #### Disclaimer
 
 I am not as knowledgeable about hardening/securing a Linux kernel as I'd like. As much as I hate to admit it, I do not know what all of these settings do. My understanding is that most of them are general kernel hardening and performance, and the others are to protect against spoofing and DOS attacks. 
@@ -1526,6 +1660,10 @@ If a bad actor has physical access to your server, they could use GRUB to gain u
 #### Why Not
 
 If you forget the password, you'll have to go through [some work](https://www.cyberciti.biz/tips/howto-recovering-grub-boot-loader-password.html) to recover the password.
+
+#### How It Works
+
+WIP
 
 #### Goals
 
@@ -1640,6 +1778,10 @@ To work around this, you can use the `--force` option for `sulogin`. Some distri
 
 An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
 
+#### How It Works
+
+WIP
+
 #### Goal
 
 - locked **root** account that nobody can use to log in as **root**
@@ -1684,6 +1826,10 @@ When and if other accounts need access to a file/folder, you want to explicitly 
 #### <a name="umask-root"></a>Why Not
 
 Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications that do not run with **root** privileges.
+
+#### How It Works
+
+WIP
 
 #### Goals
 
@@ -1758,20 +1904,19 @@ Changing the default `umask` can create unexpected problems. For example, if you
 
 As you use your system, and you install and uninstall software, you'll eventually end up with orphaned, or unused software/packages/libraries. You don't need to remove them, but if you don't need them, why keep them? When security is a priority, anything not explicitly needed is a potential security threat. You want to keep your server as trimmed and lean as possible.
 
-#### <a name="orphaned-software-why-not"></a>Why Not
+#### Notes
+
+- Each distribution manages software/packages/libraries differently so how you find and remove orphaned packages will be different. So far I only have steps for Debian based systems.
+
+#### Debian Based Systems
+
+##### <a name="orphaned-software-why-not"></a>Why Not
 
 Keep in mind, `deborphan` finds packages that have **no package dependencies**. That does not mean they are not used. You could very well have a package you use every day that has no dependencies that you wouldn't want to remove. And, if `deborphan` gets anything wrong, then removing critical packages may break your system.
 
-#### Notes
+##### Steps
 
-- Each distribution manages software/packages/libraries differently so how you find and remove orphaned packages will be different.
-- So far I only have steps for Debian; I will add for other distributions as I learn how.
-
-#### Steps
-
-##### Debian
-
-For Debian based distributions, you can use [`deborphan`](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages. 
+On Debian based systems, you can use [`deborphan`](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages. 
  
 1. Install `deborphan`.
        
@@ -1811,6 +1956,10 @@ For Debian based distributions, you can use [`deborphan`](http://freshmeat.sourc
 From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
 > Lynis is a battle-tested security tool for systems running Linux, macOS, or Unix-based operating system. It performs an extensive health scan of your systems to support system hardening and compliance testing.
+
+#### How It Works
+
+WIP
 
 #### Goals
 
@@ -1866,6 +2015,10 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 Unless you're planning on setting up your own mail server, you'll need a way to send e-mails from your server. This will be important for system alerts/messages.
 
 You can use any Gmail account but I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password but why take the risk?
+
+#### How It Works
+
+WIP
 
 #### Goals
 
@@ -1949,6 +2102,10 @@ You can use any Gmail account but I recommend you create one specific for this s
 #### Why
 
 There will come a time when you'll need to look through your `iptables` logs. Having all the `iptables` logs go to their own file will make it a lot easier to find what you're looking for.
+
+#### How It Works
+
+WIP
 
 #### References
 
