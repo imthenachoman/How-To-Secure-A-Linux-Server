@@ -21,17 +21,17 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
-- [The Basics](#the-basics)
-  - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
-  - [NTP Client](#ntp-client)
-  - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
-  - [Apticron - Automatic Update Notifier](#apticron---automatic-update-notifier)
 - [The SSH](#the-ssh)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
   - [Deactivate Short Moduli](#deactivate-short-moduli)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
+- [The Basics](#the-basics)
+  - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
+  - [NTP Client](#ntp-client)
+  - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
+  - [Apticron - Automatic Update Notifier](#apticron---automatic-update-notifier)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: `iptables` Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -236,220 +236,6 @@ Where applicable, use the expert install option so you have tighter control of w
 - File paths and settings also may differ slightly -- check with your distribution's documentation if you have issues.
 - Read the whole guide before you start. Your use-case and/or principals may call for not doing something or for changing the order.
 - Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
-
-([Table of Contents](#table-of-contents))
-
-## The Basics
-
-### Limit Who Can Use `sudo`
-
-#### Why
-
-`sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
-
-#### Goals
-
-- `sudo` privileges limited to those who are in a group we specify
-
-#### Notes
-
-- Your installation may have already done this, or may already have a special group intended for this purpose so check first.
-  - Debian creates the `sudo` group
-  - RedHat creates the `wheel` group
-
-#### Steps
-
-1. Create a group:
-
-    ``` bash
-    sudo groupadd sudousers
-    ```
-
-1. Add account(s) to the group:
-
-    ``` bash
-    sudo usermod -a -G sudousers user1
-    sudo usermod -a -G sudousers user2
-    sudo usermod -a -G sudousers  ...
-    ```
-    
-    You'll need to do this for every account on your server that needs `sudo` privileges.
-
-1. Edit `/etc/sudoers`:
-
-    ``` bash
-    sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
-    sudo visudo
-    ```
-
-1. Tell `sudo` to only allow users in the `sudousers` group to use `sudo` by **adding** this line if it is not already there:
-
-    ```
-    %sudousers   ALL=(ALL:ALL) ALL
-    ```
-
-([Table of Contents](#table-of-contents))
-
-### NTP Client
-
-#### Why
-
-Many security protocols leverage the time. If your system time is incorrect, it could have negative impacts to your server. An NTP client can solve that problem by keeping your system time in-sync with [global NTP servers](https://www.pool.ntp.org/en/).
-
-#### Goals
-
-- NTP client installed and keeping server time in-sync
-
-#### References
-
-- https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/
-
-#### Steps
-
-1. Install `ntp`.
-
-    On Debian based systems:
-    
-    ``` bash
-    sudo apt install ntp
-    ```
-
-1. Check `ntp`'s status:
-
-    ``` bash
-    sudo systemctl status ntp
-    ```
-
-    > ```
-    > ● ntp.service - LSB: Start NTP daemon
-    >    Loaded: loaded (/etc/init.d/ntp; generated; vendor preset: enabled)
-    >    Active: active (running) since Sat 2019-02-16 00:32:20 EST; 3s ago
-    >      Docs: man:systemd-sysv-generator(8)
-    >    CGroup: /system.slice/ntp.service
-    >            └─1051 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 109:114
-    > 
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 3 enp0s3 192.168.1.96:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 4 lo [::1]:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 5 enp0s3 [fe80::a00:27ff:feb6:ed8e%2]:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listening on routing socket on fd #22 for interface updates
-    > Feb 16 00:32:21 host ntpd[1051]: Soliciting pool server 173.255.206.154
-    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 216.6.2.70
-    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 82.197.188.130
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 95.215.175.2
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 107.155.79.108
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 212.110.158.28
-    > ```
-    
-    ``` bash
-    sudo ntpq -p
-    ```
-    
-    > ```
-    >      remote           refid      st t when poll reach   delay   offset  jitter
-    > ==============================================================================
-    >  0.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  1.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  2.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  3.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    > -li216-154.membe 45.56.123.24     3 u  119   64    2   51.912    0.663   2.311
-    > +eudyptula.init7 162.23.41.10     2 u   60   64    3   99.378    1.563   3.485
-    > +107.155.79.108  129.7.1.66       2 u  119   64    2   49.171   -1.372   1.441
-    > -212.110.158.28  89.109.251.21    2 u  120   64    2  167.465   -1.064   1.263
-    > *ec2-54-242-183- 128.10.19.24     2 u   62   64    3   19.157    2.536   4.434
-    > -69.195.159.158  128.252.19.1     2 u  119   64    2   42.990    6.302   3.507
-    > -200.89.75.198 ( 200.27.106.115   2 u   58   64    3  160.786   42.737  12.827
-    > ```
-
-([Table of Contents](#table-of-contents))
-
-### Force Accounts To Use Secure Passwords
-
-#### Why
-
-By default, accounts can use any password they want, including bad ones. [pwquality](https://linux.die.net/man/5/pwquality.conf)/[pam_pwquality](https://linux.die.net/man/8/pam_pwquality) addresses this security gap by providing "a way to configure the default password quality requirements for the system passwords" and checking "its strength against a system dictionary and a set of rules for identifying poor choices."
-
-#### Goal
-
-- enforced strong passwords
-
-#### Steps
-
-1. Install `libpam-pwquality`.
-
-    On Debian based systems:
-    
-    ``` bash
-    sudo apt install libpam-pwquality
-    ```
-
-1. Tell PAM to use `libpam-pwquality` to enforce strong passwords by editing the file `/etc/pam.d/common-password` and **change** the line that starts like this:
-
-    ```
-    password        requisite                       pam_pwquality.so
-    ```
-    
-    to this:
-
-    ```
-    password        requisite                       pam_pwquality.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec
-    ```
-   
-   The above options are:
-
-     - `retry=3` = prompt user 3 times before returning with error.
-     - `minlen=10` = the minimum length of the password, factoring in any credits (or debits) from these:
-       - `dcredit=-1` = must have at least **one digit**
-       - `ucredit=-1` = must have at least **one upper case letter**
-       - `lcredit=-1` = must have at least **one lower case letter**
-       - `ocredit=-1` = must have at least **one non-alphanumeric character**
-     - `difok=3` = at least 3 characters from the new password cannot have been in the old password
-     - `maxrepeat=3` = allow a maximum of 3 repeated characters
-     - `gecoschec` = do not allow passwords with the account's name
-
-
-    [For the lazy](#editing-configuration-files---for-the-lazy):
-   
-    ``` bash
-    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
-    
-    sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
-    ```
-
-([Table of Contents](#table-of-contents))
-
-### Apticron - Automatic Update Notifier
-
-#### Why
-
-It is important to keep your server up-to-date with all security patches. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
-
-You have two options:
-
-- Configure your server for unattended updates
-- Be notified when updates are available
-
-Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
-
-#### Notes
-
-- Your server will need a way to send e-mails for this to work
-
-#### References
-
-- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
-- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
-- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
-
-#### Steps
-
-1. Install `apticron`.
-    
-    On Debian based systems:
-    
-    ``` bash
-    sudo apt install apticron
-    ```
-1. Set the value of `EMAIL` in `/etc/apticron/apticron.conf` to your e-mail address. 
 
 ([Table of Contents](#table-of-contents))
 
@@ -870,6 +656,220 @@ Many folks might find the experience cumbersome or annoying. And, access to your
     ``` bash
     sudo service sshd restart
     ```
+
+([Table of Contents](#table-of-contents))
+
+## The Basics
+
+### Limit Who Can Use `sudo`
+
+#### Why
+
+`sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
+
+#### Goals
+
+- `sudo` privileges limited to those who are in a group we specify
+
+#### Notes
+
+- Your installation may have already done this, or may already have a special group intended for this purpose so check first.
+  - Debian creates the `sudo` group
+  - RedHat creates the `wheel` group
+
+#### Steps
+
+1. Create a group:
+
+    ``` bash
+    sudo groupadd sudousers
+    ```
+
+1. Add account(s) to the group:
+
+    ``` bash
+    sudo usermod -a -G sudousers user1
+    sudo usermod -a -G sudousers user2
+    sudo usermod -a -G sudousers  ...
+    ```
+    
+    You'll need to do this for every account on your server that needs `sudo` privileges.
+
+1. Edit `/etc/sudoers`:
+
+    ``` bash
+    sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
+    sudo visudo
+    ```
+
+1. Tell `sudo` to only allow users in the `sudousers` group to use `sudo` by **adding** this line if it is not already there:
+
+    ```
+    %sudousers   ALL=(ALL:ALL) ALL
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### NTP Client
+
+#### Why
+
+Many security protocols leverage the time. If your system time is incorrect, it could have negative impacts to your server. An NTP client can solve that problem by keeping your system time in-sync with [global NTP servers](https://www.pool.ntp.org/en/).
+
+#### Goals
+
+- NTP client installed and keeping server time in-sync
+
+#### References
+
+- https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/
+
+#### Steps
+
+1. Install `ntp`.
+
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install ntp
+    ```
+
+1. Check `ntp`'s status:
+
+    ``` bash
+    sudo systemctl status ntp
+    ```
+
+    > ```
+    > ● ntp.service - LSB: Start NTP daemon
+    >    Loaded: loaded (/etc/init.d/ntp; generated; vendor preset: enabled)
+    >    Active: active (running) since Sat 2019-02-16 00:32:20 EST; 3s ago
+    >      Docs: man:systemd-sysv-generator(8)
+    >    CGroup: /system.slice/ntp.service
+    >            └─1051 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 109:114
+    > 
+    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 3 enp0s3 192.168.1.96:123
+    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 4 lo [::1]:123
+    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 5 enp0s3 [fe80::a00:27ff:feb6:ed8e%2]:123
+    > Feb 16 00:32:20 host ntpd[1051]: Listening on routing socket on fd #22 for interface updates
+    > Feb 16 00:32:21 host ntpd[1051]: Soliciting pool server 173.255.206.154
+    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 216.6.2.70
+    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 82.197.188.130
+    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 95.215.175.2
+    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 107.155.79.108
+    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 212.110.158.28
+    > ```
+    
+    ``` bash
+    sudo ntpq -p
+    ```
+    
+    > ```
+    >      remote           refid      st t when poll reach   delay   offset  jitter
+    > ==============================================================================
+    >  0.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+    >  1.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+    >  2.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+    >  3.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
+    > -li216-154.membe 45.56.123.24     3 u  119   64    2   51.912    0.663   2.311
+    > +eudyptula.init7 162.23.41.10     2 u   60   64    3   99.378    1.563   3.485
+    > +107.155.79.108  129.7.1.66       2 u  119   64    2   49.171   -1.372   1.441
+    > -212.110.158.28  89.109.251.21    2 u  120   64    2  167.465   -1.064   1.263
+    > *ec2-54-242-183- 128.10.19.24     2 u   62   64    3   19.157    2.536   4.434
+    > -69.195.159.158  128.252.19.1     2 u  119   64    2   42.990    6.302   3.507
+    > -200.89.75.198 ( 200.27.106.115   2 u   58   64    3  160.786   42.737  12.827
+    > ```
+
+([Table of Contents](#table-of-contents))
+
+### Force Accounts To Use Secure Passwords
+
+#### Why
+
+By default, accounts can use any password they want, including bad ones. [pwquality](https://linux.die.net/man/5/pwquality.conf)/[pam_pwquality](https://linux.die.net/man/8/pam_pwquality) addresses this security gap by providing "a way to configure the default password quality requirements for the system passwords" and checking "its strength against a system dictionary and a set of rules for identifying poor choices."
+
+#### Goal
+
+- enforced strong passwords
+
+#### Steps
+
+1. Install `libpam-pwquality`.
+
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install libpam-pwquality
+    ```
+
+1. Tell PAM to use `libpam-pwquality` to enforce strong passwords by editing the file `/etc/pam.d/common-password` and **change** the line that starts like this:
+
+    ```
+    password        requisite                       pam_pwquality.so
+    ```
+    
+    to this:
+
+    ```
+    password        requisite                       pam_pwquality.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec
+    ```
+   
+   The above options are:
+
+     - `retry=3` = prompt user 3 times before returning with error.
+     - `minlen=10` = the minimum length of the password, factoring in any credits (or debits) from these:
+       - `dcredit=-1` = must have at least **one digit**
+       - `ucredit=-1` = must have at least **one upper case letter**
+       - `lcredit=-1` = must have at least **one lower case letter**
+       - `ocredit=-1` = must have at least **one non-alphanumeric character**
+     - `difok=3` = at least 3 characters from the new password cannot have been in the old password
+     - `maxrepeat=3` = allow a maximum of 3 repeated characters
+     - `gecoschec` = do not allow passwords with the account's name
+
+
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+   
+    ``` bash
+    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
+    
+    sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Apticron - Automatic Update Notifier
+
+#### Why
+
+It is important to keep your server up-to-date with all security patches. Otherwise you're at risk of known security vulnerabilities that bad-actors could use to gain unauthorized access to your server.
+
+You have two options:
+
+- Configure your server for unattended updates
+- Be notified when updates are available
+
+Which option you pick is up to you but I prefer being notified by e-mail when updates are available. This is because an update may break something else. If the server updates it-self then I may not know and, if I do find out, I'll have to scramble to fix it. If it e-mails me when updates are available, then I can do the updates at my schedule.
+
+#### Notes
+
+- Your server will need a way to send e-mails for this to work
+
+#### References
+
+- https://wiki.debian.org/UnattendedUpgrades#apt-listchanges
+- https://www.cyberciti.biz/faq/apt-get-apticron-send-email-upgrades-available/
+- https://www.unixmen.com/how-to-get-email-notifications-for-new-updates-on-debianubuntu/
+
+#### Steps
+
+1. Install `apticron`.
+    
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install apticron
+    ```
+1. Set the value of `EMAIL` in `/etc/apticron/apticron.conf` to your e-mail address. 
 
 ([Table of Contents](#table-of-contents))
 
