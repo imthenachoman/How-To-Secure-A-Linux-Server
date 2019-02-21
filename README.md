@@ -563,7 +563,9 @@ Many folks might find the experience cumbersome or annoying. And, access to your
 
 #### How It Works
 
-On Linux, PAM is responsible for authentication. When you log into a server, be it directly from the console or via SSH, the door you came through will send the request PAM and PAM will ask for and verify your password. You can customize the rules each doors use. For example, you could have one set of rules when logging in directly from the console and another set of rules for when logging in via SSH.
+On Linux, PAM is responsible for authentication. There are four tasks to PAM that you can read about at https://en.wikipedia.org/wiki/Linux_PAM. This section talks about the authentication task.
+
+When you log into a server, be it directly from the console or via SSH, the door you came through will send the request to the authentication task of PAM and PAM will ask for and verify your password. You can customize the rules each doors use. For example, you could have one set of rules when logging in directly from the console and another set of rules for when logging in via SSH.
 
 This section will alter the authentication rules for when logging in via SSH to require both a password and a 6 digit code.
 
@@ -692,10 +694,6 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
 
 `sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
 
-#### How It Works
-
-WIP
-
 #### Goals
 
 - `sudo` privileges limited to those who are in a group we specify
@@ -743,11 +741,11 @@ WIP
 
 #### Why
 
-Many security protocols leverage the time. If your system time is incorrect, it could have negative impacts to your server. An NTP client can solve that problem by keeping your system time in-sync with [global NTP servers](https://www.pool.ntp.org/en/).
+Many security protocols leverage the time. If your system time is incorrect, it could have negative impacts to your server. An NTP client can solve that problem by keeping your system time in-sync with [global NTP servers](https://en.wikipedia.org/wiki/Network_Time_Protocol)
 
 #### How It Works
 
-WIP
+[NTP] stands for Network Time Protocol. In the context of this guide, an NTP client on the server is used to update the server time with the official time pulled from official servers. Check https://www.pool.ntp.org/en/ for all of the public NTP servers.
 
 #### Goals
 
@@ -756,6 +754,8 @@ WIP
 #### References
 
 - https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/
+- https://en.wikipedia.org/wiki/Network_Time_Protocol
+- https://www.pool.ntp.org/en/
 
 #### Steps
 
@@ -823,7 +823,9 @@ By default, accounts can use any password they want, including bad ones. [pwqual
 
 #### How It Works
 
-WIP
+On Linux, PAM is responsible for authentication. There are four tasks to PAM that you can read about at https://en.wikipedia.org/wiki/Linux_PAM. This section talks about the password task.
+
+When there is a need to set or change an account password, the password task of PAM handles the request. In this section we will tell PAM's password task to pass the requested new password to `libpam-pwquality` to make sure it meets our requirements. If the requirements are met it is used/set; if it does not meet the requirements it errors and lets the user know.
 
 #### Goal
 
