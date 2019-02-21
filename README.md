@@ -90,7 +90,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
 - [x] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
-- [ ] [Security-Enhanced Linux / SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux)
+- [ ] Security-Enhanced Linux / SELinux - https://en.wikipedia.org/wiki/Security-Enhanced_Linux, https://linuxtechlab.com/beginners-guide-to-selinux/, https://linuxtechlab.com/replicate-selinux-policies-among-linux-machines/, https://teamignition.us/how-to-stop-being-a-scrub-and-learn-to-use-selinux.html
 - [ ] disk encryption
 - [x] BIOS password
 - [ ] Anti-Virus
@@ -106,6 +106,10 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] shipping/backing up logs
 - [ ] Tripwire
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
+- [ ] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
+- [ ] Knockd
+- [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
+- [ ] `netstat -nlp`
 
 ([Table of Contents](#table-of-contents))
 
