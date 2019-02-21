@@ -745,7 +745,7 @@ Many security protocols leverage the time. If your system time is incorrect, it 
 
 #### How It Works
 
-[NTP] stands for Network Time Protocol. In the context of this guide, an NTP client on the server is used to update the server time with the official time pulled from official servers. Check https://www.pool.ntp.org/en/ for all of the public NTP servers.
+NTP stands for Network Time Protocol. In the context of this guide, an NTP client on the server is used to update the server time with the official time pulled from official servers. Check https://www.pool.ntp.org/en/ for all of the public NTP servers.
 
 #### Goals
 
