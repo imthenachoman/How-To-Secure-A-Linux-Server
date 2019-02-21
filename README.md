@@ -185,7 +185,7 @@ These are just **a few things** to think about. Before you start securing your s
 
 ### Picking A Linux Distribution
 
-<a name="distribution-agnostic"></a>This guide is intended to be distribution agnostic so users can use [any distribution](https://distrowatch.com/) they want. With that said, there are a few things to keep in mind:
+This guide is intended to be distribution agnostic so users can use [any distribution](https://distrowatch.com/) they want. With that said, there are a few things to keep in mind:
 
 You want a distribution that...
 
@@ -243,7 +243,7 @@ Using SSH public/private keys is more secure than using a password. It also make
 
 #### How It Works
 
-Check the [references](#ssh-key-references) below for more details but, at a high level, public/private keys work by using a pair of keys to verify identity.
+Check the references below for more details but, at a high level, public/private keys work by using a pair of keys to verify identity.
 
 1. One key, the **public** key, **can only encrypt data**, not decrypt it
 1. The other key, the **private** key, can decrypt the data
@@ -272,7 +272,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
 
 - You'll need to do this step for every computer and account you'll be connecting to your server from/as.
 
-#### <a name="ssh-key-references"></a>References
+#### References
 
 - https://www.ssh.com/ssh/public-key-authentication
 - https://help.ubuntu.com/community/SSH/OpenSSH/Keys
@@ -1607,15 +1607,11 @@ The kernel is the brains of a Linux system. Securing it just makes sense.
 
 Changing kernel settings with `sysctl` is risky and could break your server. If you don't know what you are doing, don't have the time to debug issues, or just don't want to take the risks, I would advise from not following these steps.
 
-#### How It Works
-
-WIP
-
 #### Disclaimer
 
 I am not as knowledgeable about hardening/securing a Linux kernel as I'd like. As much as I hate to admit it, I do not know what all of these settings do. My understanding is that most of them are general kernel hardening and performance, and the others are to protect against spoofing and DOS attacks. 
 
-In fact, since I am not 100% sure exactly what each setting does, I took recommended settings from numerous sites (all linked [below](#sysctl-references)) and combined them to figure out what should be set. I figure if multiple reputable sites mention the same setting, it's probably safe.
+In fact, since I am not 100% sure exactly what each setting does, I took recommended settings from numerous sites (all linked in the references below) and combined them to figure out what should be set. I figure if multiple reputable sites mention the same setting, it's probably safe.
 
 If you have a better understanding of what these settings do, or have any other feedback/advice on them, please [let me know](#contacting-me).
 
@@ -1624,9 +1620,9 @@ I won't provide [For the lazy](#editing-configuration-files---for-the-lazy) code
 #### Notes
 
 - Documentation on all the `sysctl` settings/keys is severely lacking. The [documentation I can find](https://github.com/torvalds/linux/tree/master/Documentation) seems to reference the 2.2 version kernel. I could not find anything newer. If you know where I can, please [let me know](#contacting-me).
-- The reference sites listed [below](#sysctl-references) have more comments on what each setting does.
+- The reference sites listed below have more comments on what each setting does.
 
-#### <a name="sysctl-references"></a>References
+#### References
 
 - https://github.com/torvalds/linux/tree/master/Documentation
 - https://www.cyberciti.biz/faq/linux-kernel-etcsysctl-conf-security-hardening/
@@ -1690,10 +1686,6 @@ If a bad actor has physical access to your server, they could use GRUB to gain u
 #### Why Not
 
 If you forget the password, you'll have to go through [some work](https://www.cyberciti.biz/tips/howto-recovering-grub-boot-loader-password.html) to recover the password.
-
-#### How It Works
-
-WIP
 
 #### Goals
 
@@ -1808,10 +1800,6 @@ To work around this, you can use the `--force` option for `sulogin`. Some distri
 
 An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
 
-#### How It Works
-
-WIP
-
 #### Goal
 
 - locked **root** account that nobody can use to log in as **root**
@@ -1853,13 +1841,13 @@ WIP
 
 When and if other accounts need access to a file/folder, you want to explicitly grant it using a combination of file/folder permissions and primary group.
 
-#### <a name="umask-root"></a>Why Not
+#### Why Not
 
 Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications that do not run with **root** privileges.
 
 #### How It Works
 
-WIP
+In order to explain how `umask` works I'd have to explain how Linux file/folder permissions work. As that is a rather complicated question, I will defer you to the references below for further reading.
 
 #### Goals
 
@@ -1987,10 +1975,6 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
 > Lynis is a battle-tested security tool for systems running Linux, macOS, or Unix-based operating system. It performs an extensive health scan of your systems to support system hardening and compliance testing.
 
-#### How It Works
-
-WIP
-
 #### Goals
 
 - Lynis installed
@@ -2045,10 +2029,6 @@ WIP
 Unless you're planning on setting up your own mail server, you'll need a way to send e-mails from your server. This will be important for system alerts/messages.
 
 You can use any Gmail account but I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password but why take the risk?
-
-#### How It Works
-
-WIP
 
 #### Goals
 
@@ -2132,10 +2112,6 @@ WIP
 #### Why
 
 There will come a time when you'll need to look through your `iptables` logs. Having all the `iptables` logs go to their own file will make it a lot easier to find what you're looking for.
-
-#### How It Works
-
-WIP
 
 #### References
 
