@@ -100,16 +100,16 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 - [ ] `logwatch`
 - [ ] Rkhunter and chrootkit
 - [ ] AppArmor
-- [ ] port knockers for SSH
+- [ ] port knockers for SSH - https://news.ycombinator.com/item?id=19181829, https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egropaw/
 - [ ] https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
 - [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
-- [ ] shipping/backing up logs
-- [ ] Tripwire
+- [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
+- [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
 - [ ] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
-- [ ] Knockd
+- [ ] Knockd - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egswikz/
 - [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
-- [ ] `netstat -nlp`
+- [ ] `netstat -nlp` - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
 
 ([Table of Contents](#table-of-contents))
 
@@ -1599,6 +1599,14 @@ This sections cover things that are high risk because there is a possibility the
 
 <details><summary>!! PROCEED AT YOUR OWN RISK !!</summary>
 
+### Table of Contents
+
+- [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
+- [Password Protect GRUB](#password-protect-grub)
+- [Disable Root Login](#disable-root-login)
+- [Change Default `umask`](#change-default-umask)
+- [Orphaned Software](#orphaned-software)
+
 ### Linux Kernel `sysctl` Hardening
 
 <details><summary>!! PROCEED AT YOUR OWN RISK !!</summary>
@@ -1818,6 +1826,7 @@ An alternative to locking the **root** acount is set a long/complicated **root**
 - https://github.com/systemd/systemd/issues/7115
 - https://github.com/karelzak/util-linux/commit/7ff1162e67164cb4ece19dd809c26272461aa254
 - https://github.com/systemd/systemd/issues/11596
+- https://www.reddit.com/r/selfhosted/comments/aoxd4l/new_guide_created_by_me_how_to_secure_a_linux/eg4rkfi/
 - `man systemd`
 
 #### Steps
