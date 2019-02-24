@@ -1,3 +1,5 @@
+[![CC-BY-SA](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](#copyright)
+
 # How To Secure A Linux Server
 
 An evolving how-to guide for securing a Linux server that, hopefully, also teaches you a little about security and why it matters.
@@ -51,6 +53,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Additional References](#additional-references)
   - [Acknowledgments](#acknowledgments)
   - [Disclaimer / Warranty](#disclaimer--warranty)
+  - [Copyright](#copyright)
 
 (TOC made with [nGitHubTOC](https://imthenachoman.github.io/nGitHubTOC/))
 
@@ -2246,5 +2249,15 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 ### Disclaimer / Warranty
 
 This guide comes with ABSOLUTELY NO WARRANTY. Use with caution. I take no responsibility for anything, related to or not related to this guide. 
- 
+
+([Table of Contents](#table-of-contents))
+
+### Copyright
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+</a>
+
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+
 ([Table of Contents](#table-of-contents))
