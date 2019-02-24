@@ -4,10 +4,12 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
   - [Why Yet Another Guide](#why-yet-another-guide)
+  - [Official Guides](#official-guides)
   - [To Do / To Add](#to-do--to-add)
 - [Guide Overview](#guide-overview)
   - [About This Guide](#about-this-guide)
@@ -38,7 +40,9 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 - [The Danger Zone](#the-danger-zone)
   - [Proceed At Your Own Risk](#proceed-at-your-own-risk)
 - [The Auditing](#the-auditing)
+  - [`netstat` (WIP)](#netstat-wip)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
+  - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
   - [Configure Gmail as MTA](#configure-gmail-as-mta)
   - [Separate `iptables` Log File](#separate-iptables-log-file)
@@ -68,7 +72,7 @@ At a high level, the second a  device, like a server, is in the public domain --
 
 What's worse is, without good security, you may never know if your server has been compromised. A bad-actor may have gained unauthorized access to your server and copied your data without changing anything so you'd never know. Or your server may have been part of a DDOS attack and you wouldn't know. Look at many of the large scale data breaches in the news -- the companies often did not discover the data leak or intrusion until long after the bad-actors were gone.
 
-Contrary to popular belief, bad-actors don't always want to change something or [lock you out of your data for money](). Sometimes they just want the data on your server for their data warehouses (there is big money in big data) or to covertly use your server for their nefarious purposes.
+Contrary to popular belief, bad-actors don't always want to change something or [lock you out of your data for money](https://en.wikipedia.org/wiki/Ransomware). Sometimes they just want the data on your server for their data warehouses (there is big money in big data) or to covertly use your server for their nefarious purposes.
 
 ([Table of Contents](#table-of-contents))
 
@@ -83,6 +87,15 @@ I've never found one guide that covers everything -- this guide is my attempt.
 Many of the things covered in this guide may be rather basic/trivial, but most of us do not install Linux every day and it is easy to forget those basic things.
 
 IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www.chef.io/), [Jenkins](https://jenkins.io/), [Puppet](https://puppet.com/), etc. help with the tedious task of installing/configuring a server but IMHO they are better suited for multiple or large scale deployments. IMHO, the overhead required to use those kinds of automation tools is wholly unnecessary for a one-time single server install for home use.
+
+([Table of Contents](#table-of-contents))
+
+### Official Guides
+
+There are many official guides provided by industry leaders and the distributions themselves. It is not practical, and sometimes against copyright, to include everything from those guides. I advise you to also check those guides.
+
+- For distribution specific hardening/security guides, check your distributions documentation.
+- The [Center for Internet Security (CIS)](https://www.cisecurity.org/) provides [benchmarks](https://www.cisecurity.org/cis-benchmarks/) that are exhaustive, industry trusted, step-by-step instructions for securing many flavors of Linux. Check their [About Us](https://www.cisecurity.org/about-us/) for details. I personally go through their guides first and then finish it off with what I have in this guide.
 
 ([Table of Contents](#table-of-contents))
 
@@ -225,6 +238,7 @@ Where applicable, use the expert install option so you have tighter control of w
   - Installing core software you'll want like `man`
   - Etc...
 - Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail as MTA](#configure-gmail-as-mta). 
+- I would also recommend you go through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide.
 
 ([Table of Contents](#table-of-contents))
 
@@ -457,6 +471,9 @@ SSH is a door into your server. This is especially true if you are opening ports
     # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
     ########################################################################################################
     
+    # don't let users set environment variables
+    PermitUserEnvironment no
+    
     # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
     Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
     
@@ -486,6 +503,9 @@ SSH is a door into your server. This is especially true if you are opening ports
     TCPKeepAlive no
     AllowAgentForwarding no
     PermitRootLogin no
+    
+    # don't allow .rhosts or /etc/hosts.equiv
+    HostbasedAuthentication no
     ```
    
 1. Then **find and edit or add** these settings, and set values as per your requirements:
@@ -1980,6 +2000,10 @@ On Debian based systems, you can use [`deborphan`](http://freshmeat.sourceforge.
 
 ## The Auditing
 
+### `netstat` (WIP)
+
+WIP
+
 ### Lynis - Linux Security Auditing
 
 #### Why
@@ -2030,6 +2054,12 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     ```
     
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
+
+([Table of Contents](#table-of-contents))
+
+### CIS-CAT (WIP)
+
+WIP
 
 ([Table of Contents](#table-of-contents))
 
