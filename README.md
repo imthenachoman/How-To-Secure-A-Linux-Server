@@ -2255,13 +2255,12 @@ This guide comes with ABSOLUTELY NO WARRANTY. Use with caution. I take no respon
 
 ([Table of Contents](#table-of-contents))
 
-### Copyright
+### License
 
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
-    <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
-</a>
-<br />
-This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-<br /><br />
+[![https://i.creativecommons.org/l/by-sa/4.0/88x31.png]](http://creativecommons.org/licenses/by-sa/4.0/)
+
+How To Secure A Linux Server by Anchal Nigam is licensed under [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0)
+
+See [LICENSE](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/LICENSE.txt) for the full license.
 
 ([Table of Contents](#table-of-contents))
