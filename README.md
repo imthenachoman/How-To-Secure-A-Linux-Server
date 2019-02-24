@@ -2259,5 +2259,5 @@ This guide comes with ABSOLUTELY NO WARRANTY. Use with caution. I take no respon
 </a>
 <br />
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-
+<br /><br />
 ([Table of Contents](#table-of-contents))
