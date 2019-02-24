@@ -52,7 +52,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Contacting Me](#contacting-me)
   - [Additional References](#additional-references)
   - [Acknowledgments](#acknowledgments)
-  - [Disclaimer / Warranty](#disclaimer--warranty)
   - [Copyright](#copyright)
 
 (TOC made with [nGitHubTOC](https://imthenachoman.github.io/nGitHubTOC/))
@@ -2246,12 +2245,6 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 - https://news.ycombinator.com/item?id=19177435#19178618
 - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/
 - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/
-
-([Table of Contents](#table-of-contents))
-
-### Disclaimer / Warranty
-
-This guide comes with ABSOLUTELY NO WARRANTY. Use with caution. I take no responsibility for anything, related to or not related to this guide. 
 
 ([Table of Contents](#table-of-contents))
 
