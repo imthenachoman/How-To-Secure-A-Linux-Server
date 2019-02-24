@@ -11,7 +11,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
   - [Why Yet Another Guide](#why-yet-another-guide)
-  - [Official Guides](#official-guides)
+  - [Other Guides](#official-guides)
   - [To Do / To Add](#to-do--to-add)
 - [Guide Overview](#guide-overview)
   - [About This Guide](#about-this-guide)
@@ -93,12 +93,18 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 
 ([Table of Contents](#table-of-contents))
 
-### Official Guides
+### Other Guides
 
-There are many official guides provided by industry leaders and the distributions themselves. It is not practical, and sometimes against copyright, to include everything from those guides. I advise you to also check those guides.
+There are many guides provided by experts, industry leaders, and the distributions themselves. It is not practical, and sometimes against copyright, to include everything from those guides.
 
-- For distribution specific hardening/security guides, check your distributions documentation.
 - The [Center for Internet Security (CIS)](https://www.cisecurity.org/) provides [benchmarks](https://www.cisecurity.org/cis-benchmarks/) that are exhaustive, industry trusted, step-by-step instructions for securing many flavors of Linux. Check their [About Us](https://www.cisecurity.org/about-us/) for details. I personally go through their guides first and then finish it off with what I have in this guide.
+- For distribution specific hardening/security guides, check your distributions documentation.
+- https://security.utexas.edu/os-hardening-checklist/linux-7 - Red Hat Enterprise Linux 7 Hardening Checklist
+- https://cloudpro.zone/index.php/2018/01/18/debian-9-3-server-setup-guide-part-1/ - # Debian 9.3 server setup guide
+- https://blog.vigilcode.com/2011/04/ubuntu-server-initial-security-quick-secure-setup-part-i/ - Ubuntu Server Initial Security guide
+- https://www.tldp.org/LDP/sag/html/index.html
+- https://seifried.org/lasg/
+- https://news.ycombinator.com/item?id=19178964
 
 ([Table of Contents](#table-of-contents))
 
@@ -2227,12 +2233,9 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ([Table of Contents](#table-of-contents))
 
-### Additional References
+### Helpful Links
 
 - [https://github.com/pratiktri/server_init_harden](https://github.com/pratiktri/server_init_harden) - Bash script that automates few of the tasks that you need to perform on a new Linux server to give it basic amount security.
-- https://security.utexas.edu/os-hardening-checklist/linux-7 -  Red Hat Enterprise Linux 7 Hardening Checklist
-- https://cloudpro.zone/index.php/2018/01/18/debian-9-3-server-setup-guide-part-1/ - # Debian 9.3 server setup guide
-- https://blog.vigilcode.com/2011/04/ubuntu-server-initial-security-quick-secure-setup-part-i/ - Ubuntu Server Initial Security guide
 
 ([Table of Contents](#table-of-contents))
 
