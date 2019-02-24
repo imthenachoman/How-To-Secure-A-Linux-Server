@@ -1,4 +1,4 @@
-[![CC-BY-SA](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](#copyright)
+[![CC-BY-SA](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](#license)
 
 # How To Secure A Linux Server
 
