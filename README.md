@@ -11,7 +11,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
   - [Why Yet Another Guide](#why-yet-another-guide)
-  - [Other Guides](#official-guides)
+  - [Other Guides](#other-guides)
   - [To Do / To Add](#to-do--to-add)
 - [Guide Overview](#guide-overview)
   - [About This Guide](#about-this-guide)
