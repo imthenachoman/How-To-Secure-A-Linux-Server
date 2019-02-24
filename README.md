@@ -2261,6 +2261,6 @@ This guide comes with ABSOLUTELY NO WARRANTY. Use with caution. I take no respon
 
 How To Secure A Linux Server by Anchal Nigam is licensed under [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0)
 
-See [LICENSE](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/LICENSE.txt) for the full license.
+See [LICENSE](LICENSE.txt) for the full license.
 
 ([Table of Contents](#table-of-contents))
