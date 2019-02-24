@@ -52,7 +52,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Contacting Me](#contacting-me)
   - [Additional References](#additional-references)
   - [Acknowledgments](#acknowledgments)
-  - [Copyright](#copyright)
+  - [License and Copyright](#license-and-copyright)
 
 (TOC made with [nGitHubTOC](https://imthenachoman.github.io/nGitHubTOC/))
 
@@ -2248,7 +2248,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 ([Table of Contents](#table-of-contents))
 
-### License
+### License and Copyright
 
 [![CC-BY-SA](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
 
