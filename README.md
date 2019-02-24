@@ -2252,7 +2252,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 
 [![CC-BY-SA](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
 
-How To Secure A Linux Server by Anchal Nigam is licensed under [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0)
+[How To Secure A Linux Server](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server) by [Anchal Nigam](https://github.com/imthenachoman) is licensed under [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0)
 
 See [LICENSE](LICENSE.txt) for the full license.
 
