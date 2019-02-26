@@ -2156,8 +2156,6 @@ You can use any Gmail account but I recommend you create one specific for this s
 
 1. Now instruct Exim4 to use TLS and port 465:
 
-    In `/etc/exim4/exim4.conf.template`, CTRL+F for `30_exim4-config_remote_smtp_smarthost` then add `protocol=smtps`.
-
     In `/etc/exim4/exim4.conf.localmacros`, add:
 
     ```
@@ -2175,7 +2173,7 @@ You can use any Gmail account but I recommend you create one specific for this s
     .endif
     ```
 
-    CTRL+F for `MAIN_TLS_ENABLE` and after the `ifdef` block add:
+    CTRL+F for `MAIN_TLS_ENABLE` and inside the `ifdef` block add:
 
     ```
     .ifdef TLS_ON_CONNECT_PORTS
