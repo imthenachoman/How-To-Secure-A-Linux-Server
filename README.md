@@ -2114,7 +2114,7 @@ You can use any Gmail account but I recommend you create one specific for this s
     |--:|--|
     |General type of mail configuration|`mail sent by smarthost; no local mail`|
     |System mail name|`Your FQDN or localhost`|
-    |IP-addresses to listen on for incoming SMTP connections|`127.0.0.1`|
+    |IP-addresses to listen on for incoming SMTP connections|`127.0.0.1; ::1`|
     |Other destinations for which mail is accepted|(default)|
     |Visible domain name for local users|`Your FQDN or localhost`|
     |IP address or host name of the outgoing smarthost|`smtp.gmail.com::465`|
