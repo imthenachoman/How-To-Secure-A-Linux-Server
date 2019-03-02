@@ -46,7 +46,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
   - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
-  - [Configure Gmail Over TLS For MTA](#configure-gmail-over-tls-for-mta)
+  - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
   - [Separate `iptables` Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
   - [Contacting Me](#contacting-me)
@@ -245,7 +245,7 @@ Where applicable, use the expert install option so you have tighter control of w
   - Creating the initial user accounts
   - Installing core software you'll want like `man`
   - Etc...
-- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail Over TLS For MTA](#configure-gmail-over-tls-for-mta). 
+- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls). 
 - I would also recommend you go through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide.
 
 ([Table of Contents](#table-of-contents))
@@ -2122,7 +2122,7 @@ WIP
 
 ## The Miscellaneous
 
-### Configure Gmail Over TLS For MTA
+### Configure Gmail As MTA With Implicit TLS
 
 #### Why
 
