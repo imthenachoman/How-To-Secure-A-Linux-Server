@@ -60,7 +60,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ### Guide Objective
 
-This guide's purpose is to teach you how to secure a Linux server. 
+This guide's purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
@@ -82,7 +82,7 @@ Contrary to popular belief, bad-actors don't always want to change something or 
 
 This guide may appear duplicative/unnecessary because there are countless articles online that tell you [how to secure Linux](https://duckduckgo.com/?q=how+to+secure+linux&t=ffab&atb=v151-7&ia=web), but the information is spread across different articles, that cover different things, and in different ways. Who has time to scour through hundreds of articles?
 
-As I was going through research for my Debian build, I kept notes. At the end I realized that, along with what I already knew, and what I was learning, I had the makings of a how-to guide. I figured I'd put it online to hopefully help others **learn**, and **save time**. 
+As I was going through research for my Debian build, I kept notes. At the end I realized that, along with what I already knew, and what I was learning, I had the makings of a how-to guide. I figured I'd put it online to hopefully help others **learn**, and **save time**.
 
 I've never found one guide that covers everything -- this guide is my attempt.
 
@@ -147,7 +147,7 @@ This guide...
 - ...**does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. For example, physical security is out of scope for this guide.
 - ...**does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to whet your appetite and make you hungry enough to want to go and learn more.
 - ...**aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
-- ...**is** organized in an order that makes logical sense to me -- i.e. securing SSH before installing a firewall. As such, this guide is intended to be followed in the order it is presented but it is not necessary to do so. Just be careful if you do things in a different order -- some sections require previous sections to be completed. 
+- ...**is** organized in an order that makes logical sense to me -- i.e. securing SSH before installing a firewall. As such, this guide is intended to be followed in the order it is presented but it is not necessary to do so. Just be careful if you do things in a different order -- some sections require previous sections to be completed.
 
 ([Table of Contents](#table-of-contents))
 
@@ -199,7 +199,7 @@ Before you start you will want to identify what your Principles are. What is you
 - How much security do you want or not want?
 - How much convenience are you willing to compromise for security and vice-versa?
 - What are the threats you want to protect against? What are the specifics to your situation? For example:
-  - Is physical access to your server/network a possible attack vector? 
+  - Is physical access to your server/network a possible attack vector?
   - Will you be opening ports on your router so you can access your server from outside your home?
   - Will you be hosting a file share on your server that will be mounted on a desktop class machine? What is the possibility of the desktop machine getting infected and, in turn, infecting the server?
  - Do you have a means of recovering if your security implementation locks you out of your own server? For example, you [disabled root login](#disable-root-login) or [password protected GRUB](#password-protect-grub).
@@ -214,7 +214,7 @@ This guide is intended to be distribution agnostic so users can use [any distrib
 
 You want a distribution that...
 
-- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#automatic-security-updates-and-alerts), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software. 
+- ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#automatic-security-updates-and-alerts), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software.
 - ...**stays up-to-date with security patches**. You can secure everything on your server, but if the core OS or applications you're running have known vulnerabilities, you'll never be safe.
 - ...**you're familiar with.** If you don't know Linux, I would advise you play around with one before you try to secure it. You should be comfortable with it and know your way around, like how to install software, where configuration files are, etc...
 - ...**is well supported.** Even the most seasoned admin needs help every now and then. Having a place to go for help will save your sanity.
@@ -236,7 +236,7 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ### Pre/Post Installation Requirements
 
-- If you're opening ports on your router so you can access your server from the outside, disable the port forwarding until your system is up and secured. 
+- If you're opening ports on your router so you can access your server from the outside, disable the port forwarding until your system is up and secured.
 - Unless you're doing everything physically connected to your server, you'll need remote access so be sure SSH works.
 - Keep your system up-to-date (i.e. `sudo apt update && sudo apt upgrade` on Debian based systems).
 - Make sure you perform any tasks specific to your setup like:
@@ -245,7 +245,7 @@ Where applicable, use the expert install option so you have tighter control of w
   - Creating the initial user accounts
   - Installing core software you'll want like `man`
   - Etc...
-- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls). 
+- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls).
 - I would also recommend you go through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide.
 
 ([Table of Contents](#table-of-contents))
@@ -280,7 +280,7 @@ When you connect to an SSH server, SSH will look for a public key that matches t
 
 After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice write-up of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
 
-They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key. 
+They are considered more secure because you need the private key to establish an SSH connection. If you set [`PasswordAuthentication no` in `/etc/ssh/sshd_config`](#PasswordAuthentication), then SSH won't let you connect without the private key.
 
 You can also set a pass-phrase for the keys which would require you to enter the key pass-phrase when connecting using public/private keys. Keep in mind doing this means you can't use the key for automation because you'll have no way to send the passphrase in your scripts. `ssh-agent` is a program that is shipped in many Linux distros (and usually already running) that will allow you to hold your unencrypted private key in memory for a configurable duration. Simply run `ssh-add` and it will prompt you for your passphrase. You will not be prompted for your passphrase again until the configurable duration has passed.
 
@@ -347,7 +347,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
 1. Now you need to **append** the public key `~/.ssh/id_ed25519.pub` from your client to the `~/.ssh/authorized_keys` file on your server. Since we're presumable still at home on the LAN, we're probably safe from [MIM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) attacks, so we will use `ssh-copy-id` to transfer and append the public key:
 
     ``` bash
-    ssh-copy-id user@server    
+    ssh-copy-id user@server
     ```
     
     > ```
@@ -365,7 +365,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
     > and check to make sure that only the key(s) you wanted were added.
     > ```
 
-Now would be a good time to [perform any tasks specific to your setup](#prepost-installation).
+Now would be a good time to [perform any tasks specific to your setup](#prepost-installation-requirements).
 
 ([Table of Contents](#table-of-contents))
 
@@ -377,7 +377,7 @@ To make it easy to control who can SSH to the server. By using a group, we can q
 
 #### How It Works
 
-We will use the [`AllowGroups` option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config). to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in. 
+We will use the [`AllowGroups` option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config). to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in.
 
 #### Goals
 
@@ -441,16 +441,16 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 #### Steps
 
-1. Make a backup of `/etc/ssh/sshd_config` and remove default comments to make it easier to read:
+1. Make a backup of `/etc/ssh/sshd_config` and remove comments to make it easier to read:
 
     ``` bash
     sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
     sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
     ```
     
-1. Edit `/etc/ssh/sshd_config` then **find and edit or add** these settings that should be applied regardless of your configuration/setup:
+1. Edit `/etc/ssh/sshd_config` then find and edit or add these settings that should be applied regardless of your configuration/setup:
     
-    **Note**: Your `/etc/ssh/sshd_config` file may already have some of these settings/lines. You will want to remove those and replace them with the ones below.
+    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
     
     ```
     ########################################################################################################
@@ -534,8 +534,6 @@ SSH is a door into your server. This is especially true if you are opening ports
     
     Check `man sshd_config` for more details what these settings mean.
 
-1. SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
-    
 1. Restart ssh:
 
     ``` bash
@@ -582,7 +580,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67), "all Diffie-Hellman moduli in use should be at least 3072-bit-long".
 
-The Diffie-Hellman algorithm is used by SSH to establish a secure connection. The larger the moduli (key size) the stronger the encryption. 
+The Diffie-Hellman algorithm is used by SSH to establish a secure connection. The larger the moduli (key size) the stronger the encryption.
 
 #### Goal
 
@@ -619,7 +617,7 @@ Even though SSH is a pretty good security guard for your doors and windows, it i
 
 Using Two Factor Authentication (2FA) / Multi Factor Authentication (MFA) requires anyone entering to have **two** keys to enter which makes it harder for bad actors. The two keys are:
 
-1. Their password 
+1. Their password
 1. A 6 digit token that changes every 30 seconds
 
 Without both keys, they won't be able to get in.
@@ -646,7 +644,7 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
 
 #### Notes
 
-- Before you do this, you should have an idea of how 2FA/MFA works and you'll need an authenticator app on your phone to continue. 
+- Before you do this, you should have an idea of how 2FA/MFA works and you'll need an authenticator app on your phone to continue.
 - We'll use [google-authenticator-libpam](https://github.com/google/google-authenticator-libpam).
 - With the below configuration, a user will only need to enter their 2FA/MFA code if they are logging on with their password but **not** if they are using [SSH public/private keys](#ssh-publicprivate-keys). Check the documentation on how to change this behavior to suite your requirements.
 
@@ -965,7 +963,7 @@ Automatic and unattended updates may break your system and you may not be near y
 #### Goals
 
 - Automatic, unattended, updates of critical security patches
-- Automatic emails of remaining pending updates 
+- Automatic emails of remaining pending updates
 
 #### Debian Based Systems
 
@@ -1021,7 +1019,7 @@ We will use `unattended-upgrades` to apply **critical security patches**. We can
     //     3:  + trace on    APT::Periodic::Verbose "2";    
     APT::Periodic::Unattended-Upgrade "1";
     
-    // Automatically upgrade packages from these 
+    // Automatically upgrade packages from these
     Unattended-Upgrade::Origins-Pattern {
           "o=Debian,a=stable";
           "o=Debian,a=stable-updates";
@@ -1098,7 +1096,7 @@ Call me paranoid, and you don't have to agree, but I want to deny all traffic in
 
 Of course, if you disagree, that is totally fine and can configure UFW to suit your needs.
 
-Either way, ensuring that only traffic we explicitly allow is the job of a firewall. On Linux, the most common firewall is [`iptables`](https://en.wikipedia.org/wiki/Iptables). `iptables`, however, is rather complicated and confusing (IMHO). This is where UFW comes in. UFW simplifies the process of creating and managing `iptables` rules. 
+Either way, ensuring that only traffic we explicitly allow is the job of a firewall. On Linux, the most common firewall is [`iptables`](https://en.wikipedia.org/wiki/Iptables). `iptables`, however, is rather complicated and confusing (IMHO). This is where UFW comes in. UFW simplifies the process of creating and managing `iptables` rules.
 
 **UFW** works by letting you configure rules that:
 
@@ -1182,9 +1180,6 @@ WIP
     sudo ufw allow out http comment 'allow HTTP traffic out'
     sudo ufw allow out https comment 'allow HTTPS traffic out'
     sudo ufw allow out ftp comment 'allow FTP traffic out'
-    
-    # allow mail to go out
-    sudo ufw allow out 'Mail submission' comment 'allow mail out'
     
     # allow whois
     sudo ufw allow out whois comment 'allow whois'
@@ -1384,7 +1379,7 @@ WIP
 - https://www.thefanclub.co.za/how-to/how-install-psad-intrusion-detection-ubuntu-1204-lts-server
 - https://serverfault.com/a/447604/289829
 - https://serverfault.com/a/770424/289829
-- https://gist.github.com/netson/c45b2dc4e835761fbccc- 
+- https://gist.github.com/netson/c45b2dc4e835761fbccc-
 
 #### Steps
 
@@ -1690,7 +1685,7 @@ This sections cover things that are high risk because there is a possibility the
 
 #### Why
 
-The kernel is the brains of a Linux system. Securing it just makes sense. 
+The kernel is the brains of a Linux system. Securing it just makes sense.
 
 #### Why Not
 
@@ -1698,7 +1693,7 @@ Changing kernel settings with `sysctl` is risky and could break your server. If 
 
 #### Disclaimer
 
-I am not as knowledgeable about hardening/securing a Linux kernel as I'd like. As much as I hate to admit it, I do not know what all of these settings do. My understanding is that most of them are general kernel hardening and performance, and the others are to protect against spoofing and DOS attacks. 
+I am not as knowledgeable about hardening/securing a Linux kernel as I'd like. As much as I hate to admit it, I do not know what all of these settings do. My understanding is that most of them are general kernel hardening and performance, and the others are to protect against spoofing and DOS attacks.
 
 In fact, since I am not 100% sure exactly what each setting does, I took recommended settings from numerous sites (all linked in the references below) and combined them to figure out what should be set. I figure if multiple reputable sites mention the same setting, it's probably safe.
 
@@ -1718,7 +1713,7 @@ I won't provide [For the lazy](#editing-configuration-files---for-the-lazy) code
 - https://geektnt.com/sysctl-conf-hardening.html
 - https://linoxide.com/how-tos/linux-server-protection/
 - https://github.com/klaver/sysctl/blob/master/sysctl.conf
-- https://cloudpro.zone/index.php/2018/01/30/debian-9-3-server-setup-guide-part-5/ 
+- https://cloudpro.zone/index.php/2018/01/30/debian-9-3-server-setup-guide-part-5/
 
 #### Steps
 
@@ -1848,7 +1843,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
     ```
 
 1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and add `--unrestricted` to the `CLASS` variable.
- 
+    
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
@@ -1946,7 +1941,7 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
 
 #### Notes
 
-- `umask` is a Bash built-in which means a user can change their own `umask` setting. 
+- `umask` is a Bash built-in which means a user can change their own `umask` setting.
 
 #### References
 
@@ -1983,7 +1978,7 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
     ``` bash
     sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
     
-    echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
+    echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs
     ```
 
 1. Set default `umask` for the **root** account to **0077** by adding this line to `/root/.bashrc`:
@@ -2018,14 +2013,14 @@ As you use your system, and you install and uninstall software, you'll eventuall
 
 #### Debian Based Systems
 
+On Debian based systems, you can use [`deborphan`](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages.
+
 ##### <a name="orphaned-software-why-not"></a>Why Not
 
 Keep in mind, `deborphan` finds packages that have **no package dependencies**. That does not mean they are not used. You could very well have a package you use every day that has no dependencies that you wouldn't want to remove. And, if `deborphan` gets anything wrong, then removing critical packages may break your system.
 
 ##### Steps
 
-On Debian based systems, you can use [`deborphan`](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages. 
- 
 1. Install `deborphan`.
        
     ``` bash
@@ -2075,7 +2070,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
 #### Notes
 
-- CISOFY offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specific installation instructions. 
+- CISOFY offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specific installation instructions.
 
 #### References
 
@@ -2130,7 +2125,7 @@ Unless you're planning on setting up your own mail server, you'll need a way to 
 
 You can use any Gmail account. I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password, but why take the risk?
 
-There are many guides on-line that cover how to configure Gmail as MTA using STARTTLS including a [previous version of this guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/tree/cc5edcae1cf846dd250e76b121e721d836481d2f#configure-gmail-as-mta). With STARTTLS, an initial **unencrypted** connection is made and then upgraded to an encrypted TLS or SSL connection. Instead, with the approach outlined below, an encrypted TLS connection is made from the start. 
+There are many guides on-line that cover how to configure Gmail as MTA using STARTTLS including a [previous version of this guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/tree/cc5edcae1cf846dd250e76b121e721d836481d2f#configure-gmail-as-mta). With STARTTLS, an initial **unencrypted** connection is made and then upgraded to an encrypted TLS or SSL connection. Instead, with the approach outlined below, an encrypted TLS connection is made from the start.
 
 #### Goals
 
@@ -2314,6 +2309,27 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     sudo service exim4 restart
     ```
     
+1. If you're using [UFW](#ufw-uncomplicated-firewall), you'll need to allow outbound traffic on 465. To do this we'll create a custom UFW application profile and then enable it. Create the file `/etc/ufw/applications.d/smtptls`, add this, then run `ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'`:
+
+    ```
+    [SMTPTLS]
+    title=SMTP through TLS 
+    description=This opens up the TLS port 465 for use with SMPT to send e-mails.
+    ports=465/tcp
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    cat << EOF | sudo tee /etc/ufw/applications.d/smtptls
+    [SMTPTLS]
+    title=SMTP through TLS 
+    description=This opens up the TLS port 465 for use with SMPT to send e-mails.
+    ports=465/tcp
+    EOF
+    ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'
+    ```
+
 1. Add some mail aliases so we can send e-mails to local accounts by adding lines like this to `/etc/aliases`:
     
     ```
