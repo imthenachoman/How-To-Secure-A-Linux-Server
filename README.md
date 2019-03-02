@@ -46,7 +46,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
   - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
-  - [Configure Gmail as MTA](#configure-gmail-as-mta)
+  - [Configure Gmail Over TLS For MTA](#configure-gmail-over-tls-for-mta)
   - [Separate `iptables` Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
   - [Contacting Me](#contacting-me)
@@ -175,7 +175,7 @@ So, when and where possible, I have provided `code` snippets to quickly do what 
 
 The `code` snippets use basic commands like `echo`, `cat`, `sed`, `awk`, and `grep`. How the `code` snippets work, like what each command/part does, is out of scope for this guide -- the `man` pages are your friend.
 
-**Note:** The `code` snippets do not validate/verify the change went through -- i.e. the line was actually added or changed. I'll leave the verifying part in your capable hands. The steps in this guide do include taking backups of all files that will be changed.
+**Note**: The `code` snippets do not validate/verify the change went through -- i.e. the line was actually added or changed. I'll leave the verifying part in your capable hands. The steps in this guide do include taking backups of all files that will be changed.
 
 Not all changes can be automated with `code` snippets. Those changes need good, old fashioned, manual editing. For example, you can't just append a line to an [INI](https://en.wikipedia.org/wiki/INI_file) type file. Use your [favorite](https://en.wikipedia.org/wiki/Vi) Linux text editor.
 
@@ -245,7 +245,7 @@ Where applicable, use the expert install option so you have tighter control of w
   - Creating the initial user accounts
   - Installing core software you'll want like `man`
   - Etc...
-- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail as MTA](#configure-gmail-as-mta). 
+- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail Over TLS For MTA](#configure-gmail-over-tls-for-mta). 
 - I would also recommend you go through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide.
 
 ([Table of Contents](#table-of-contents))
@@ -448,7 +448,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
     ```
     
-1. Edit `/etc/ssh/sshd_config` then **find and edit or add** these settings that should apply regardless of your configuration/setup:
+1. Edit `/etc/ssh/sshd_config` then **find and edit or add** these settings that should be applied regardless of your configuration/setup:
     
     **Note**: Your `/etc/ssh/sshd_config` file may already have some of these settings/lines. You will want to remove those and replace them with the ones below.
     
@@ -534,11 +534,45 @@ SSH is a door into your server. This is especially true if you are opening ports
     
     Check `man sshd_config` for more details what these settings mean.
 
+1. SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
+    
 1. Restart ssh:
 
     ``` bash
     sudo service sshd restart
     ```
+    
+1. You can check verify the configurations worked with `sshd -T` and verify the output:
+
+    ``` bash
+    sudo sshd -T
+    ```
+    
+    > ```    
+    > port 22
+    > addressfamily any
+    > listenaddress [::]:22
+    > listenaddress 0.0.0.0:22
+    > usepam yes
+    > logingracetime 30
+    > x11displayoffset 10
+    > maxauthtries 2
+    > maxsessions 2
+    > clientaliveinterval 300
+    > clientalivecountmax 0
+    > streamlocalbindmask 0177
+    > permitrootlogin no
+    > ignorerhosts yes
+    > ignoreuserknownhosts no
+    > hostbasedauthentication no
+    > ...
+    > subsystem sftp internal-sftp -f AUTHPRIV -l INFO
+    > maxstartups 2:30:2
+    > permittunnel no
+    > ipqos lowdelay throughput
+    > rekeylimit 0 0
+    > permitopen any
+    > ```
 
 ([Table of Contents](#table-of-contents))
 
@@ -681,13 +715,13 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     
     Select default option (y in most cases) for all the questions it asks and remember to save the emergency scratch codes.
     
-1. Now we need to enable it as an authentication method for SSH by **adding** this line to `/etc/pam.d/sshd`:
+1. Now we need to enable it as an authentication method for SSH by adding this line to `/etc/pam.d/sshd`:
 
     ```
     auth       required     pam_google_authenticator.so nullok
     ```
     
-    Check [here](https://github.com/google/google-authenticator-libpam/blob/master/README.md#nullok) for what `nullok` means.
+    **Note**: Check [here](https://github.com/google/google-authenticator-libpam/blob/master/README.md#nullok) for what `nullok` means.
     
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
@@ -697,7 +731,7 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     echo -e "\nauth       required     pam_google_authenticator.so nullok         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/pam.d/sshd
     ```
     
-1. Tell SSH to leverage it by **adding** this line in `/etc/ssh/sshd_config`:
+1. Tell SSH to leverage it by adding or editing this line in `/etc/ssh/sshd_config`:
     
     ```
     ChallengeResponseAuthentication yes
@@ -707,7 +741,7 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     
     ``` bash
     sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
-    
+    sudo sed -i -r -e "s/^(challengeresponseauthentication .*)$/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/I" /etc/ssh/sshd_config
     echo -e "\nChallengeResponseAuthentication yes         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ssh/sshd_config
     ```
     
@@ -762,7 +796,7 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     sudo visudo
     ```
 
-1. Tell `sudo` to only allow users in the `sudousers` group to use `sudo` by **adding** this line if it is not already there:
+1. Tell `sudo` to only allow users in the `sudousers` group to use `sudo` by adding this line if it is not already there:
 
     ```
     %sudousers   ALL=(ALL:ALL) ALL
@@ -965,7 +999,7 @@ We will use `unattended-upgrades` to apply **critical security patches**. We can
     sudo apt install unattended-upgrades apt-listchanges apticron
     ```
 
-1. Now we need to configure `unattended-upgrades` to automatically apply the updates. This is typically done by editing the files `/etc/apt/apt.conf.d/20auto-upgrades` and `/etc/apt/apt.conf.d/50unattended-upgrades` that were created by the packages. However, because these file may get overwritten with a future update, we'll create a new file instead. **Create** the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
+1. Now we need to configure `unattended-upgrades` to automatically apply the updates. This is typically done by editing the files `/etc/apt/apt.conf.d/20auto-upgrades` and `/etc/apt/apt.conf.d/50unattended-upgrades` that were created by the packages. However, because these file may get overwritten with a future update, we'll create a new file instead. Create the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
 
     ```
     // Enable the update/upgrade script (0=disable)
@@ -1365,7 +1399,7 @@ WIP
 1. Make a backup of `/etc/psad/psad.conf`:
     
     ``` bash
-    sudo cp /etc/psad/psad.conf /etc/psad/psad.conf.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/psad/psad.conf /etc/psad/psad.conf.$(date +"%Y%m%d%H%M%S")
     ```
     
 1. Review and update configuration options in `/etc/psad/psad.conf`. Pay special attention to these:
@@ -1380,13 +1414,13 @@ WIP
    
    Check the configuration file `psad`'s documentation at http://www.cipherdyne.org/psad/docs/config.html for more details.
 
-1. <a name="psad_step4"></a>Now we need to make some changes to `ufw` so it works with `psad` by telling `ufw` to log all traffic so `psad` can analyze it. Do this by editing **two files** and **adding** these lines **at the end but before the COMMIT line**.
+1. <a name="psad_step4"></a>Now we need to make some changes to `ufw` so it works with `psad` by telling `ufw` to log all traffic so `psad` can analyze it. Do this by editing **two files** and adding these lines **at the end but before the COMMIT line**.
     
     Make backups:
     
     ``` bash
-    sudo cp /etc/ufw/before.rules /etc/ufw/before.rules.$(date +"%Y%m%d%H%M%S")
-    sudo cp /etc/ufw/before6.rules /etc/ufw/before6.rules.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/ufw/before.rules /etc/ufw/before.rules.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/ufw/before6.rules /etc/ufw/before6.rules.$(date +"%Y%m%d%H%M%S")
     ```
     
     Edit the files:
@@ -1394,7 +1428,7 @@ WIP
     - `/etc/ufw/before.rules`
     - `/etc/ufw/before6.rules`
     
-    And add **add** this **at the end but before the COMMIT line**:
+    And add add this **at the end but before the COMMIT line**:
     
     ```
     # log all traffic so psad can analyze
@@ -1526,7 +1560,7 @@ WIP
     sudo apt install fail2ban
     ```
     
-1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll update a local copy instead. **Add** this to `/etc/fail2ban/jail.local` after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
+1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll update a local copy instead. Add this to `/etc/fail2ban/jail.local` after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
     
     ```
     [DEFAULT]
@@ -1548,7 +1582,7 @@ WIP
     
     **Note**: Your server will need to be able to send e-mails so Fail2ban can let you know of suspicious activity and when it banned an IP.
 
-1. We need to create a jail for `ssh` that tells `fail2ban` to look at `ssh` logs and use `ufw` to ban/unban IPs as needed. Create a jail for `ssh` by **adding** this to `/etc/fail2ban/jail.d/ssh.local`:
+1. We need to create a jail for `ssh` that tells `fail2ban` to look at `ssh` logs and use `ufw` to ban/unban IPs as needed. Create a jail for `ssh` by adding this to `/etc/fail2ban/jail.d/ssh.local`:
 
     ```
     [sshd]
@@ -1558,6 +1592,20 @@ WIP
     filter = sshd
     logpath = %(sshd_log)s
     maxretry = 5
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    cat << EOF | sudo tee /etc/fail2ban/jail.d/ssh.local
+    [sshd]
+    enabled = true
+    banaction = ufw
+    port = ssh
+    filter = sshd
+    logpath = %(sshd_log)s
+    maxretry = 5
+    EOF
     ```
     
 1. In the above we tell `fail2ban` to use the `ufw` as the `banaction`. Fail2ban ships with an action configuration file for `ufw`. You can see it in `/etc/fail2ban/action.d/ufw.conf`
@@ -1762,7 +1810,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 
 1. Copy everything **after** `PBKDF2 hash of your password is `, **starting from and including** `grub.pbkdf2.sha512...` to the end. You'll need this in the next step.
 
-1. The `update-grub` program uses scripts to generate configuration files it will use for GRUB's settings.  Create the file `/etc/grub.d/01_password` and **add** the below code after replacing `[hash]` with the hash you copied from the first step. This tells `update-grub` to use this username and password for GRUB.
+1. The `update-grub` program uses scripts to generate configuration files it will use for GRUB's settings.  Create the file `/etc/grub.d/01_password` and add the below code after replacing `[hash]` with the hash you copied from the first step. This tells `update-grub` to use this username and password for GRUB.
 
     ``` bash
     #!/bin/sh
@@ -1799,7 +1847,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
     sudo chmod a-x /etc/grub.d/10_linux.*
     ```
 
-1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and **add** `--unrestricted` to the `CLASS` variable.
+1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and add `--unrestricted` to the `CLASS` variable.
  
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
@@ -1909,7 +1957,7 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
 
 #### Steps
 
-1. Set default `umask` for **non-root** accounts to **0027** by **adding** this line to `/etc/profile` and `/etc/bash.bashrc`:
+1. Set default `umask` for **non-root** accounts to **0027** by adding this line to `/etc/profile` and `/etc/bash.bashrc`:
     
     ```
     umask 0027
@@ -1924,7 +1972,7 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
     echo -e "\numask 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/profile /etc/bash.bashrc
     ```
 
-1. We also need to **add** this line to `/etc/login.defs`:
+1. We also need to add this line to `/etc/login.defs`:
     
     ```
     UMASK 0027
@@ -1938,7 +1986,7 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs 
     ```
 
-1. Set default `umask` for the **root** account to **0077** by **adding** this line to `/root/.bashrc`:
+1. Set default `umask` for the **root** account to **0077** by adding this line to `/root/.bashrc`:
     
     ```
     umask 0077
@@ -2074,22 +2122,28 @@ WIP
 
 ## The Miscellaneous
 
-### Configure Gmail as MTA
+### Configure Gmail Over TLS For MTA
 
 #### Why
 
 Unless you're planning on setting up your own mail server, you'll need a way to send e-mails from your server. This will be important for system alerts/messages.
 
-You can use any Gmail account but I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password but why take the risk?
+You can use any Gmail account; I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password, but why take the risk?
+
+There are many guides on-line that cover how to configure Gmail over STARTTLS including a [previous version of this guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/tree/cc5edcae1cf846dd250e76b121e721d836481d2f#configure-gmail-as-mta). With STARTTLS, an initial **unencrypted** connection is made and then upgraded to an encrypted TLS or SSL connection. Instead, with the approach outlined below, an encrypted TLS connection is made from the start. 
 
 #### Goals
 
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
 
 #### References
+- Special thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS.
+- https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24
 - https://wiki.debian.org/Exim
 - https://wiki.debian.org/GmailAndExim4
 - https://www.exim.org/exim-html-current/doc/html/spec_html/ch-encrypted_smtp_connections_using_tlsssl.html
+- https://php.quicoto.com/setup-exim4-to-use-gmail-in-ubuntu/
+- https://www.fastmail.com/help/technical/ssltlsstarttls.html
 
 #### Steps
 
@@ -2113,31 +2167,29 @@ You can use any Gmail account but I recommend you create one specific for this s
     |Prompt|Answer|
     |--:|--|
     |General type of mail configuration|`mail sent by smarthost; no local mail`|
-    |System mail name|`Your FQDN or localhost`|
+    |System mail name|`localhost`|
     |IP-addresses to listen on for incoming SMTP connections|`127.0.0.1; ::1`|
     |Other destinations for which mail is accepted|(default)|
-    |Visible domain name for local users|`Your FQDN or localhost`|
+    |Visible domain name for local users|`localhost`|
     |IP address or host name of the outgoing smarthost|`smtp.gmail.com::465`|
     |Keep number of DNS-queries minimal (Dial-on-Demand)?|`No`|
     |Split configuration into small files?|`No`|
 
-    If you prefer to use `STARTTLS`, then choose port `587`.
-    
 1. Make a backup of `/etc/exim4/passwd.client`:
     
     ``` bash
-        sudo cp /etc/exim4/passwd.client /etc/exim4/passwd.client.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/exim4/passwd.client /etc/exim4/passwd.client.$(date +"%Y%m%d%H%M%S")
     ```
     
-1. **Add** a line like this to `/etc/exim4/passwd.client`
+1. Add a line like this to `/etc/exim4/passwd.client`
     
     ```
     *.google.com:yourAccount@gmail.com:yourPassword
     ```
 
-    Always check `host smtp.gmail.com` for the most up-to-date domains to list.
-    
-    Replace `yourAccount@gmail.com` and `yourPassword` with your details. If you have 2FA/MFA enabled on your Gmail then you'll need to create and use an app password.
+    **Notes**:
+    - Replace `yourAccount@gmail.com` and `yourPassword` with your details. If you have 2FA/MFA enabled on your Gmail then you'll need to create and use an app password here.
+    - Always check `host smtp.gmail.com` for the most up-to-date domains to list.
 
 1. This file has your Gmail password so we need to lock it down:
 
@@ -2146,17 +2198,45 @@ You can use any Gmail account but I recommend you create one specific for this s
     sudo chmod 640 /etc/exim4/passwd.client
     ```
 
-1. The following instructions only apply if you choose implicit TLS (port 465) instead of `STARTTLS`. Skip to "restart `exim4`" if you are not using implicit TLS.
-
-    You need a TLS certificate. You can either use [Let's Encrypt](https://letsencrypt.org/), the `openssl` command or just let Exim generate it for you.
-
+1. The next step is to create an TLS certificate that `exim4` will use to make the encrypted connection to `smtp.gmail.com`. You can use your own certificate, like one from [Let's Encrypt](https://letsencrypt.org/), or create one yourself using `openssl`. We will use a script that comes with `exim4` that calls `openssl` to make our certificate:
+    
     ``` bash
     sudo bash /usr/share/doc/exim4-base/examples/exim-gencert
     ```
-
-1. Now instruct Exim4 to use TLS and port 465:
-
-    In `/etc/exim4/exim4.conf.localmacros`, add:
+    
+    > ```
+    > [*] Creating a self signed SSL certificate for Exim!
+    >     This may be sufficient to establish encrypted connections but for
+    >     secure identification you need to buy a real certificate!
+    > 
+    >     Please enter the hostname of your MTA at the Common Name (CN) prompt!
+    > 
+    > Generating a RSA private key
+    > ..........................................+++++
+    > ................................................+++++
+    > writing new private key to '/etc/exim4/exim.key'
+    > -----
+    > You are about to be asked to enter information that will be incorporated
+    > into your certificate request.
+    > What you are about to enter is what is called a Distinguished Name or a DN.
+    > There are quite a few fields but you can leave some blank
+    > For some fields there will be a default value,
+    > If you enter '.', the field will be left blank.
+    > -----
+    > Country Code (2 letters) [US]:[redacted]
+    > State or Province Name (full name) []:[redacted]
+    > Locality Name (eg, city) []:[redacted]
+    > Organization Name (eg, company; recommended) []:[redacted]
+    > Organizational Unit Name (eg, section) []:[redacted]
+    > Server name (eg. ssl.domain.tld; required!!!) []:localhost
+    > Email Address []:[redacted]
+    > [*] Done generating self signed certificates for exim!
+    >     Refer to the documentation and example configuration files
+    >     over at /usr/share/doc/exim4-base/ for an idea on how to enable TLS
+    >     support in your mail transfer agent.
+    > ```
+    
+1. Instruct `exim4` to use TLS and port 465 by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
 
     ```
     MAIN_TLS_ENABLE = 1
@@ -2164,31 +2244,77 @@ You can use any Gmail account but I recommend you create one specific for this s
     TLS_ON_CONNECT_PORTS = 465
     REQUIRE_PROTOCOL = smtps
     ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    cat << EOF | sudo tee /etc/exim4/exim4.conf.localmacros
+    MAIN_TLS_ENABLE = 1
+    REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS = *
+    TLS_ON_CONNECT_PORTS = 465
+    REQUIRE_PROTOCOL = smtps
+    EOF
+    ```
+    
+1. We need to change some `exim4` settings so take a backup of `/etc/exim4/exim4.conf.template`:
 
-    In `/etc/exim4/exim4.conf.template`, CTRL+F for `REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS` and after the `ifdef` block add:
+    ``` bash
+    sudo cp --preserve /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template.$(date +"%Y%m%d%H%M%S")
+    ```
+    
+1. Add the below to `/etc/exim4/exim4.conf.template` after the `.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS ... .endif` block:
 
     ```
     .ifdef REQUIRE_PROTOCOL
       protocol = REQUIRE_PROTOCOL
     .endif
     ```
-
-    CTRL+F for `MAIN_TLS_ENABLE` and inside the `ifdef` block add:
-
+    
+    > ```
+    > .ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS
+    >   hosts_require_tls = REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS
+    > .endif
+    > .ifdef REQUIRE_PROTOCOL
+    >     protocol = REQUIRE_PROTOCOL
+    > .endif
+    > .ifdef REMOTE_SMTP_HEADERS_REWRITE
+    >   headers_rewrite = REMOTE_SMTP_HEADERS_REWRITE
+    > .endif
+    > ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    WIP: gotta figure this out
+    
+1. Add the below to `/etc/exim4/exim4.conf.template` inside the `.ifdef MAIN_TLS_ENABLE` block:
+    
     ```
     .ifdef TLS_ON_CONNECT_PORTS
       tls_on_connect_ports = TLS_ON_CONNECT_PORTS
     .endif
     ```
+    
+    > ```
+    > .ifdef MAIN_TLS_ENABLE
+    > .ifdef TLS_ON_CONNECT_PORTS
+    >     tls_on_connect_ports = TLS_ON_CONNECT_PORTS
+    > .endif
+    > ```
+        
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "/\.ifdef MAIN_TLS_ENABLE/ a # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n.ifdef TLS_ON_CONNECT_PORTS\n    tls_on_connect_ports = TLS_ON_CONNECT_PORTS\n.endif\n# end add" /etc/exim4/exim4.conf.template
+    ```
 
-1. Restart `exim4`:
+1. Update `exim4` configuration to use TLS and then restart the service:
     
     ``` bash
     sudo update-exim4.conf
     sudo service exim4 restart
     ```
     
-1. Add some mail aliases so we can send e-mails to local accounts by **adding** lines like this to `/etc/aliases`:
+1. Add some mail aliases so we can send e-mails to local accounts by adding lines like this to `/etc/aliases`:
     
     ```
     user1: user1@gmail.com
@@ -2201,7 +2327,7 @@ You can use any Gmail account but I recommend you create one specific for this s
 1. Test your setup:
 
     ```
-    echo "test" | mail -s "Test" email@example.com
+    echo "test" | mail -s "Test" email@gmail.com
     sudo tail /var/log/exim4/mainlog
     ```
 
@@ -2223,7 +2349,7 @@ There will come a time when you'll need to look through your `iptables` logs. Ha
 
 1. The first step is by telling your firewall to prefix all log entries with some unique string. If you're using `iptables` directly, you would do something like `--log-prefix "[IPTABLES] "` for all the rules. We took care of this in step [step 4 of installing `psad`](#psad_step4).
 
-1. After you've added a prefix to the firewall logs, we need to tell `rsyslog` to send those lines to its own file. Do this by **creating** the file `/etc/rsyslog.d/10-iptables.conf` and **adding** this:
+1. After you've added a prefix to the firewall logs, we need to tell `rsyslog` to send those lines to its own file. Do this by creating the file `/etc/rsyslog.d/10-iptables.conf` and adding this:
 
     ```
     :msg, contains, "[IPTABLES] " /var/log/iptables.log
@@ -2254,7 +2380,7 @@ There will come a time when you'll need to look through your `iptables` logs. Ha
     sudo service rsyslog restart
     ```
 
-1. The last thing we have to do is tell `logrotate` to rotate the new log file so it doesn't get to big and fill up our disk. **Create** the file `/etc/logrotate.d/iptables` and **add** this:
+1. The last thing we have to do is tell `logrotate` to rotate the new log file so it doesn't get to big and fill up our disk. Create the file `/etc/logrotate.d/iptables` and add this:
 
     ```
     /var/log/iptables.log
