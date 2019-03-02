@@ -2087,8 +2087,9 @@ You can use any Gmail account but I recommend you create one specific for this s
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
 
 #### References
-
-- https://php.quicoto.com/setup-exim4-to-use-gmail-in-ubuntu/
+- https://wiki.debian.org/Exim
+- https://wiki.debian.org/GmailAndExim4
+- https://www.exim.org/exim-html-current/doc/html/spec_html/ch-encrypted_smtp_connections_using_tlsssl.html
 
 #### Steps
 
@@ -2112,13 +2113,15 @@ You can use any Gmail account but I recommend you create one specific for this s
     |Prompt|Answer|
     |--:|--|
     |General type of mail configuration|`mail sent by smarthost; no local mail`|
-    |System mail name|(default)|
-    |IP-addresses to listen on for incoming SMTP connections|`127.0.0.1`|
+    |System mail name|`Your FQDN or localhost`|
+    |IP-addresses to listen on for incoming SMTP connections|`127.0.0.1; ::1`|
     |Other destinations for which mail is accepted|(default)|
-    |Visible domain name for local users|(default)|
-    |IP address or host name of the outgoing smarthost|`smtp.gmail.com::587`|
+    |Visible domain name for local users|`Your FQDN or localhost`|
+    |IP address or host name of the outgoing smarthost|`smtp.gmail.com::465`|
     |Keep number of DNS-queries minimal (Dial-on-Demand)?|`No`|
     |Split configuration into small files?|`No`|
+
+    If you prefer to use `STARTTLS`, then choose port `587`.
     
 1. Make a backup of `/etc/exim4/passwd.client`:
     
@@ -2131,6 +2134,8 @@ You can use any Gmail account but I recommend you create one specific for this s
     ```
     *.google.com:yourAccount@gmail.com:yourPassword
     ```
+
+    Always check `host smtp.gmail.com` for the most up-to-date domains to list.
     
     Replace `yourAccount@gmail.com` and `yourPassword` with your details. If you have 2FA/MFA enabled on your Gmail then you'll need to create and use an app password.
 
@@ -2141,9 +2146,45 @@ You can use any Gmail account but I recommend you create one specific for this s
     sudo chmod 640 /etc/exim4/passwd.client
     ```
 
+1. The following instructions only apply if you choose implicit TLS (port 465) instead of `STARTTLS`. Skip to "restart `exim4`" if you are not using implicit TLS.
+
+    You need a TLS certificate. You can either use [Let's Encrypt](https://letsencrypt.org/), the `openssl` command or just let Exim generate it for you.
+
+    ``` bash
+    sudo bash /usr/share/doc/exim4-base/examples/exim-gencert
+    ```
+
+1. Now instruct Exim4 to use TLS and port 465:
+
+    In `/etc/exim4/exim4.conf.localmacros`, add:
+
+    ```
+    MAIN_TLS_ENABLE = 1
+    REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS = *
+    TLS_ON_CONNECT_PORTS = 465
+    REQUIRE_PROTOCOL = smtps
+    ```
+
+    In `/etc/exim4/exim4.conf.template`, CTRL+F for `REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS` and after the `ifdef` block add:
+
+    ```
+    .ifdef REQUIRE_PROTOCOL
+      protocol = REQUIRE_PROTOCOL
+    .endif
+    ```
+
+    CTRL+F for `MAIN_TLS_ENABLE` and inside the `ifdef` block add:
+
+    ```
+    .ifdef TLS_ON_CONNECT_PORTS
+      tls_on_connect_ports = TLS_ON_CONNECT_PORTS
+    .endif
+    ```
+
 1. Restart `exim4`:
     
     ``` bash
+    sudo update-exim4.conf
     sudo service exim4 restart
     ```
     
@@ -2156,6 +2197,13 @@ You can use any Gmail account but I recommend you create one specific for this s
     ```
     
     You'll need to add all the local accounts that exist on your server.
+
+1. Test your setup:
+
+    ```
+    echo "test" | mail -s "Test" email@example.com
+    sudo tail /var/log/exim4/mainlog
+    ```
 
 ([Table of Contents](#table-of-contents))
 
