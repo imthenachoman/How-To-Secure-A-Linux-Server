@@ -96,7 +96,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 
 There are many guides provided by experts, industry leaders, and the distributions themselves. It is not practical, and sometimes against copyright, to include everything from those guides. I recommend you check them out before starting with this guide.
 
-- The [Center for Internet Security (CIS)](https://www.cisecurity.org/) provides [benchmarks](https://www.cisecurity.org/cis-benchmarks/) that are exhaustive, industry trusted, step-by-step instructions for securing many flavors of Linux. Check their [About Us](https://www.cisecurity.org/about-us/) page for details. I personally go through their guides first and then finish it off with what I have in this guide.
+- The [Center for Internet Security (CIS)](https://www.cisecurity.org/) provides [benchmarks](https://www.cisecurity.org/cis-benchmarks/) that are exhaustive, industry trusted, step-by-step instructions for securing many flavors of Linux. Check their [About Us](https://www.cisecurity.org/about-us/) page for details. My recommendation is to go through this guide first and then CIS's guide. That way their recommendations will trump anything in this guide.
 - For distribution specific hardening/security guides, check your distributions documentation.
 - https://security.utexas.edu/os-hardening-checklist/linux-7 - Red Hat Enterprise Linux 7 Hardening Checklist
 - https://cloudpro.zone/index.php/2018/01/18/debian-9-3-server-setup-guide-part-1/ - # Debian 9.3 server setup guide
@@ -832,7 +832,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     sudo apt install ntp
     ```
 
-1. Check `ntp`'s status:
+1. Check the status of the `ntp` service:
 
     ``` bash
     sudo systemctl status ntp
@@ -857,7 +857,9 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 107.155.79.108
     > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 212.110.158.28
     > ```
-    
+
+1. Check `ntp`'s status:
+
     ``` bash
     sudo ntpq -p
     ```
