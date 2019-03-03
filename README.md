@@ -127,7 +127,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
-- [ ] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
+- [x] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
 - [ ] Knockd - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egswikz/
 - [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
 - [ ] `netstat -nlp` - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
