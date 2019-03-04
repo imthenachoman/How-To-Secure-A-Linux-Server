@@ -1117,7 +1117,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
 #### Goal
 
-- Logwatch configured to send a daily e-mail summary of the server's status and logs
+- Logwatch configured to send a daily e-mail summary of all of the server's status and logs
 
 #### Notes
 
@@ -1175,7 +1175,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     sudo chmod -x /etc/cron.daily/00logwatch.*
     ```
 
-1. By default, unless you changed it, logwatch sends output to `stdout`. Since the end goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. That way, when we run it manually we'll still get output to `stdout` and when cron runs it, we'll get an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to this:
+1. By default, unless you changed it, logwatch sends output to `stdout`. Since the end goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. That way, when we run it manually we'll still get output to `stdout` and when cron runs it we'll get an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to this:
 
     ```
     /usr/sbin/logwatch --output mail --format html --mailto root --mailfrom root --range yesterday --service all
