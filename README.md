@@ -2209,7 +2209,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     On Debian based systems, using CISOFY's community software repository:
 
     ``` bash
-    sudo apt install apt-transport-https ca-certificates
+    sudo apt install apt-transport-https ca-certificates host
     sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
     sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
     sudo apt update
