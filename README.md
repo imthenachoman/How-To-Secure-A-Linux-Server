@@ -2209,6 +2209,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     On Debian based systems, using CISOFY's community software repository:
 
     ``` bash
+    sudo apt install ca-certificates
     sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
     sudo apt install apt-transport-https
     sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
@@ -2265,12 +2266,12 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
 
 #### Steps
 
-1. Install exim4. You will also need openssl.
+1. Install exim4. You will also need openssl and ca-certificates.
 
     On Debian based systems:
 
     ``` bash
-    sudo apt install exim4 openssl
+    sudo apt install exim4 openssl ca-certificates
     ```
 
 1. Configure exim4:
