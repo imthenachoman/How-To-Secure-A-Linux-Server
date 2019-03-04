@@ -50,6 +50,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
   - [Contacting Me](#contacting-me)
+  - [Helpful Links](#helpful-links)
   - [Acknowledgments](#acknowledgments)
   - [License and Copyright](#license-and-copyright)
 
