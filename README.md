@@ -6,7 +6,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -35,6 +34,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
+  - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -50,7 +50,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
   - [Contacting Me](#contacting-me)
-  - [Additional References](#additional-references)
   - [Acknowledgments](#acknowledgments)
   - [License and Copyright](#license-and-copyright)
 
