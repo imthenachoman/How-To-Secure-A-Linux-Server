@@ -442,7 +442,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 #### Steps
 
-1. Make a backup of `/etc/ssh/sshd_config` and remove comments to make it easier to read:
+1. Make a backup of OpenSSH server's configuration file `/etc/ssh/sshd_config` and remove comments to make it easier to read:
 
     ``` bash
     sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
@@ -595,7 +595,7 @@ The Diffie-Hellman algorithm is used by SSH to establish a secure connection. Th
 
 #### Steps
 
-1. Make a backup of `/etc/ssh/moduli`:
+1. Make a backup of SSH's moduli file `/etc/ssh/moduli`:
 
     ``` bash
     sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
@@ -713,7 +713,13 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     Notice this is **not run as root**.
     
     Select default option (y in most cases) for all the questions it asks and remember to save the emergency scratch codes.
-    
+
+1. Make a backup of PAM's SSH configuration file `/etc/pam.d/sshd`:
+
+    ``` bash
+    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
+    ```
+
 1. Now we need to enable it as an authentication method for SSH by adding this line to `/etc/pam.d/sshd`:
 
     ```
@@ -725,8 +731,6 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
-    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\nauth       required     pam_google_authenticator.so nullok         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/pam.d/sshd
     ```
     
@@ -739,7 +743,6 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
-    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
     sudo sed -i -r -e "s/^(challengeresponseauthentication .*)$/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/I" /etc/ssh/sshd_config
     echo -e "\nChallengeResponseAuthentication yes         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ssh/sshd_config
     ```
@@ -787,11 +790,16 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     ```
     
     You'll need to do this for every account on your server that needs `sudo` privileges.
-
-1. Edit `/etc/sudoers`:
+    
+1. Make a backup of the `sudo`'s configuration file `/etc/sudoers`:
 
     ``` bash
     sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Edit `sudo`'s configuration file `/etc/sudoers`:
+
+    ``` bash
     sudo visudo
     ```
 
@@ -909,7 +917,13 @@ When there is a need to set or change an account password, the password task of 
     sudo apt install libpam-pwquality
     ```
 
-1. Tell PAM to use `libpam-pwquality` to enforce strong passwords by editing the file `/etc/pam.d/common-password` and **change** the line that starts like this:
+1. Make a backup of PAM's password configuration file `/etc/pam.d/common-password`:
+
+    ``` bash
+    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Tell PAM to use `libpam-pwquality` to enforce strong passwords by editing the file `/etc/pam.d/common-password` and change the line that starts like this:
 
     ```
     password        requisite                       pam_pwquality.so
@@ -937,8 +951,6 @@ When there is a need to set or change an account password, the password task of 
     [For the lazy](#editing-configuration-files---for-the-lazy):
    
     ``` bash
-    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
-    
     sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
     ```
 
@@ -1058,7 +1070,9 @@ We will use `unattended-upgrades` to apply **critical security patches**. We can
     Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
     ```
     
-    **Note**: Check `/usr/lib/apt/apt.systemd.daily` for details on the `APT::Periodic` options and check https://github.com/mvo5/unattended-upgrades for details on the `Unattended-Upgrade` options.
+    **Notes**:
+    - Check `/usr/lib/apt/apt.systemd.daily` for details on the `APT::Periodic` options
+    - Check https://github.com/mvo5/unattended-upgrades for details on the `Unattended-Upgrade` options
     
 1. Run a dry-run of `unattended-upgrades` to make sure your configuration file is okay:
 
@@ -1394,7 +1408,7 @@ WIP
     sudo apt install psad
     ```
 
-1. Make a backup of `/etc/psad/psad.conf`:
+1. Make a backup of `psad`'s configuration file `/etc/psad/psad.conf`:
     
     ``` bash
     sudo cp --preserve /etc/psad/psad.conf /etc/psad/psad.conf.$(date +"%Y%m%d%H%M%S")
@@ -1449,7 +1463,6 @@ WIP
     > COMMIT
     > ```
     
-
 1. Now we need to reload/restart `ufw` and `psad` for the changes to take effect:
 
     ``` bash
@@ -1558,7 +1571,7 @@ WIP
     sudo apt install fail2ban
     ```
     
-1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll update a local copy instead. Add this to `/etc/fail2ban/jail.local` after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
+1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll create a local copy instead. Add this to `/etc/fail2ban/jail.local` after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
     
     ```
     [DEFAULT]
@@ -1838,7 +1851,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
    sudo chmod a+x /etc/grub.d/01_password
    ```
 
-1. Make a backup of `/etc/grub.d/10_linux` and unset execute bit so `update-grub` doesn't try to run it:
+1. Make a backup of GRUB's configuration file `/etc/grub.d/10_linux` that we'll be modifying and unset the execute bit so `update-grub` doesn't try to run it:
 
     ``` bash
     sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
@@ -1955,6 +1968,15 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
 
 #### Steps
 
+1. Make a backup of files we'll be editing:
+
+    ``` bash
+    sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
+    ```
+
 1. Set default `umask` for **non-root** accounts to **0027** by adding this line to `/etc/profile` and `/etc/bash.bashrc`:
     
     ```
@@ -1964,9 +1986,6 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
-    sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\numask 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/profile /etc/bash.bashrc
     ```
 
@@ -1979,8 +1998,6 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
-    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs
     ```
 
@@ -1993,8 +2010,6 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
-    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\numask 0077         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /root/.bashrc
     ```
 
@@ -2145,12 +2160,12 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
 
 #### Steps
 
-1. Install `exim4`.
+1. Install `exim4`. You will also need `openssl`.
 
     On Debian based systems:
     
     ``` bash
-    sudo apt install exim4
+    sudo apt install exim4 openssl
     ```
 
 1. Configure `exim4`:
@@ -2254,7 +2269,7 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     EOF
     ```
     
-1. We need to change some `exim4` settings so take a backup of `/etc/exim4/exim4.conf.template`:
+1. Make a backup of `exim4`'s configuration file `/etc/exim4/exim4.conf.template`:
 
     ``` bash
     sudo cp --preserve /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template.$(date +"%Y%m%d%H%M%S")
