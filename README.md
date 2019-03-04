@@ -1571,7 +1571,7 @@ WIP
     sudo apt install fail2ban
     ```
     
-1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll create a local copy instead. Add this to `/etc/fail2ban/jail.local` after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
+1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll create a local copy instead. Create the file `/etc/fail2ban/jail.local` and add this to it after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
     
     ```
     [DEFAULT]
@@ -1593,7 +1593,7 @@ WIP
     
     **Note**: Your server will need to be able to send e-mails so Fail2ban can let you know of suspicious activity and when it banned an IP.
 
-1. We need to create a jail for `ssh` that tells `fail2ban` to look at `ssh` logs and use `ufw` to ban/unban IPs as needed. Create a jail for `ssh` by adding this to `/etc/fail2ban/jail.d/ssh.local`:
+1. We need to create a jail for `ssh` that tells `fail2ban` to look at `ssh` logs and use `ufw` to ban/unban IPs as needed. Create a jail for `ssh` by creating the file `/etc/fail2ban/jail.d/ssh.local` and adding this to it:
 
     ```
     [sshd]
@@ -2345,7 +2345,8 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     description=This opens up the TLS port 465 for use with SMPT to send e-mails.
     ports=465/tcp
     EOF
-    ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'
+    
+    sudo ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'
     ```
 
 1. Add some mail aliases so we can send e-mails to local accounts by adding lines like this to `/etc/aliases`:
