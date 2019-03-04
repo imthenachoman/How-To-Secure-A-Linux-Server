@@ -104,6 +104,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://www.tldp.org/LDP/sag/html/index.html
 - https://seifried.org/lasg/
 - https://news.ycombinator.com/item?id=19178964
+- https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
 
 ([Table of Contents](#table-of-contents))
 
