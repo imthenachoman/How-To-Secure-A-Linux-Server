@@ -2379,6 +2379,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
     REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS = *
     TLS_ON_CONNECT_PORTS = 465
     REQUIRE_PROTOCOL = smtps
+    IGNORE_SMTP_LINE_LENGTH_LIMIT = true
     EOF
     ```
 
