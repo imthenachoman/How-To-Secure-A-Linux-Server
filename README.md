@@ -1123,7 +1123,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
 - Your server will need to be able to send e-mails for this to work
 - The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
-- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
 
 #### References
 
@@ -1208,7 +1208,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     sudo /etc/cron.daily/00logwatch
     ```
     
-    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
 
 ([Table of Contents](#table-of-contents))
 
@@ -2361,7 +2361,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
     >     support in your mail transfer agent.
     > ```
 
-1. Instruct exim4 to use TLS and port 465, and [fix exim's long line issue](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29), by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
+1. Instruct exim4 to use TLS and port 465, and [fix exim4's long lines issue](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29), by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
 
     ```
     MAIN_TLS_ENABLE = 1
