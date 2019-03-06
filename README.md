@@ -1205,7 +1205,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 1. You can test the cron job by executing it:
 
     ``` bash
-    /etc/cron.daily/00logwatch
+    sudo /etc/cron.daily/00logwatch
     ```
     
     **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
