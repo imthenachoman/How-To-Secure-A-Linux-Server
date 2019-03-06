@@ -1123,9 +1123,11 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
 - Your server will need to be able to send e-mails for this to work
 - The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
 
 #### References
 
+- Thanks to [amacheema](https://github.com/amacheema) for fixing some issues with the steps and letting me know of a long line bug with exim4 as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
 - https://sourceforge.net/projects/logwatch/
 - https://www.digitalocean.com/community/tutorials/how-to-install-and-use-logwatch-log-analyzer-and-reporter-on-a-vps
 
@@ -1142,7 +1144,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 1. To see a sample of what logwatch collects you can run it directly:
 
     ``` bash
-    /usr/sbin/logwatch --output stdout --format text
+    sudo /usr/sbin/logwatch --output stdout --format text --range yesterday --service all
     ```
 
     > ```
@@ -1166,7 +1168,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     >  ###################### Logwatch End #########################
     > ```
 
-1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `MailFrom`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
+1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
 
 1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
 
@@ -1178,7 +1180,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
 
     ```
-    /usr/sbin/logwatch --output mail --format html --mailto root --mailfrom root --range yesterday --service all
+    /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
     ```
 
     > ```
@@ -1188,7 +1190,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     > test -x /usr/share/logwatch/scripts/logwatch.pl || exit 0
     > 
     > #execute
-    > /usr/sbin/logwatch --output mail --format html --service all
+    > /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
     > 
     > #Note: It's possible to force the recipient in above command
     > #Just pass --mailto address@a.com instead of --output mail
@@ -1197,7 +1199,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
-    sudo sed -i -r -e "s,^($(which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(which logwatch) --output mail --format html --mailto root --mailfrom root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
+    sudo sed -i -r -e "s,^($(sudo which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(sudo which logwatch) --output mail --format html --mailto root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
     ```
 
 1. You can test the cron job by executing it:
@@ -1205,6 +1207,8 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     ``` bash
     /etc/cron.daily/00logwatch
     ```
+    
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
 
 ([Table of Contents](#table-of-contents))
 
@@ -2255,8 +2259,7 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
 
 #### References
-- Special thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS.
-- https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24
+- Thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS as documented in [issue #24](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24) and [pull request #26](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/pull/26).
 - https://wiki.debian.org/Exim
 - https://wiki.debian.org/GmailAndExim4
 - https://www.exim.org/exim-html-current/doc/html/spec_html/ch-encrypted_smtp_connections_using_tlsssl.html
