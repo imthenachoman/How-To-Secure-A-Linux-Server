@@ -2254,9 +2254,12 @@ You can use any Gmail account. I recommend you create one specific for this serv
 
 There are many guides on-line that cover how to configure Gmail as MTA using STARTTLS including a [previous version of this guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/tree/cc5edcae1cf846dd250e76b121e721d836481d2f#configure-gmail-as-mta). With STARTTLS, an initial **unencrypted** connection is made and then upgraded to an encrypted TLS or SSL connection. Instead, with the approach outlined below, an encrypted TLS connection is made from the start.
 
+Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29) and [here](https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender), exim4 will fail for messages with long lines. We'll fix this in this section too.
+
 #### Goals
 
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
+- long line support for exim4
 
 #### References
 - Thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS as documented in [issue #24](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24) and [pull request #26](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/pull/26).
@@ -2265,6 +2268,7 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
 - https://www.exim.org/exim-html-current/doc/html/spec_html/ch-encrypted_smtp_connections_using_tlsssl.html
 - https://php.quicoto.com/setup-exim4-to-use-gmail-in-ubuntu/
 - https://www.fastmail.com/help/technical/ssltlsstarttls.html
+- exim4 fails for messages with long lines - [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29) and https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender
 
 #### Steps
 
@@ -2357,13 +2361,14 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     >     support in your mail transfer agent.
     > ```
 
-1. Instruct exim4 to use TLS and port 465 by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
+1. Instruct exim4 to use TLS and port 465, and [fix exim's long line issue](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29), by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
 
     ```
     MAIN_TLS_ENABLE = 1
     REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS = *
     TLS_ON_CONNECT_PORTS = 465
     REQUIRE_PROTOCOL = smtps
+    IGNORE_SMTP_LINE_LENGTH_LIMIT = true
     ```
 
     [For the lazy](#editing-configuration-files---for-the-lazy):
@@ -2427,6 +2432,8 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     ``` bash
     sudo sed -i -r -e "/\.ifdef MAIN_TLS_ENABLE/ a # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n.ifdef TLS_ON_CONNECT_PORTS\n    tls_on_connect_ports = TLS_ON_CONNECT_PORTS\n.endif\n# end add" /etc/exim4/exim4.conf.template
     ```
+    
+1. Add the below to `/etc/exim4/exim4.conf.template` after the `.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS ... .endif` block:
 
 1. Update exim4 configuration to use TLS and then restart the service:
 
