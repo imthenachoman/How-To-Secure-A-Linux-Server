@@ -111,27 +111,17 @@ There are many guides provided by experts, industry leaders, and the distributio
 ### To Do / To Add
 
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [x] [Linux Kernel sysctl Hardening](#linux-kernel-sysctl-hardening)
 - [ ] Security-Enhanced Linux / SELinux - https://en.wikipedia.org/wiki/Security-Enhanced_Linux, https://linuxtechlab.com/beginners-guide-to-selinux/, https://linuxtechlab.com/replicate-selinux-policies-among-linux-machines/, https://teamignition.us/how-to-stop-being-a-scrub-and-learn-to-use-selinux.html
 - [ ] disk encryption
-- [x] BIOS password
 - [ ] Anti-Virus
-- [x] use ed25519 keys instead of RSA for SSH public/private keys
-- [x] psad
-- [x] unattended upgrades for critical security updates and patches
-- [x] logwatch
 - [ ] Rkhunter and chrootkit
 - [ ] AppArmor
-- [ ] port knockers for SSH - https://news.ycombinator.com/item?id=19181829, https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egropaw/
 - [ ] https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
 - [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
-- [x] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
-- [ ] Knockd - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egswikz/
 - [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
-- [x] `netstat -nlp` - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
 
 ([Table of Contents](#table-of-contents))
 
