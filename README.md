@@ -42,7 +42,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Proceed At Your Own Risk](#proceed-at-your-own-risk)
 - [The Auditing](#the-auditing)
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
-  - [netstat (WIP)](#netstat-wip)
+  - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
   - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
@@ -131,7 +131,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [x] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
 - [ ] Knockd - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egswikz/
 - [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
-- [ ] `netstat -nlp` - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
+- [x] `netstat -nlp` - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
 
 ([Table of Contents](#table-of-contents))
 
@@ -1543,7 +1543,7 @@ But what about the applications/services your server is running, like SSH and Ap
 
 #### How It Works
 
-Fail2ban monitors the logs of your applications like SSH and Apache to detect and prevent potential intrusions. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
+Fail2ban monitors the logs of your applications (like SSH and Apache) to detect and prevent potential intrusions. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
 
 #### Goal
 
@@ -1593,7 +1593,7 @@ Fail2ban monitors the logs of your applications like SSH and Apache to detect an
 
     **Note**: Your server will need to be able to send e-mails so Fail2ban can let you know of suspicious activity and when it banned an IP.
 
-1. We need to create a jail for ssh that tells fail2ban to look at ssh logs and use ufw to ban/unban IPs as needed. Create a jail for ssh by creating the file `/etc/fail2ban/jail.d/ssh.local` and adding this to it:
+1. We need to create a jail for SSH that tells fail2ban to look at SSH logs and use ufw to ban/unban IPs as needed. Create a jail for SSH by creating the file `/etc/fail2ban/jail.d/ssh.local` and adding this to it:
 
     ```
     [sshd]
@@ -2179,9 +2179,48 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
 ([Table of Contents](#table-of-contents))
 
-### netstat (WIP)
+### ss - Seeing Ports Your Server Is Listening On
 
-WIP
+#### Why
+
+Ports are how applications, services, and processes communicate with each other -- either locally within your server or with other devices on the network. When you have an application or service (like SSH or Apache) running on your server, they listen for requests on specific ports.
+
+Obviously we don't want your server listening on ports we don't know about. We'll use `ss` to see all the ports that services are listening on. This will help us track down and stop rogue, potentially dangerous, services.
+
+#### Goals
+
+- find out non-localhost what ports are open and listening for connections
+
+#### References
+
+- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
+- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egs1rev/
+- https://www.tecmint.com/find-open-ports-in-linux/
+- `man ss`
+
+#### Steps
+
+1. To see the all the ports listening for traffic:
+
+    ``` bash
+    sudo ss -lntup
+    ```
+    
+    > ```
+    > Netid  State      Recv-Q Send-Q     Local Address:Port     Peer Address:Port
+    > udp    UNCONN     0      0                      *:68                  *:*        users:(("dhclient",pid=389,fd=6))
+    > tcp    LISTEN     0      128                    *:22                  *:*        users:(("sshd",pid=4390,fd=3))
+    > tcp    LISTEN     0      128                   :::22                 :::*        users:(("sshd",pid=4390,fd=4))
+    > ```
+    
+    **Switch Explanations**:
+    - `l` = display listening sockets
+    - `n` = do now try to resolve service names
+    - `t` = display TCP sockets
+    - `u` = display UDP sockets
+    - `p` = show process information
+
+1. If you see anything suspicious, like a port you're not aware of or a process you don't know, investigate and remediate as necessary.
 
 ### Lynis - Linux Security Auditing
 
