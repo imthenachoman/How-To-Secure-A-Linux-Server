@@ -34,7 +34,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
-  - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
 - [The Firewall](#the-firewall)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -42,6 +41,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 - [The Danger Zone](#the-danger-zone)
   - [Proceed At Your Own Risk](#proceed-at-your-own-risk)
 - [The Auditing](#the-auditing)
+  - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [netstat (WIP)](#netstat-wip)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
   - [CIS-CAT (WIP)](#cis-cat-wip)
@@ -1103,115 +1103,6 @@ We will use unattended-upgrades to apply **critical security patches**. We can a
 
 ([Table of Contents](#table-of-contents))
 
-### logwatch - system log analyzer and reporter
-
-#### Why
-
-Your server will be generating a lot of logs that may contain important information. Unless you plan on checking your server everyday, you'll want a way to get e-mail summary of your server's logs. To accomplish this we'll use [logwatch](https://sourceforge.net/projects/logwatch/).
-
-#### How It Works
-
-logwatch scans system log files and summarizes them. You can run it directly from the command line or schedule it to run on a recurring schedule. logwatch uses service files to know how to read/summarize a log file. You can see all of the stock service files in `/usr/share/logwatch/scripts/services`.
-
-logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` specifies default options. You can override them via command line arguments.
-
-#### Goal
-
-- Logwatch configured to send a daily e-mail summary of all of the server's status and logs
-
-#### Notes
-
-- Your server will need to be able to send e-mails for this to work
-- The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
-- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
-
-#### References
-
-- Thanks to [amacheema](https://github.com/amacheema) for fixing some issues with the steps and letting me know of a long line bug with exim4 as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
-- https://sourceforge.net/projects/logwatch/
-- https://www.digitalocean.com/community/tutorials/how-to-install-and-use-logwatch-log-analyzer-and-reporter-on-a-vps
-
-#### Steps
-
-1. Install logwatch.
-
-    On Debian based systems:
-
-    ``` bash
-    sudo apt install logwatch
-    ```
-
-1. To see a sample of what logwatch collects you can run it directly:
-
-    ``` bash
-    sudo /usr/sbin/logwatch --output stdout --format text --range yesterday --service all
-    ```
-
-    > ```
-    > 
-    >  ################### Logwatch 7.4.3 (12/07/16) ####################
-    >         Processing Initiated: Mon Mar  4 00:05:50 2019
-    >         Date Range Processed: yesterday
-    >                               ( 2019-Mar-03 )
-    >                               Period is day.
-    >         Detail Level of Output: 5
-    >         Type of Output/Format: stdout / text
-    >         Logfiles for Host: host
-    >  ##################################################################
-    > 
-    >  --------------------- Cron Begin ------------------------
-    > ...
-    > ...
-    >  ---------------------- Disk Space End -------------------------
-    > 
-    > 
-    >  ###################### Logwatch End #########################
-    > ```
-
-1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
-
-1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
-
-    ``` bash
-    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch.$(date +"%Y%m%d%H%M%S")
-    sudo chmod -x /etc/cron.daily/00logwatch.*
-    ```
-
-1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
-
-    ```
-    /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
-    ```
-
-    > ```
-    > #!/bin/bash
-    > 
-    > #Check if removed-but-not-purged
-    > test -x /usr/share/logwatch/scripts/logwatch.pl || exit 0
-    > 
-    > #execute
-    > /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
-    > 
-    > #Note: It's possible to force the recipient in above command
-    > #Just pass --mailto address@a.com instead of --output mail
-    > ```
-
-    [For the lazy](#editing-configuration-files---for-the-lazy):
-    
-    ``` bash
-    sudo sed -i -r -e "s,^($(sudo which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(sudo which logwatch) --output mail --format html --mailto root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
-    ```
-
-1. You can test the cron job by executing it:
-
-    ``` bash
-    sudo /etc/cron.daily/00logwatch
-    ```
-    
-    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
-
-([Table of Contents](#table-of-contents))
-
 ## The Firewall
 
 ### UFW: Uncomplicated Firewall
@@ -1222,7 +1113,11 @@ Call me paranoid, and you don't have to agree, but I want to deny all traffic in
 
 Of course, if you disagree, that is totally fine and can configure UFW to suit your needs.
 
-Either way, ensuring that only traffic we explicitly allow is the job of a firewall. On Linux, the most common firewall is [iptables](https://en.wikipedia.org/wiki/Iptables). iptables, however, is rather complicated and confusing (IMHO). This is where UFW comes in. UFW simplifies the process of creating and managing iptables rules.
+Either way, ensuring that only traffic we explicitly allow is the job of a firewall.
+
+#### How It Works
+
+The Linux kernel provides capabilities to monitor and control network traffic. These capabilities are exposed to the end-user through firewall utilities. On Linux, the most common firewall is [iptables](https://en.wikipedia.org/wiki/Iptables). However, iptables is rather complicated and confusing (IMHO). This is where UFW comes in. Think of UFW as a front-end to iptables. It simplifies the process of managing the iptables rules that tell the Linux kernel what to do with network traffic.
 
 **UFW** works by letting you configure rules that:
 
@@ -1231,10 +1126,6 @@ Either way, ensuring that only traffic we explicitly allow is the job of a firew
 - **to** or **from** ports
 
 You can create rules by explicitly specifying the ports or with application configurations that specify the ports.
-
-#### How It Works
-
-WIP
 
 #### Goal
 
@@ -1488,15 +1379,15 @@ sudo ufw allow plexmediaserver
 
 #### Why
 
+Even if you have a firewall to guard your doors, it is possible to try brute-forcing your way in any of the guarded doors. We want to monitor all network activity to detect potential intrusion attempts, such has repeated attempts to get in, and block them.
+
+#### How It Works
+
 I can't explain it any better than user [FINESEC](https://serverfault.com/users/143961/finesec) from https://serverfault.com/ did at: https://serverfault.com/a/447604/289829.
 
 > Fail2BAN scans log files of various applications such as apache, ssh or ftp and automatically bans IPs that show the malicious signs such as automated login attempts. PSAD on the other hand scans iptables and ip6tables log messages (typically /var/log/messages) to detect and optionally block scans and other types of suspect traffic such as DDoS or OS fingerprinting attempts. It's ok to use both programs at the same time because they operate on different level.
 
 And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follow the awesome instructions by [netson](https://gist.github.com/netson) at https://gist.github.com/netson/c45b2dc4e835761fbccc to make PSAD work with UFW.
-
-#### How It Works
-
-WIP
 
 #### References
 
@@ -1646,13 +1537,13 @@ WIP
 
 #### Why
 
-A firewall will board up all the doors and windows you don't want anyone using so nobody can see they are even there. But what about the doors and windows you want visible so approved folks can use them? Even if the door is locked, how do you ensure that someone doesn't try to force their way in?
+UFW tells your server what doors to board up so nobody can see them, and what doors to allow authorized users through. PSAD monitors network activity to detect and prevent potential intrusions -- repeated attempts to get in. 
 
-That is where **Fail2ban** comes in. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
+But what about the applications/services your server is running, like SSH and Apache, where your firewall is configured to allow access in. Even though access may be allowed that doesn't mean all access attempts are valid and harmless. What if someone tries to brute-force their way in to a web-app you're running on your server? This is where Fail2ban comes in.
 
 #### How It Works
 
-WIP
+Fail2ban monitors the logs of your applications like SSH and Apache to detect and prevent potential intrusions. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
 
 #### Goal
 
@@ -2179,6 +2070,115 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 
 ## The Auditing
 
+### logwatch - system log analyzer and reporter
+
+#### Why
+
+Your server will be generating a lot of logs that may contain important information. Unless you plan on checking your server everyday, you'll want a way to get e-mail summary of your server's logs. To accomplish this we'll use [logwatch](https://sourceforge.net/projects/logwatch/).
+
+#### How It Works
+
+logwatch scans system log files and summarizes them. You can run it directly from the command line or schedule it to run on a recurring schedule. logwatch uses service files to know how to read/summarize a log file. You can see all of the stock service files in `/usr/share/logwatch/scripts/services`.
+
+logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` specifies default options. You can override them via command line arguments.
+
+#### Goal
+
+- Logwatch configured to send a daily e-mail summary of all of the server's status and logs
+
+#### Notes
+
+- Your server will need to be able to send e-mails for this to work
+- The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+
+#### References
+
+- Thanks to [amacheema](https://github.com/amacheema) for fixing some issues with the steps and letting me know of a long line bug with exim4 as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
+- https://sourceforge.net/projects/logwatch/
+- https://www.digitalocean.com/community/tutorials/how-to-install-and-use-logwatch-log-analyzer-and-reporter-on-a-vps
+
+#### Steps
+
+1. Install logwatch.
+
+    On Debian based systems:
+
+    ``` bash
+    sudo apt install logwatch
+    ```
+
+1. To see a sample of what logwatch collects you can run it directly:
+
+    ``` bash
+    sudo /usr/sbin/logwatch --output stdout --format text --range yesterday --service all
+    ```
+
+    > ```
+    > 
+    >  ################### Logwatch 7.4.3 (12/07/16) ####################
+    >         Processing Initiated: Mon Mar  4 00:05:50 2019
+    >         Date Range Processed: yesterday
+    >                               ( 2019-Mar-03 )
+    >                               Period is day.
+    >         Detail Level of Output: 5
+    >         Type of Output/Format: stdout / text
+    >         Logfiles for Host: host
+    >  ##################################################################
+    > 
+    >  --------------------- Cron Begin ------------------------
+    > ...
+    > ...
+    >  ---------------------- Disk Space End -------------------------
+    > 
+    > 
+    >  ###################### Logwatch End #########################
+    > ```
+
+1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
+
+1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
+
+    ``` bash
+    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch.$(date +"%Y%m%d%H%M%S")
+    sudo chmod -x /etc/cron.daily/00logwatch.*
+    ```
+
+1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
+
+    ```
+    /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
+    ```
+
+    > ```
+    > #!/bin/bash
+    > 
+    > #Check if removed-but-not-purged
+    > test -x /usr/share/logwatch/scripts/logwatch.pl || exit 0
+    > 
+    > #execute
+    > /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
+    > 
+    > #Note: It's possible to force the recipient in above command
+    > #Just pass --mailto address@a.com instead of --output mail
+    > ```
+
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s,^($(sudo which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(sudo which logwatch) --output mail --format html --mailto root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
+    ```
+
+1. You can test the cron job by executing it:
+
+    ``` bash
+    sudo /etc/cron.daily/00logwatch
+    ```
+    
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+
+([Table of Contents](#table-of-contents))
+
 ### netstat (WIP)
 
 WIP
@@ -2411,7 +2411,9 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 
     [For the lazy](#editing-configuration-files---for-the-lazy):
 
-    WIP: gotta figure this out
+    ``` bash
+    sudo sed -i -r -e '/^.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS$/I { :a; n; /^.endif$/!ba; a\# added by '"$(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")"'\n.ifdef REQUIRE_PROTOCOL\n    protocol = REQUIRE_PROTOCOL\n.endif\n# end add' -e '}' /etc/exim4/exim4.conf.template
+    ```
 
 1. Add the below to `/etc/exim4/exim4.conf.template` inside the `.ifdef MAIN_TLS_ENABLE` block:
 
