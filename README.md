@@ -34,7 +34,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [NTP Client](#ntp-client)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
-- [The Firewall](#the-firewall)
+- [The Network](#the-network)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
   - [Fail2ban: Application Intrusion Detection And Prevention](#fail2ban-application-intrusion-detection-and-prevention)
@@ -1103,7 +1103,7 @@ We will use unattended-upgrades to apply **critical security patches**. We can a
 
 ([Table of Contents](#table-of-contents))
 
-## The Firewall
+## The Network
 
 ### UFW: Uncomplicated Firewall
 
@@ -2436,8 +2436,6 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
     sudo sed -i -r -e "/\.ifdef MAIN_TLS_ENABLE/ a # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n.ifdef TLS_ON_CONNECT_PORTS\n    tls_on_connect_ports = TLS_ON_CONNECT_PORTS\n.endif\n# end add" /etc/exim4/exim4.conf.template
     ```
     
-1. Add the below to `/etc/exim4/exim4.conf.template` after the `.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS ... .endif` block:
-
 1. Update exim4 configuration to use TLS and then restart the service:
 
     ``` bash
