@@ -125,7 +125,6 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] disk encryption
 - [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-- [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)

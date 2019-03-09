@@ -6,52 +6,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-  - [Guide Objective](#guide-objective)
-  - [Why Secure Your Server](#why-secure-your-server)
-  - [Why Yet Another Guide](#why-yet-another-guide)
-  - [Other Guides](#other-guides)
-  - [To Do / To Add](#to-do--to-add)
-- [Guide Overview](#guide-overview)
-  - [About This Guide](#about-this-guide)
-  - [My Use-Case](#my-use-case)
-  - [Editing Configuration Files - For The Lazy](#editing-configuration-files---for-the-lazy)
-  - [Contributing](#contributing)
-- [Before You Start](#before-you-start)
-  - [Identify Your Principles](#identify-your-principles)
-  - [Picking A Linux Distribution](#picking-a-linux-distribution)
-  - [Installing Linux](#installing-linux)
-  - [Pre/Post Installation Requirements](#prepost-installation-requirements)
-  - [Other Important Notes](#other-important-notes)
-- [The SSH Server](#the-ssh-server)
-  - [SSH Public/Private Keys](#ssh-publicprivate-keys)
-  - [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups)
-  - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
-  - [Remove Short Diffie-Hellman Keys](#remove-short-diffie-hellman-keys)
-  - [2FA/MFA for SSH](#2famfa-for-ssh)
-- [The Basics](#the-basics)
-  - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
-  - [NTP Client](#ntp-client)
-  - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
-  - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
-- [The Network](#the-network)
-  - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
-  - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
-  - [Fail2ban: Application Intrusion Detection And Prevention](#fail2ban-application-intrusion-detection-and-prevention)
-- [The Danger Zone](#the-danger-zone)
-- [The Auditing](#the-auditing)
-  - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
-  - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
-  - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
-  - [CIS-CAT (WIP)](#cis-cat-wip)
-- [The Miscellaneous](#the-miscellaneous)
-  - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
-  - [Separate iptables Log File](#separate-iptables-log-file)
-- [Left Over](#left-over)
-  - [Contacting Me](#contacting-me)
-  - [Helpful Links](#helpful-links)
-  - [Acknowledgments](#acknowledgments)
-  - [License and Copyright](#license-and-copyright)
+WIP
 
 (TOC made with [nGitHubTOC](https://imthenachoman.github.io/nGitHubTOC/))
 
@@ -124,7 +79,6 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] disk encryption
 - [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-- [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
