@@ -32,6 +32,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 - [The Basics](#the-basics)
   - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
   - [NTP Client](#ntp-client)
+  - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
 - [The Network](#the-network)
@@ -110,12 +111,20 @@ There are many guides provided by experts, industry leaders, and the distributio
 ### To Do / To Add
 
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [ ] Security-Enhanced Linux / SELinux - https://en.wikipedia.org/wiki/Security-Enhanced_Linux, https://linuxtechlab.com/beginners-guide-to-selinux/, https://linuxtechlab.com/replicate-selinux-policies-among-linux-machines/, https://teamignition.us/how-to-stop-being-a-scrub-and-learn-to-use-selinux.html
+- [ ] LSMs
+   - https://wiki.archlinux.org/index.php/security#Mandatory_access_control
+   - Security-Enhanced Linux / SELinux
+       - https://en.wikipedia.org/wiki/Security-Enhanced_Linux
+       - https://linuxtechlab.com/beginners-guide-to-selinux/
+       - https://linuxtechlab.com/replicate-selinux-policies-among-linux-machines/
+       - https://teamignition.us/how-to-stop-being-a-scrub-and-learn-to-use-selinux.html
+   - AppArmor
+       - https://wiki.archlinux.org/index.php/AppArmor
+       - https://security.stackexchange.com/questions/29378/comparison-between-apparmor-and-selinux
+        - http://www.insanitybit.com/2012/06/01/why-i-like-apparmor-more-than-selinux-5/
 - [ ] disk encryption
-- [ ] Anti-Virus
+- [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-- [ ] AppArmor
-- [ ] https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
 - [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
@@ -919,6 +928,54 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     > -69.195.159.158  128.252.19.1     2 u  119   64    2   42.990    6.302   3.507
     > -200.89.75.198 ( 200.27.106.115   2 u   58   64    3  160.786   42.737  12.827
     > ```
+
+([Table of Contents](#table-of-contents))
+
+### Securing /proc
+
+#### Why
+
+To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
+
+> When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some file system configuration tweaks, we can change this behavior and improve the security of the system.
+
+#### Goals
+
+- `/proc` mounted with `hidepid=2` so users can only see information about their processes
+
+#### References
+
+- https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
+- https://likegeeks.com/secure-linux-server-hardening-best-practices/#Hardening-proc-Directory
+- https://www.cyberciti.biz/faq/linux-hide-processes-from-other-users/
+
+#### Steps
+
+1. Make a backup of `/etc/fstab`:
+
+    ``` bash
+    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Add this line to `/etc/fstab` to have `/proc` mounted with `hidepid=2`:
+
+    ```
+    proc     /proc     proc     defaults,hidepid=2     0     0
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    echo -e "\nproc     /proc     proc     defaults,hidepid=2     0     0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
+    ```
+
+1. Reboot the system:
+
+    ``` bash
+    sudo reboot now
+    ```
+    
+    **Note**: Alternatively, you can remount `/proc` without rebooting with `sudo mount -o remount,hidepid=2 /proc`
 
 ([Table of Contents](#table-of-contents))
 
@@ -2252,6 +2309,8 @@ Obviously we don't want your server listening on ports we don't know about. We'l
     - `p` = show process information
 
 1. If you see anything suspicious, like a port you're not aware of or a process you don't know, investigate and remediate as necessary.
+
+([Table of Contents](#table-of-contents))
 
 ### Lynis - Linux Security Auditing
 

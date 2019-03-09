@@ -124,7 +124,6 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] disk encryption
 - [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-- [ ] https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
 - [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
@@ -935,19 +934,47 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 
 #### Why
 
-WIP
+To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
+
+> When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some file system configuration tweaks, we can change this behavior and improve the security of the system.
 
 #### Goals
 
-WIP
+- `/proc` mounted with `hidepid=2` so users can only see information about their processes
 
 #### References
 
 - https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
+- https://likegeeks.com/secure-linux-server-hardening-best-practices/#Hardening-proc-Directory
+- https://www.cyberciti.biz/faq/linux-hide-processes-from-other-users/
 
 #### Steps
 
-WIP
+1. Make a backup of `/etc/fstab`:
+
+    ``` bash
+    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Add this line to `/etc/fstab` to have `/proc` mounted with `hidepid=2`:
+
+    ```
+    proc     /proc     proc     defaults,hidepid=2     0     0
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    echo -e "\nproc     /proc     proc     defaults,hidepid=2     0     0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
+    ```
+
+1. Reboot the system:
+
+    ``` bash
+    sudo reboot now
+    ```
+    
+    **Note**: Alternatively, you can remount `/proc` without rebooting with `sudo mount -o remount,hidepid=2 /proc`
 
 ([Table of Contents](#table-of-contents))
 
