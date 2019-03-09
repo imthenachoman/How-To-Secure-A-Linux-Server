@@ -39,7 +39,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
   - [Fail2ban: Application Intrusion Detection And Prevention](#fail2ban-application-intrusion-detection-and-prevention)
 - [The Danger Zone](#the-danger-zone)
-  - [Proceed At Your Own Risk](#proceed-at-your-own-risk)
 - [The Auditing](#the-auditing)
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
@@ -121,7 +120,6 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
-- [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
 
 ([Table of Contents](#table-of-contents))
 
@@ -820,6 +818,8 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 - https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/
 - https://en.wikipedia.org/wiki/Network_Time_Protocol
 - https://www.pool.ntp.org/en/
+- https://serverfault.com/questions/957302/securing-hardening-ntp-client-on-linux-servers-config-file/957450#957450
+- https://tf.nist.gov/tf-cgi/servers.cgi
 
 #### Steps
 
@@ -829,6 +829,47 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 
     ``` bash
     sudo apt install ntp
+    ```
+    
+1. Make a backup of the NTP client's configuration file `/etc/ntp.conf`:
+
+    ``` bash
+    sudo cp --preserve /etc/ntp.conf /etc/ntp.conf.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
+    
+    ```
+    pool time.nist.gov iburst
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s/^((server|pool).*)/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/ntp.conf
+    echo -e "\npool time.nist.gov iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntp.conf
+    ```
+
+    **Example `/etc/ntp.conf`**:
+    
+    ```
+    driftfile /var/lib/ntp/ntp.drift
+    statistics loopstats peerstats clockstats
+    filegen loopstats file loopstats type day enable
+    filegen peerstats file peerstats type day enable
+    filegen clockstats file clockstats type day enable
+    restrict -4 default kod notrap nomodify nopeer noquery limited
+    restrict -6 default kod notrap nomodify nopeer noquery limited
+    restrict 127.0.0.1
+    restrict ::1
+    restrict source notrap nomodify noquery
+    pool time.nist.gov iburst         # added by user on 2019-03-09 @ 10:23:35
+    ```
+    
+1. Restart ntp:
+
+    ``` bash
+    sudo service ntp restart
     ```
 
 1. Check the status of the ntp service:
