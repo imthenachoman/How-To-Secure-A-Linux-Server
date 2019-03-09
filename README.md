@@ -44,7 +44,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
-                                 
+  - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
   - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
@@ -60,7 +60,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ### Guide Objective
 
-This guides purpose is to teach you how to secure a Linux server.
+This guide's purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
@@ -105,7 +105,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://seifried.org/lasg/
 - https://news.ycombinator.com/item?id=19178964
 - https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
-- https://securecompliance.co/linux-server-hardening-checklist/
+                                                               
 
 ([Table of Contents](#table-of-contents))
 
@@ -126,13 +126,13 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] disk encryption
 - [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-    - http://www.chkrootkit.org/
-    - http://rkhunter.sourceforge.net/
-    - https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
-    - https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/
+                                
+                                      
+                                                                                                                                                                                                             
+                                                                                                                                                                
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
-- [ ] CIS-CAT - https://learn.cisecurity.org/cis-cat-landing-page
+                                                                 
 
 ([Table of Contents](#table-of-contents))
 
@@ -865,19 +865,19 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 
     **Example `/etc/ntp.conf`**:
     
-    > ```
-    > driftfile /var/lib/ntp/ntp.drift
-    > statistics loopstats peerstats clockstats
-    > filegen loopstats file loopstats type day enable
-    > filegen peerstats file peerstats type day enable
-    > filegen clockstats file clockstats type day enable
-    > restrict -4 default kod notrap nomodify nopeer noquery limited
-    > restrict -6 default kod notrap nomodify nopeer noquery limited
-    > restrict 127.0.0.1
-    > restrict ::1
-    > restrict source notrap nomodify noquery
-    > pool time.nist.gov iburst         # added by user on 2019-03-09 @ 10:23:35
-    > ```
+    ```
+    driftfile /var/lib/ntp/ntp.drift
+    statistics loopstats peerstats clockstats
+    filegen loopstats file loopstats type day enable
+    filegen peerstats file peerstats type day enable
+    filegen clockstats file clockstats type day enable
+    restrict -4 default kod notrap nomodify nopeer noquery limited
+    restrict -6 default kod notrap nomodify nopeer noquery limited
+    restrict 127.0.0.1
+    restrict ::1
+    restrict source notrap nomodify noquery
+    pool time.nist.gov iburst         # added by user on 2019-03-09 @ 10:23:35
+    ```
     
 1. Restart ntp:
 
@@ -2367,11 +2367,11 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
 
-                                         
+([Table of Contents](#table-of-contents))
 
-                 
+### CIS-CAT (WIP)
 
-   
+WIP
 
 ([Table of Contents](#table-of-contents))
 
