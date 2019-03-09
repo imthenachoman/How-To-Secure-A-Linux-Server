@@ -65,7 +65,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 ### To Do / To Add
 
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [ ] LSMs
+- [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
    - https://wiki.archlinux.org/index.php/security#Mandatory_access_control
    - Security-Enhanced Linux / SELinux
        - https://en.wikipedia.org/wiki/Security-Enhanced_Linux
@@ -81,7 +81,6 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] Rkhunter and chrootkit
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
-- [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
 
 ([Table of Contents](#table-of-contents))
 
