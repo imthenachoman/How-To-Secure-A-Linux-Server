@@ -44,7 +44,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
-  - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
   - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
@@ -60,7 +59,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ### Guide Objective
 
-This guide's purpose is to teach you how to secure a Linux server.
+This guides purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
@@ -105,7 +104,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://seifried.org/lasg/
 - https://news.ycombinator.com/item?id=19178964
 - https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
-                                                               
+- https://securecompliance.co/linux-server-hardening-checklist/
 
 ([Table of Contents](#table-of-contents))
 
@@ -126,13 +125,13 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] disk encryption
 - [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-                                
-                                      
-                                                                                                                                                                                                             
-                                                                                                                                                                
+    - http://www.chkrootkit.org/
+    - http://rkhunter.sourceforge.net/
+    - https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
+    - https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
-                                                                 
+- [ ] CIS-CAT - https://learn.cisecurity.org/cis-cat-landing-page
 
 ([Table of Contents](#table-of-contents))
 
@@ -853,31 +852,31 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
     
     ```
-    pool time.nist.gov iburst
+    pool pool.ntp.org iburst
     ```
     
     [For the lazy](#editing-configuration-files---for-the-lazy):
     
     ``` bash
     sudo sed -i -r -e "s/^((server|pool).*)/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/ntp.conf
-    echo -e "\npool time.nist.gov iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntp.conf
+    echo -e "\npool pool.ntp.org iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntp.conf
     ```
 
     **Example `/etc/ntp.conf`**:
     
-    ```
-    driftfile /var/lib/ntp/ntp.drift
-    statistics loopstats peerstats clockstats
-    filegen loopstats file loopstats type day enable
-    filegen peerstats file peerstats type day enable
-    filegen clockstats file clockstats type day enable
-    restrict -4 default kod notrap nomodify nopeer noquery limited
-    restrict -6 default kod notrap nomodify nopeer noquery limited
-    restrict 127.0.0.1
-    restrict ::1
-    restrict source notrap nomodify noquery
-    pool time.nist.gov iburst         # added by user on 2019-03-09 @ 10:23:35
-    ```
+    > ```
+    > driftfile /var/lib/ntp/ntp.drift
+    > statistics loopstats peerstats clockstats
+    > filegen loopstats file loopstats type day enable
+    > filegen peerstats file peerstats type day enable
+    > filegen clockstats file clockstats type day enable
+    > restrict -4 default kod notrap nomodify nopeer noquery limited
+    > restrict -6 default kod notrap nomodify nopeer noquery limited
+    > restrict 127.0.0.1
+    > restrict ::1
+    > restrict source notrap nomodify noquery
+    > pool pool.ntp.org iburst         # added by user on 2019-03-09 @ 10:23:35
+    > ```
     
 1. Restart ntp:
 
@@ -894,21 +893,24 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     > ```
     > ● ntp.service - LSB: Start NTP daemon
     >    Loaded: loaded (/etc/init.d/ntp; generated; vendor preset: enabled)
-    >    Active: active (running) since Sat 2019-02-16 00:32:20 EST; 3s ago
+    >    Active: active (running) since Sat 2019-03-09 15:19:46 EST; 4s ago
     >      Docs: man:systemd-sysv-generator(8)
+    >   Process: 1016 ExecStop=/etc/init.d/ntp stop (code=exited, status=0/SUCCESS)
+    >   Process: 1028 ExecStart=/etc/init.d/ntp start (code=exited, status=0/SUCCESS)
+    >     Tasks: 2 (limit: 4915)
     >    CGroup: /system.slice/ntp.service
-    >            └─1051 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 109:114
+    >            └─1038 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 108:113
     > 
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 3 enp0s3 192.168.1.96:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 4 lo [::1]:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 5 enp0s3 [fe80::a00:27ff:feb6:ed8e%2]:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listening on routing socket on fd #22 for interface updates
-    > Feb 16 00:32:21 host ntpd[1051]: Soliciting pool server 173.255.206.154
-    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 216.6.2.70
-    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 82.197.188.130
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 95.215.175.2
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 107.155.79.108
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 212.110.158.28
+    > Mar 09 15:19:46 host ntpd[1038]: Listen and drop on 0 v6wildcard [::]:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen and drop on 1 v4wildcard 0.0.0.0:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 2 lo 127.0.0.1:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 3 enp0s3 10.10.20.96:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 4 lo [::1]:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 5 enp0s3 [fe80::a00:27ff:feb6:ed8e%2]:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listening on routing socket on fd #22 for interface updates
+    > Mar 09 15:19:47 host ntpd[1038]: Soliciting pool server 108.61.56.35
+    > Mar 09 15:19:48 host ntpd[1038]: Soliciting pool server 69.89.207.199
+    > Mar 09 15:19:49 host ntpd[1038]: Soliciting pool server 45.79.111.114
     > ```
 
 1. Check ntp's status:
@@ -920,17 +922,9 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     > ```
     >      remote           refid      st t when poll reach   delay   offset  jitter
     > ==============================================================================
-    >  0.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  1.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  2.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  3.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    > -li216-154.membe 45.56.123.24     3 u  119   64    2   51.912    0.663   2.311
-    > +eudyptula.init7 162.23.41.10     2 u   60   64    3   99.378    1.563   3.485
-    > +107.155.79.108  129.7.1.66       2 u  119   64    2   49.171   -1.372   1.441
-    > -212.110.158.28  89.109.251.21    2 u  120   64    2  167.465   -1.064   1.263
-    > *ec2-54-242-183- 128.10.19.24     2 u   62   64    3   19.157    2.536   4.434
-    > -69.195.159.158  128.252.19.1     2 u  119   64    2   42.990    6.302   3.507
-    > -200.89.75.198 ( 200.27.106.115   2 u   58   64    3  160.786   42.737  12.827
+    >  pool.ntp.org    .POOL.          16 p    -   64    0    0.000    0.000   0.000
+    > *lithium.constan 198.30.92.2      2 u    -   64    1   19.900    4.894   3.951
+    >  ntp2.wiktel.com 212.215.1.157    2 u    2   64    1   48.061   -0.431   0.104
     > ```
 
 ([Table of Contents](#table-of-contents))
@@ -2350,7 +2344,7 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
     sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
     sudo apt update
-    sudo apt install lynis
+    sudo apt install lynis host
     ```
 
 1. Update it:
@@ -2366,12 +2360,6 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     ```
 
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
-
-([Table of Contents](#table-of-contents))
-
-### CIS-CAT (WIP)
-
-WIP
 
 ([Table of Contents](#table-of-contents))
 
@@ -2639,7 +2627,7 @@ There will come a time when you'll need to look through your iptables logs. Havi
     :msg, contains, "[IPTABLES] " /var/log/iptables.log
     & stop
     ```
-
+    
     If you're expecting a lot if data being logged by your firewall, prefix the filename with a `-` ["to omit syncing the file after every logging"](https://www.rsyslog.com/doc/v8-stable/configuration/actions.html#regular-file). For example:
 
     ```
@@ -2648,11 +2636,28 @@ There will come a time when you'll need to look through your iptables logs. Havi
     ```
 
     **Note**: Remember to change the prefix to whatever you use.
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+
+    ``` bash
+    cat << EOF | sudo tee /etc/rsyslog.d/10-iptables.conf
+    :msg, contains, "[IPTABLES] " /var/log/iptables.log
+    & stop
+    EOF
+    ```
 
 1. Since we're logging firewall messages to a different file, we need to tell psad where the new file is. Edit `/etc/psad/psad.conf` and set `IPT_SYSLOG_FILE` to the path of the log file. For example:
 
     ```
     IPT_SYSLOG_FILE /var/log/iptables.log;
+    ```
+    
+    **Note**: Remember to change the prefix to whatever you use.
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s/^(IPT_SYSLOG_FILE\s+)([^;]+)(;)$/# \1\2\3       # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1\/var\/log\/iptables.log\3       # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/psad/psad.conf 
     ```
 
 1. Restart psad and rsyslog to activate the changes (or reboot):
@@ -2679,6 +2684,25 @@ There will come a time when you'll need to look through your iptables logs. Havi
             invoke-rc.d rsyslog rotate > /dev/null
         endscript
     }
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    cat << EOF | sudo tee /etc/logrotate.d/iptables
+    /var/log/iptables.log
+    {
+        rotate 7
+        daily
+        missingok
+        notifempty
+        delaycompress
+        compress
+        postrotate
+            invoke-rc.d rsyslog rotate > /dev/null
+        endscript
+    }
+    EOF
     ```
 
 ([Table of Contents](#table-of-contents))
