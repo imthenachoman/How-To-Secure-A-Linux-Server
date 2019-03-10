@@ -6,7 +6,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -26,31 +25,31 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Other Important Notes](#other-important-notes)
 - [The SSH Server](#the-ssh-server)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
-  - [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups)
+  - [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
   - [Remove Short Diffie-Hellman Keys](#remove-short-diffie-hellman-keys)
   - [2FA/MFA for SSH](#2famfa-for-ssh)
 - [The Basics](#the-basics)
-  - [Limit Who Can Use `sudo`](#limit-who-can-use-sudo)
+  - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
   - [NTP Client](#ntp-client)
+  - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
-- [The Firewall](#the-firewall)
+- [The Network](#the-network)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
-  - [PSAD: `iptables` Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
+  - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
   - [Fail2ban: Application Intrusion Detection And Prevention](#fail2ban-application-intrusion-detection-and-prevention)
 - [The Danger Zone](#the-danger-zone)
-  - [Proceed At Your Own Risk](#proceed-at-your-own-risk)
 - [The Auditing](#the-auditing)
-  - [`netstat` (WIP)](#netstat-wip)
+  - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
+  - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
-  - [CIS-CAT (WIP)](#cis-cat-wip)
 - [The Miscellaneous](#the-miscellaneous)
   - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
-  - [Separate `iptables` Log File](#separate-iptables-log-file)
+  - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
   - [Contacting Me](#contacting-me)
-  - [Additional References](#additional-references)
+  - [Helpful Links](#helpful-links)
   - [Acknowledgments](#acknowledgments)
   - [License and Copyright](#license-and-copyright)
 
@@ -60,7 +59,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ### Guide Objective
 
-This guide's purpose is to teach you how to secure a Linux server.
+This guides purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
@@ -104,33 +103,35 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://www.tldp.org/LDP/sag/html/index.html
 - https://seifried.org/lasg/
 - https://news.ycombinator.com/item?id=19178964
+- https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
+- https://securecompliance.co/linux-server-hardening-checklist/
 
 ([Table of Contents](#table-of-contents))
 
 ### To Do / To Add
 
 - [ ] [Custom Jails for Fail2ban](#custom-jails)
-- [x] [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
-- [ ] Security-Enhanced Linux / SELinux - https://en.wikipedia.org/wiki/Security-Enhanced_Linux, https://linuxtechlab.com/beginners-guide-to-selinux/, https://linuxtechlab.com/replicate-selinux-policies-among-linux-machines/, https://teamignition.us/how-to-stop-being-a-scrub-and-learn-to-use-selinux.html
+- [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
+   - https://wiki.archlinux.org/index.php/security#Mandatory_access_control
+   - Security-Enhanced Linux / SELinux
+       - https://en.wikipedia.org/wiki/Security-Enhanced_Linux
+       - https://linuxtechlab.com/beginners-guide-to-selinux/
+       - https://linuxtechlab.com/replicate-selinux-policies-among-linux-machines/
+       - https://teamignition.us/how-to-stop-being-a-scrub-and-learn-to-use-selinux.html
+   - AppArmor
+       - https://wiki.archlinux.org/index.php/AppArmor
+       - https://security.stackexchange.com/questions/29378/comparison-between-apparmor-and-selinux
+        - http://www.insanitybit.com/2012/06/01/why-i-like-apparmor-more-than-selinux-5/
 - [ ] disk encryption
-- [x] BIOS password
-- [ ] Anti-Virus
-- [x] use ed25519 keys instead of RSA for SSH public/private keys
-- [x] `psad`
-- [x] unattended upgrades for critical security updates and patches
-- [ ] `logwatch`
+- [ ] Antivirus
 - [ ] Rkhunter and chrootkit
-- [ ] AppArmor
-- [ ] port knockers for SSH - https://news.ycombinator.com/item?id=19181829, https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egropaw/
-- [ ] https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
-- [ ] https://likegeeks.com/secure-linux-server-hardening-best-practices/#Secure-Mounted-Filesystems
+    - http://www.chkrootkit.org/
+    - http://rkhunter.sourceforge.net/
+    - https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
+    - https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
-- [ ] MAC (Mandatory Access Control) and Linux Security Modules (LSMs)
-- [x] CIS hardening guidelines and benchmarks @ https://www.cisecurity.org/cis-benchmarks/
-- [ ] Knockd - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egswikz/
-- [ ] securing NTP - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/egqc160/
-- [ ] `netstat -nlp` - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
+- [ ] CIS-CAT - https://learn.cisecurity.org/cis-cat-landing-page
 
 ([Table of Contents](#table-of-contents))
 
@@ -274,7 +275,7 @@ Check the references below for more details but, at a high level, public/private
 1. One key, the **public** key, **can only encrypt data**, not decrypt it
 1. The other key, the **private** key, can decrypt the data
 
-For SSH, a public and private key is created on the client. You want to keep both keys secure, especially the private key. Even though the public key is meant to be public, it is wise to make sure neither keys fall fall in the wrong hands.
+For SSH, a public and private key is created on the client. You want to keep both keys secure, especially the private key. Even though the public key is meant to be public, it is wise to make sure neither keys fall in the wrong hands.
 
 When you connect to an SSH server, SSH will look for a public key that matches the client you're connecting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Anther approach is to use use [`ssh-copy-id`](https://www.ssh.com/ssh/copy-id) to transfer and append the public key.
 
@@ -341,7 +342,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
     > |+..=**=o=.       |
     > +----[SHA256]-----+
     > ```
-    
+
     **Note**: If you set a passphrase, you'll need to enter it every time you connect to your server using this key, unless you're using `ssh-agent`.
 
 1. Now you need to **append** the public key `~/.ssh/id_ed25519.pub` from your client to the `~/.ssh/authorized_keys` file on your server. Since we're presumable still at home on the LAN, we're probably safe from [MIM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) attacks, so we will use `ssh-copy-id` to transfer and append the public key:
@@ -349,7 +350,7 @@ We will be using Ed25519 keys which, according to [https://linux-audit.com/](htt
     ``` bash
     ssh-copy-id user@server
     ```
-    
+
     > ```
     > /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/user/.ssh/id_ed25519.pub"
     > The authenticity of host 'host (192.168.1.96)' can't be established.
@@ -369,7 +370,7 @@ Now would be a good time to [perform any tasks specific to your setup](#prepost-
 
 ([Table of Contents](#table-of-contents))
 
-### Create SSH Group For `AllowGroups`
+### Create SSH Group For AllowGroups
 
 #### Why
 
@@ -377,7 +378,7 @@ To make it easy to control who can SSH to the server. By using a group, we can q
 
 #### How It Works
 
-We will use the [`AllowGroups` option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config). to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in.
+We will use the [AllowGroups option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config). to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in.
 
 #### Goals
 
@@ -407,7 +408,7 @@ We will use the [`AllowGroups` option](#AllowGroups) in SSH's configuration file
     sudo usermod -a -G sshusers user2
     sudo usermod -a -G sshusers ...
     ```
-    
+
     You'll need to do this for every account on your server that needs SSH access.
 
 ([Table of Contents](#table-of-contents))
@@ -428,7 +429,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 #### Notes
 
-- Make sure you've completed [Create SSH Group For `AllowGroups`](#create-ssh-group-for-allowgroups) first.
+- Make sure you've completed [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups) first.
 
 #### References
 
@@ -441,17 +442,17 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 #### Steps
 
-1. Make a backup of `/etc/ssh/sshd_config` and remove comments to make it easier to read:
+1. Make a backup of OpenSSH server's configuration file `/etc/ssh/sshd_config` and remove comments to make it easier to read:
 
     ``` bash
     sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
     sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
     ```
-    
+
 1. Edit `/etc/ssh/sshd_config` then find and edit or add these settings that should be applied regardless of your configuration/setup:
-    
+
     **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
-    
+
     ```
     ########################################################################################################
     # start settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
@@ -479,13 +480,13 @@ SSH is a door into your server. This is especially true if you are opening ports
     ########################################################################################################
     # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
     ########################################################################################################
-    
+
     # don't let users set environment variables
     PermitUserEnvironment no
-    
+
     # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
     Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
-    
+
     # only use the newer, more secure protocol
     Protocol 2
 
@@ -512,11 +513,11 @@ SSH is a door into your server. This is especially true if you are opening ports
     TCPKeepAlive no
     AllowAgentForwarding no
     PermitRootLogin no
-    
+
     # don't allow .rhosts or /etc/hosts.equiv
     HostbasedAuthentication no
     ```
-   
+
 1. Then **find and edit or add** these settings, and set values as per your requirements:
 
     |Setting|Valid Values|Example|Description|Notes|
@@ -531,7 +532,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     |**MaxStartups**|number|`MaxStartups 2`|maximum number of login sessions||
     |<a name="PasswordAuthentication"></a>**PasswordAuthentication**|`yes` or `no`|`PasswordAuthentication no`|if login with a password is allowed||
     |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
-    
+
     Check `man sshd_config` for more details what these settings mean.
 
 1. Restart ssh:
@@ -539,14 +540,14 @@ SSH is a door into your server. This is especially true if you are opening ports
     ``` bash
     sudo service sshd restart
     ```
-    
+
 1. You can check verify the configurations worked with `sshd -T` and verify the output:
 
     ``` bash
     sudo sshd -T
     ```
-    
-    > ```    
+
+    > ```
     > port 22
     > addressfamily any
     > listenaddress [::]:22
@@ -594,7 +595,7 @@ The Diffie-Hellman algorithm is used by SSH to establish a secure connection. Th
 
 #### Steps
 
-1. Make a backup of `/etc/ssh/moduli`:
+1. Make a backup of SSH's moduli file `/etc/ssh/moduli`:
 
     ``` bash
     sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
@@ -634,9 +635,9 @@ When you log into a server, be it directly from the console or via SSH, the door
 
 This section will alter the authentication rules for when logging in via SSH to require both a password and a 6 digit code.
 
-We will use Google's `libpam-google-authenticator` PAM module to create and verify a [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_algorithm) key. https://fastmail.blog/2016/07/22/how-totp-authenticator-apps-work/ and https://jemurai.com/2018/10/11/how-it-works-totp-based-mfa/ have very good writeups of how TOTP works.
+We will use Google's libpam-google-authenticator PAM module to create and verify a [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_algorithm) key. https://fastmail.blog/2016/07/22/how-totp-authenticator-apps-work/ and https://jemurai.com/2018/10/11/how-it-works-totp-based-mfa/ have very good writeups of how TOTP works.
 
-What we will do is tell the server's SSH PAM configuration to ask the user for their password and then their numeric token. PAM will then verify the user's password and, if it is correct, then it will route the authentication request to `libpam-google-authenticator` which will ask for and verify your 6 digit token. If, and only if, everything is good will the authentication succeed and user be allowed to log in.
+What we will do is tell the server's SSH PAM configuration to ask the user for their password and then their numeric token. PAM will then verify the user's password and, if it is correct, then it will route the authentication request to libpam-google-authenticator which will ask for and verify your 6 digit token. If, and only if, everything is good will the authentication succeed and user be allowed to log in.
 
 #### Goals
 
@@ -658,20 +659,20 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
 
 #### Steps
 
-1. Install it `libpam-google-authenticator`.
-    
+1. Install it libpam-google-authenticator.
+
     On Debian based systems:
-    
+
     ``` bash
     sudo apt install libpam-google-authenticator
     ```
-    
+
 1. **Make sure you're logged in as the ID you want to enable 2FA/MFA for** and **execute** `google-authenticator` to create the necessary token data:
 
     ``` bash
     google-authenticator
     ```
-    
+
     > ```
     > Do you want authentication tokens to be time-based (y/n) y
     > https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/user@host%3Fsecret%3DR4ZWX34FQKZROVX7AGLJ64684Y%26issuer%3Dhost
@@ -708,42 +709,45 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     > By default, this limits attackers to no more than 3 login attempts every 30s.
     > Do you want to enable rate-limiting (y/n) y
     > ```
-    
+
     Notice this is **not run as root**.
-    
+
     Select default option (y in most cases) for all the questions it asks and remember to save the emergency scratch codes.
-    
+
+1. Make a backup of PAM's SSH configuration file `/etc/pam.d/sshd`:
+
+    ``` bash
+    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
+    ```
+
 1. Now we need to enable it as an authentication method for SSH by adding this line to `/etc/pam.d/sshd`:
 
     ```
     auth       required     pam_google_authenticator.so nullok
     ```
-    
+
     **Note**: Check [here](https://github.com/google/google-authenticator-libpam/blob/master/README.md#nullok) for what `nullok` means.
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
-    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\nauth       required     pam_google_authenticator.so nullok         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/pam.d/sshd
     ```
-    
+
 1. Tell SSH to leverage it by adding or editing this line in `/etc/ssh/sshd_config`:
-    
+
     ```
     ChallengeResponseAuthentication yes
     ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
-    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
     sudo sed -i -r -e "s/^(challengeresponseauthentication .*)$/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/I" /etc/ssh/sshd_config
     echo -e "\nChallengeResponseAuthentication yes         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ssh/sshd_config
     ```
-    
-1. Restart `ssh`:
+
+1. Restart ssh:
 
     ``` bash
     sudo service sshd restart
@@ -753,21 +757,21 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
 
 ## The Basics
 
-### Limit Who Can Use `sudo`
+### Limit Who Can Use sudo
 
 #### Why
 
-`sudo` lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use `sudo`.
+sudo lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use sudo.
 
 #### Goals
 
-- `sudo` privileges limited to those who are in a group we specify
+- sudo privileges limited to those who are in a group we specify
 
 #### Notes
 
 - Your installation may have already done this, or may already have a special group intended for this purpose so check first.
-  - Debian creates the `sudo` group
-  - RedHat creates the `wheel` group
+  - Debian creates the sudo group
+  - RedHat creates the wheel group
 
 #### Steps
 
@@ -784,17 +788,22 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
     sudo usermod -a -G sudousers user2
     sudo usermod -a -G sudousers  ...
     ```
-    
-    You'll need to do this for every account on your server that needs `sudo` privileges.
 
-1. Edit `/etc/sudoers`:
+    You'll need to do this for every account on your server that needs sudo privileges.
+
+1. Make a backup of the sudo's configuration file `/etc/sudoers`:
 
     ``` bash
     sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Edit sudo's configuration file `/etc/sudoers`:
+
+    ``` bash
     sudo visudo
     ```
 
-1. Tell `sudo` to only allow users in the `sudousers` group to use `sudo` by adding this line if it is not already there:
+1. Tell sudo to only allow users in the `sudousers` group to use sudo by adding this line if it is not already there:
 
     ```
     %sudousers   ALL=(ALL:ALL) ALL
@@ -821,18 +830,61 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 - https://cloudpro.zone/index.php/2018/01/27/debian-9-3-server-setup-guide-part-4/
 - https://en.wikipedia.org/wiki/Network_Time_Protocol
 - https://www.pool.ntp.org/en/
+- https://serverfault.com/questions/957302/securing-hardening-ntp-client-on-linux-servers-config-file/957450#957450
+- https://tf.nist.gov/tf-cgi/servers.cgi
 
 #### Steps
 
-1. Install `ntp`.
+1. Install ntp.
 
     On Debian based systems:
-    
+
     ``` bash
     sudo apt install ntp
     ```
+    
+1. Make a backup of the NTP client's configuration file `/etc/ntp.conf`:
 
-1. Check the status of the `ntp` service:
+    ``` bash
+    sudo cp --preserve /etc/ntp.conf /etc/ntp.conf.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
+    
+    ```
+    pool pool.ntp.org iburst
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s/^((server|pool).*)/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/ntp.conf
+    echo -e "\npool pool.ntp.org iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntp.conf
+    ```
+
+    **Example `/etc/ntp.conf`**:
+    
+    > ```
+    > driftfile /var/lib/ntp/ntp.drift
+    > statistics loopstats peerstats clockstats
+    > filegen loopstats file loopstats type day enable
+    > filegen peerstats file peerstats type day enable
+    > filegen clockstats file clockstats type day enable
+    > restrict -4 default kod notrap nomodify nopeer noquery limited
+    > restrict -6 default kod notrap nomodify nopeer noquery limited
+    > restrict 127.0.0.1
+    > restrict ::1
+    > restrict source notrap nomodify noquery
+    > pool pool.ntp.org iburst         # added by user on 2019-03-09 @ 10:23:35
+    > ```
+    
+1. Restart ntp:
+
+    ``` bash
+    sudo service ntp restart
+    ```
+
+1. Check the status of the ntp service:
 
     ``` bash
     sudo systemctl status ntp
@@ -841,44 +893,87 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     > ```
     > ● ntp.service - LSB: Start NTP daemon
     >    Loaded: loaded (/etc/init.d/ntp; generated; vendor preset: enabled)
-    >    Active: active (running) since Sat 2019-02-16 00:32:20 EST; 3s ago
+    >    Active: active (running) since Sat 2019-03-09 15:19:46 EST; 4s ago
     >      Docs: man:systemd-sysv-generator(8)
+    >   Process: 1016 ExecStop=/etc/init.d/ntp stop (code=exited, status=0/SUCCESS)
+    >   Process: 1028 ExecStart=/etc/init.d/ntp start (code=exited, status=0/SUCCESS)
+    >     Tasks: 2 (limit: 4915)
     >    CGroup: /system.slice/ntp.service
-    >            └─1051 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 109:114
+    >            └─1038 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 108:113
     > 
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 3 enp0s3 192.168.1.96:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 4 lo [::1]:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listen normally on 5 enp0s3 [fe80::a00:27ff:feb6:ed8e%2]:123
-    > Feb 16 00:32:20 host ntpd[1051]: Listening on routing socket on fd #22 for interface updates
-    > Feb 16 00:32:21 host ntpd[1051]: Soliciting pool server 173.255.206.154
-    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 216.6.2.70
-    > Feb 16 00:32:22 host ntpd[1051]: Soliciting pool server 82.197.188.130
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 95.215.175.2
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 107.155.79.108
-    > Feb 16 00:32:23 host ntpd[1051]: Soliciting pool server 212.110.158.28
+    > Mar 09 15:19:46 host ntpd[1038]: Listen and drop on 0 v6wildcard [::]:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen and drop on 1 v4wildcard 0.0.0.0:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 2 lo 127.0.0.1:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 3 enp0s3 10.10.20.96:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 4 lo [::1]:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listen normally on 5 enp0s3 [fe80::a00:27ff:feb6:ed8e%2]:123
+    > Mar 09 15:19:46 host ntpd[1038]: Listening on routing socket on fd #22 for interface updates
+    > Mar 09 15:19:47 host ntpd[1038]: Soliciting pool server 108.61.56.35
+    > Mar 09 15:19:48 host ntpd[1038]: Soliciting pool server 69.89.207.199
+    > Mar 09 15:19:49 host ntpd[1038]: Soliciting pool server 45.79.111.114
     > ```
 
-1. Check `ntp`'s status:
+1. Check ntp's status:
 
     ``` bash
     sudo ntpq -p
     ```
-    
+
     > ```
     >      remote           refid      st t when poll reach   delay   offset  jitter
     > ==============================================================================
-    >  0.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  1.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  2.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    >  3.debian.pool.n .POOL.          16 p    -   64    0    0.000    0.000   0.000
-    > -li216-154.membe 45.56.123.24     3 u  119   64    2   51.912    0.663   2.311
-    > +eudyptula.init7 162.23.41.10     2 u   60   64    3   99.378    1.563   3.485
-    > +107.155.79.108  129.7.1.66       2 u  119   64    2   49.171   -1.372   1.441
-    > -212.110.158.28  89.109.251.21    2 u  120   64    2  167.465   -1.064   1.263
-    > *ec2-54-242-183- 128.10.19.24     2 u   62   64    3   19.157    2.536   4.434
-    > -69.195.159.158  128.252.19.1     2 u  119   64    2   42.990    6.302   3.507
-    > -200.89.75.198 ( 200.27.106.115   2 u   58   64    3  160.786   42.737  12.827
+    >  pool.ntp.org    .POOL.          16 p    -   64    0    0.000    0.000   0.000
+    > *lithium.constan 198.30.92.2      2 u    -   64    1   19.900    4.894   3.951
+    >  ntp2.wiktel.com 212.215.1.157    2 u    2   64    1   48.061   -0.431   0.104
     > ```
+
+([Table of Contents](#table-of-contents))
+
+### Securing /proc
+
+#### Why
+
+To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
+
+> When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some file system configuration tweaks, we can change this behavior and improve the security of the system.
+
+#### Goals
+
+- `/proc` mounted with `hidepid=2` so users can only see information about their processes
+
+#### References
+
+- https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/
+- https://likegeeks.com/secure-linux-server-hardening-best-practices/#Hardening-proc-Directory
+- https://www.cyberciti.biz/faq/linux-hide-processes-from-other-users/
+
+#### Steps
+
+1. Make a backup of `/etc/fstab`:
+
+    ``` bash
+    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Add this line to `/etc/fstab` to have `/proc` mounted with `hidepid=2`:
+
+    ```
+    proc     /proc     proc     defaults,hidepid=2     0     0
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    echo -e "\nproc     /proc     proc     defaults,hidepid=2     0     0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
+    ```
+
+1. Reboot the system:
+
+    ``` bash
+    sudo reboot now
+    ```
+    
+    **Note**: Alternatively, you can remount `/proc` without rebooting with `sudo mount -o remount,hidepid=2 /proc`
 
 ([Table of Contents](#table-of-contents))
 
@@ -892,7 +987,7 @@ By default, accounts can use any password they want, including bad ones. [pwqual
 
 On Linux, PAM is responsible for authentication. There are four tasks to PAM that you can read about at https://en.wikipedia.org/wiki/Linux_PAM. This section talks about the password task.
 
-When there is a need to set or change an account password, the password task of PAM handles the request. In this section we will tell PAM's password task to pass the requested new password to `libpam-pwquality` to make sure it meets our requirements. If the requirements are met it is used/set; if it does not meet the requirements it errors and lets the user know.
+When there is a need to set or change an account password, the password task of PAM handles the request. In this section we will tell PAM's password task to pass the requested new password to libpam-pwquality to make sure it meets our requirements. If the requirements are met it is used/set; if it does not meet the requirements it errors and lets the user know.
 
 #### Goal
 
@@ -900,26 +995,32 @@ When there is a need to set or change an account password, the password task of 
 
 #### Steps
 
-1. Install `libpam-pwquality`.
+1. Install libpam-pwquality.
 
     On Debian based systems:
-    
+
     ``` bash
     sudo apt install libpam-pwquality
     ```
 
-1. Tell PAM to use `libpam-pwquality` to enforce strong passwords by editing the file `/etc/pam.d/common-password` and **change** the line that starts like this:
+1. Make a backup of PAM's password configuration file `/etc/pam.d/common-password`:
+
+    ``` bash
+    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Tell PAM to use libpam-pwquality to enforce strong passwords by editing the file `/etc/pam.d/common-password` and change the line that starts like this:
 
     ```
     password        requisite                       pam_pwquality.so
     ```
-    
+
     to this:
 
     ```
     password        requisite                       pam_pwquality.so retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec
     ```
-   
+
    The above options are:
 
      - `retry=3` = prompt user 3 times before returning with error.
@@ -934,10 +1035,8 @@ When there is a need to set or change an account password, the password task of 
 
 
     [For the lazy](#editing-configuration-files---for-the-lazy):
-   
+
     ``` bash
-    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
-    
     sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
     ```
 
@@ -973,11 +1072,11 @@ Automatic and unattended updates may break your system and you may not be near y
 
 On Debian based systems you can use:
 
-- `unattended-upgrades` to automatically do system updates you want (i.e. critical security updates)
-- `apt-listchanges` to get details about package changes before they are installed/upgraded
-- `apticron` to get emails for pending package updates
+- unattended-upgrades to automatically do system updates you want (i.e. critical security updates)
+- apt-listchanges to get details about package changes before they are installed/upgraded
+- apticron to get emails for pending package updates
 
-We will use `unattended-upgrades` to apply **critical security patches**. We can also apply stable updates since they've already been thoroughly tested by the Debian community.
+We will use unattended-upgrades to apply **critical security patches**. We can also apply stable updates since they've already been thoroughly tested by the Debian community.
 
 ##### References
 
@@ -993,34 +1092,34 @@ We will use `unattended-upgrades` to apply **critical security patches**. We can
 
 ##### Steps
 
-1. Install `unattended-upgrades`, `apt-listchanges`, and `apticron`:
+1. Install unattended-upgrades, apt-listchanges, and apticron:
 
     ``` bash
     sudo apt install unattended-upgrades apt-listchanges apticron
     ```
 
-1. Now we need to configure `unattended-upgrades` to automatically apply the updates. This is typically done by editing the files `/etc/apt/apt.conf.d/20auto-upgrades` and `/etc/apt/apt.conf.d/50unattended-upgrades` that were created by the packages. However, because these file may get overwritten with a future update, we'll create a new file instead. Create the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
+1. Now we need to configure unattended-upgrades to automatically apply the updates. This is typically done by editing the files `/etc/apt/apt.conf.d/20auto-upgrades` and `/etc/apt/apt.conf.d/50unattended-upgrades` that were created by the packages. However, because these file may get overwritten with a future update, we'll create a new file instead. Create the file `/etc/apt/apt.conf.d/51myunattended-upgrades` and add this:
 
     ```
     // Enable the update/upgrade script (0=disable)
     APT::Periodic::Enable "1";
-    
+
     // Do "apt-get update" automatically every n-days (0=disable)
     APT::Periodic::Update-Package-Lists "1";
-    
+
     // Do "apt-get upgrade --download-only" every n-days (0=disable)
     APT::Periodic::Download-Upgradeable-Packages "1";
-    
+
     // Do "apt-get autoclean" every n-days (0=disable)
     APT::Periodic::AutocleanInterval "7";
-    
+
     // Send report mail to root
     //     0:  no report             (or null string)
     //     1:  progress report       (actually any string)
     //     2:  + command outputs     (remove -qq, remove 2>/dev/null, add -d)
-    //     3:  + trace on    APT::Periodic::Verbose "2";    
+    //     3:  + trace on    APT::Periodic::Verbose "2";
     APT::Periodic::Unattended-Upgrade "1";
-    
+
     // Automatically upgrade packages from these
     Unattended-Upgrade::Origins-Pattern {
           "o=Debian,a=stable";
@@ -1031,64 +1130,66 @@ We will use `unattended-upgrades` to apply **critical security patches**. We can
     // You can specify your own packages to NOT automatically upgrade here
     Unattended-Upgrade::Package-Blacklist {
     };
-    
+
     // Run dpkg --force-confold --configure -a if a unclean dpkg state is detected to true to ensure that updates get installed even when the system got interrupted during a previous run
     Unattended-Upgrade::AutoFixInterruptedDpkg "true";
-    
+
     //Perform the upgrade when the machine is running because we wont be shutting our server down often
     Unattended-Upgrade::InstallOnShutdown "false";
-    
+
     // Send an email to this address with information about the packages upgraded.
     Unattended-Upgrade::Mail "root";
-    
+
     // Always send an e-mail
     Unattended-Upgrade::MailOnlyOnError "false";
-    
+
     // Remove all unused dependencies after the upgrade has finished
     Unattended-Upgrade::Remove-Unused-Dependencies "true";
-    
+
     // Remove any new unused dependencies after the upgrade has finished
     Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
-    
+
     // Automatically reboot WITHOUT CONFIRMATION if the file /var/run/reboot-required is found after the upgrade.
     Unattended-Upgrade::Automatic-Reboot "true";
-    
+
     // Automatically reboot even if users are logged in.
     Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
     ```
-    
-    **Note**: Check `/usr/lib/apt/apt.systemd.daily` for details on the `APT::Periodic` options and check https://github.com/mvo5/unattended-upgrades for details on the `Unattended-Upgrade` options.
-    
-1. Run a dry-run of `unattended-upgrades` to make sure your configuration file is okay:
+
+    **Notes**:
+    - Check `/usr/lib/apt/apt.systemd.daily` for details on the `APT::Periodic` options
+    - Check https://github.com/mvo5/unattended-upgrades for details on the `Unattended-Upgrade` options
+
+1. Run a dry-run of unattended-upgrades to make sure your configuration file is okay:
 
     ``` bash
     sudo unattended-upgrade -d --dry-run
     ```
-    
+
     If everything is okay, you can let it run whenever it's scheduled to or force a run with `unattended-upgrade -d`.
 
-1. Configure `apt-listchanges` to your liking:
+1. Configure apt-listchanges to your liking:
 
     ``` bash
     sudo dpkg-reconfigure apt-listchanges
     ```
 
-1. Install `apticron`:
-    
+1. Install apticron:
+
     ``` bash
     sudo apt install apticron
     ```
-    
+
     The default settings are good enough but you can check them in `/etc/apticron/apticron.conf` if you want to change them. For example, my configuration looks like this:
-    
+
     > ```
     > EMAIL="root"
     > NOTIFY_NO_UPDATES="1"
     > ```
-    
+
 ([Table of Contents](#table-of-contents))
 
-## The Firewall
+## The Network
 
 ### UFW: Uncomplicated Firewall
 
@@ -1098,7 +1199,11 @@ Call me paranoid, and you don't have to agree, but I want to deny all traffic in
 
 Of course, if you disagree, that is totally fine and can configure UFW to suit your needs.
 
-Either way, ensuring that only traffic we explicitly allow is the job of a firewall. On Linux, the most common firewall is [`iptables`](https://en.wikipedia.org/wiki/Iptables). `iptables`, however, is rather complicated and confusing (IMHO). This is where UFW comes in. UFW simplifies the process of creating and managing `iptables` rules.
+Either way, ensuring that only traffic we explicitly allow is the job of a firewall.
+
+#### How It Works
+
+The Linux kernel provides capabilities to monitor and control network traffic. These capabilities are exposed to the end-user through firewall utilities. On Linux, the most common firewall is [iptables](https://en.wikipedia.org/wiki/Iptables). However, iptables is rather complicated and confusing (IMHO). This is where UFW comes in. Think of UFW as a front-end to iptables. It simplifies the process of managing the iptables rules that tell the Linux kernel what to do with network traffic.
 
 **UFW** works by letting you configure rules that:
 
@@ -1107,10 +1212,6 @@ Either way, ensuring that only traffic we explicitly allow is the job of a firew
 - **to** or **from** ports
 
 You can create rules by explicitly specifying the ports or with application configurations that specify the ports.
-
-#### How It Works
-
-WIP
 
 #### Goal
 
@@ -1126,48 +1227,48 @@ WIP
 
 #### Steps
 
-1. Install `ufw`.
-    
+1. Install ufw.
+
     On Debian based systems:
-    
+
     ``` bash
     sudo apt install ufw
     ```
 
 1. Deny all outgoing traffic:
-    
+
     ``` bash
     sudo ufw default deny outgoing comment 'deny all outgoing traffic'
     ```
-    
+
     > ```
     > Default outgoing policy changed to 'deny'
     > (be sure to update your rules accordingly)
     > ```
-    
+
     If you are not as paranoid as me, and don't want to deny all outgoing traffic, you can allow it instead:
-    
+
     ``` bash
     sudo ufw default allow outgoing comment 'allow all outgoing traffic'
     ```
-   
+
 1. Deny all incoming traffic:
-    
+
     ``` bash
     sudo ufw default deny incoming comment 'deny all incoming traffic'
     ```
-    
+
 1. Obviously we want SSH connections in:
-    
+
     ``` bash
     sudo ufw limit in ssh comment 'allow SSH connections in'
     ```
-    
+
     > ```
     > Rules updated
     > Rules updated (v6)
     > ```
-    
+
 1. Allow additional traffic as per your needs. Some common use-cases:
 
     ``` bash
@@ -1176,27 +1277,27 @@ WIP
 	
 	# allow traffic out on port 123 -- NTP
     sudo ufw allow out 123 comment 'allow NTP out'
-    
+
     # allow traffic out for HTTP, HTTPS, or FTP
     # apt might needs these depending on which sources you're using
     sudo ufw allow out http comment 'allow HTTP traffic out'
     sudo ufw allow out https comment 'allow HTTPS traffic out'
     sudo ufw allow out ftp comment 'allow FTP traffic out'
-    
+
     # allow whois
     sudo ufw allow out whois comment 'allow whois'
-    
+
     # allow traffic out on port 68 -- the DHCP client
     # you only need this if you're using DHCP
     sudo ufw allow out 68 comment 'allow the DHCP client to update'
     ```
 
-1. Start `ufw`:
-    
+1. Start ufw:
+
     ``` bash
     sudo ufw enable
     ```
-    
+
     > ```
     > Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
     > Firewall is active and enabled on system startup
@@ -1207,7 +1308,7 @@ WIP
     ``` bash
     sudo ufw status
     ```
-    
+
     > ```
     > Status: active
     > 
@@ -1231,13 +1332,13 @@ WIP
     > Mail submission (v6)       ALLOW OUT   Anywhere (v6)              # allow mail out
     > 43/tcp (v6)                ALLOW OUT   Anywhere (v6)              # allow whois
     > ```
-    
+
     or
-    
+
     ``` bash
     sudo ufw status verbose
     ```
-    
+
     > ```
     > Status: active
     > Logging: on (low)
@@ -1267,7 +1368,7 @@ WIP
 
 #### Default Applications
 
-`ufw` ships with some default applications. You can see them with:
+ufw ships with some default applications. You can see them with:
 
 ``` bash
 sudo ufw app list
@@ -1360,19 +1461,19 @@ sudo ufw allow plexmediaserver
 
 ([Table of Contents](#table-of-contents))
 
-### PSAD: `iptables` Intrusion Detection And Prevention
+### PSAD: iptables Intrusion Detection And Prevention
 
 #### Why
+
+Even if you have a firewall to guard your doors, it is possible to try brute-forcing your way in any of the guarded doors. We want to monitor all network activity to detect potential intrusion attempts, such has repeated attempts to get in, and block them.
+
+#### How It Works
 
 I can't explain it any better than user [FINESEC](https://serverfault.com/users/143961/finesec) from https://serverfault.com/ did at: https://serverfault.com/a/447604/289829.
 
 > Fail2BAN scans log files of various applications such as apache, ssh or ftp and automatically bans IPs that show the malicious signs such as automated login attempts. PSAD on the other hand scans iptables and ip6tables log messages (typically /var/log/messages) to detect and optionally block scans and other types of suspect traffic such as DDoS or OS fingerprinting attempts. It's ok to use both programs at the same time because they operate on different level.
 
 And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follow the awesome instructions by [netson](https://gist.github.com/netson) at https://gist.github.com/netson/c45b2dc4e835761fbccc to make PSAD work with UFW.
-
-#### How It Works
-
-WIP
 
 #### References
 
@@ -1385,20 +1486,20 @@ WIP
 
 #### Steps
 
-1. Install `psad`.
+1. Install psad.
 
     On Debian based systems:
-    
+
     ``` bash
     sudo apt install psad
     ```
 
-1. Make a backup of `/etc/psad/psad.conf`:
-    
+1. Make a backup of psad's configuration file `/etc/psad/psad.conf`:
+
     ``` bash
     sudo cp --preserve /etc/psad/psad.conf /etc/psad/psad.conf.$(date +"%Y%m%d%H%M%S")
     ```
-    
+
 1. Review and update configuration options in `/etc/psad/psad.conf`. Pay special attention to these:
 
    |Setting|Set To
@@ -1408,35 +1509,35 @@ WIP
    |[`ENABLE_AUTO_IDS`](http://www.cipherdyne.org/psad/docs/config.html#ENABLE_AUTO_IDS)|`ENABLE_AUTO_IDS Y;`|
    |`ENABLE_AUTO_IDS_EMAILS`|`ENABLE_AUTO_IDS_EMAILS Y;`|
    |`EXPECT_TCP_OPTIONS`|`EXPECT_TCP_OPTIONS Y;`|
-   
-   Check the configuration file `psad`'s documentation at http://www.cipherdyne.org/psad/docs/config.html for more details.
 
-1. <a name="psad_step4"></a>Now we need to make some changes to `ufw` so it works with `psad` by telling `ufw` to log all traffic so `psad` can analyze it. Do this by editing **two files** and adding these lines **at the end but before the COMMIT line**.
-    
+   Check the configuration file psad's documentation at http://www.cipherdyne.org/psad/docs/config.html for more details.
+
+1. <a name="psad_step4"></a>Now we need to make some changes to ufw so it works with psad by telling ufw to log all traffic so psad can analyze it. Do this by editing **two files** and adding these lines **at the end but before the COMMIT line**.
+
     Make backups:
-    
+
     ``` bash
     sudo cp --preserve /etc/ufw/before.rules /etc/ufw/before.rules.$(date +"%Y%m%d%H%M%S")
     sudo cp --preserve /etc/ufw/before6.rules /etc/ufw/before6.rules.$(date +"%Y%m%d%H%M%S")
     ```
-    
+
     Edit the files:
-    
+
     - `/etc/ufw/before.rules`
     - `/etc/ufw/before6.rules`
-    
+
     And add add this **at the end but before the COMMIT line**:
-    
+
     ```
     # log all traffic so psad can analyze
     -A INPUT -j LOG --log-tcp-options --log-prefix "[IPTABLES] "
     -A FORWARD -j LOG --log-tcp-options --log-prefix "[IPTABLES] "
     ```
-    
-    **Note**: We're adding a log prefix to all the `iptables` logs. We'll need this for [seperating `iptables` logs to their own file](#ns-separate-iptables-log-file).
-    
+
+    **Note**: We're adding a log prefix to all the iptables logs. We'll need this for [seperating iptables logs to their own file](#ns-separate-iptables-log-file).
+
     For example:
-    
+
     > ```
     > ...
     > 
@@ -1447,24 +1548,23 @@ WIP
     > # don't delete the 'COMMIT' line or these rules won't be processed
     > COMMIT
     > ```
-    
 
-1. Now we need to reload/restart `ufw` and `psad` for the changes to take effect:
+1. Now we need to reload/restart ufw and psad for the changes to take effect:
 
     ``` bash
     sudo ufw reload
-    
+
     sudo psad -R
     sudo psad --sig-update
     sudo psad -H
     ```
-    
-1. Analyze `iptables` rules for errors:
-    
+
+1. Analyze iptables rules for errors:
+
     ``` bash
     sudo psad --fw-analyze
     ```
-    
+
     > ```
     > [+] Parsing INPUT chain rules.
     > [+] Parsing INPUT chain rules.
@@ -1473,15 +1573,15 @@ WIP
     > [+] Results in /var/log/psad/fw_check
     > [+] Exiting.
     > ```
-    
+
     **Note**: If there were any issues you will get an e-mail with the error.
-    
-1. Check the status of `psad`:
-    
+
+1. Check the status of psad:
+
     ``` bash
     sudo psad --Status
     ```
-    
+
     > ```
     > [-] psad: pid file /var/run/psad/psadwatchd.pid does not exist for psadwatchd on vm
     > [+] psad_fw_read (pid: 3444)  %CPU: 0.0  %MEM: 2.2
@@ -1523,13 +1623,13 @@ WIP
 
 #### Why
 
-A firewall will board up all the doors and windows you don't want anyone using so nobody can see they are even there. But what about the doors and windows you want visible so approved folks can use them? Even if the door is locked, how do you ensure that someone doesn't try to force their way in?
+UFW tells your server what doors to board up so nobody can see them, and what doors to allow authorized users through. PSAD monitors network activity to detect and prevent potential intrusions -- repeated attempts to get in. 
 
-That is where **Fail2ban** comes in. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
+But what about the applications/services your server is running, like SSH and Apache, where your firewall is configured to allow access in. Even though access may be allowed that doesn't mean all access attempts are valid and harmless. What if someone tries to brute-force their way in to a web-app you're running on your server? This is where Fail2ban comes in.
 
 #### How It Works
 
-WIP
+Fail2ban monitors the logs of your applications (like SSH and Apache) to detect and prevent potential intrusions. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
 
 #### Goal
 
@@ -1549,16 +1649,16 @@ WIP
 
 #### Steps
 
-1. Install `fail2ban`.
-    
+1. Install fail2ban.
+
     On Debian based systems:
-    
+
     ``` bash
     sudo apt install fail2ban
     ```
-    
-1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll update a local copy instead. Add this to `/etc/fail2ban/jail.local` after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
-    
+
+1. We don't want to edit `/etc/fail2ban/fail2ban.conf` or `/etc/fail2ban/jail.conf` because a future update may overwrite those so we'll create a local copy instead. Create the file `/etc/fail2ban/jail.local` and add this to it after replacing `[LAN SEGMENT]` and `[your email]` with the appropriate values:
+
     ```
     [DEFAULT]
     # the IP address range we want to ignore
@@ -1576,10 +1676,10 @@ WIP
     # get email alerts
     action = %(action_mwl)s
     ```
-    
+
     **Note**: Your server will need to be able to send e-mails so Fail2ban can let you know of suspicious activity and when it banned an IP.
 
-1. We need to create a jail for `ssh` that tells `fail2ban` to look at `ssh` logs and use `ufw` to ban/unban IPs as needed. Create a jail for `ssh` by adding this to `/etc/fail2ban/jail.d/ssh.local`:
+1. We need to create a jail for SSH that tells fail2ban to look at SSH logs and use ufw to ban/unban IPs as needed. Create a jail for SSH by creating the file `/etc/fail2ban/jail.d/ssh.local` and adding this to it:
 
     ```
     [sshd]
@@ -1590,9 +1690,9 @@ WIP
     logpath = %(sshd_log)s
     maxretry = 5
     ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
     cat << EOF | sudo tee /etc/fail2ban/jail.d/ssh.local
     [sshd]
@@ -1604,10 +1704,10 @@ WIP
     maxretry = 5
     EOF
     ```
-    
-1. In the above we tell `fail2ban` to use the `ufw` as the `banaction`. Fail2ban ships with an action configuration file for `ufw`. You can see it in `/etc/fail2ban/action.d/ufw.conf`
-    
-1. Enable `fail2ban` and the jail for SSH:
+
+1. In the above we tell fail2ban to use the ufw as the `banaction`. Fail2ban ships with an action configuration file for ufw. You can see it in `/etc/fail2ban/action.d/ufw.conf`
+
+1. Enable fail2ban and the jail for SSH:
 
     ``` bash
     sudo fail2ban-client start
@@ -1626,11 +1726,11 @@ WIP
     > |- Number of jail:      1
     > `- Jail list:   sshd
     > ```
-    
+
     ``` bash
     sudo fail2ban-client status sshd
     ```
-    
+
     > ```
     > Status for the jail: sshd
     > |- Filter
@@ -1675,13 +1775,13 @@ This sections cover things that are high risk because there is a possibility the
 
 ### Table of Contents
 
-- [Linux Kernel `sysctl` Hardening](#linux-kernel-sysctl-hardening)
+- [Linux Kernel sysctl Hardening](#linux-kernel-sysctl-hardening)
 - [Password Protect GRUB](#password-protect-grub)
 - [Disable Root Login](#disable-root-login)
-- [Change Default `umask`](#change-default-umask)
+- [Change Default umask](#change-default-umask)
 - [Orphaned Software](#orphaned-software)
 
-### Linux Kernel `sysctl` Hardening
+### Linux Kernel sysctl Hardening
 
 <details><summary>!! PROCEED AT YOUR OWN RISK !!</summary>
 
@@ -1691,7 +1791,7 @@ The kernel is the brains of a Linux system. Securing it just makes sense.
 
 #### Why Not
 
-Changing kernel settings with `sysctl` is risky and could break your server. If you don't know what you are doing, don't have the time to debug issues, or just don't want to take the risks, I would advise from not following these steps.
+Changing kernel settings with sysctl is risky and could break your server. If you don't know what you are doing, don't have the time to debug issues, or just don't want to take the risks, I would advise from not following these steps.
 
 #### Disclaimer
 
@@ -1705,7 +1805,7 @@ I won't provide [For the lazy](#editing-configuration-files---for-the-lazy) code
 
 #### Notes
 
-- Documentation on all the `sysctl` settings/keys is severely lacking. The [documentation I can find](https://github.com/torvalds/linux/tree/master/Documentation) seems to reference the 2.2 version kernel. I could not find anything newer. If you know where I can, please [let me know](#contacting-me).
+- Documentation on all the sysctl settings/keys is severely lacking. The [documentation I can find](https://github.com/torvalds/linux/tree/master/Documentation) seems to reference the 2.2 version kernel. I could not find anything newer. If you know where I can, please [let me know](#contacting-me).
 - The reference sites listed below have more comments on what each setting does.
 
 #### References
@@ -1719,20 +1819,20 @@ I won't provide [For the lazy](#editing-configuration-files---for-the-lazy) code
 
 #### Steps
 
-1. The `sysctl` settings can be found in the [linux-kernel-sysctl-hardening.md](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/linux-kernel-sysctl-hardening.md) file in this repo.
+1. The sysctl settings can be found in the [linux-kernel-sysctl-hardening.md](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/blob/master/linux-kernel-sysctl-hardening.md) file in this repo.
 
-1. Before you make a kernel `sysctl` change permanent, you can test it with the `sysctl` command:
-    
+1. Before you make a kernel sysctl change permanent, you can test it with the sysctl command:
+
     ``` bash
     sudo sysctl -w [key=value]
     ```
-    
+
     Example:
-    
+
     ``` bash
     sudo sysctl -w kernel.ctrl-alt-del=0
     ```
-    
+
     **Note**: There are no spaces in `key=value`, including before and after the space.
 
 1. Once you have tested a setting, and made sure it works without breaking your server, you can make it permanent by adding the values to `/etc/sysctl.conf`. For example:
@@ -1750,8 +1850,8 @@ I won't provide [For the lazy](#editing-configuration-files---for-the-lazy) code
     ``` bash
     sudo sysctl -p
     ```
-    
-**Note**: If `sysctl` has trouble writing any settings then `sysctl -w` or `sysctl -p` will write an error to `stderr`. You can use this to quickly find invalid settings in  your `/etc/sysctl.conf` file:
+
+**Note**: If sysctl has trouble writing any settings then `sysctl -w` or `sysctl -p` will write an error to stderr. You can use this to quickly find invalid settings in  your `/etc/sysctl.conf` file:
 
 ``` bash
 sudo sysctl -p >/dev/null
@@ -1812,15 +1912,15 @@ If you forget the password, you'll have to go through [some work](https://www.cy
     ``` bash
     #!/bin/sh
     set -e
-    
+
     cat << EOF
     set superusers="grub"
     password_pbkdf2 grub [hash]
     EOF
     ```
-    
+
     For example:
-    
+
     > ``` bash
     > #!/bin/sh
     > set -e
@@ -1837,7 +1937,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
    sudo chmod a+x /etc/grub.d/01_password
    ```
 
-1. Make a backup of `/etc/grub.d/10_linux` and unset execute bit so `update-grub` doesn't try to run it:
+1. Make a backup of GRUB's configuration file `/etc/grub.d/10_linux` that we'll be modifying and unset the execute bit so `update-grub` doesn't try to run it:
 
     ``` bash
     sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
@@ -1845,9 +1945,9 @@ If you forget the password, you'll have to go through [some work](https://www.cy
     ```
 
 1. To make the default Debian install unrestricted (**without** the password) while keeping everything else restricted (**with** the password) modify `/etc/grub.d/10_linux` and add `--unrestricted` to the `CLASS` variable.
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
     sudo sed -i -r -e "/^CLASS=/ a CLASS=\"\${CLASS} --unrestricted\"         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" /etc/grub.d/10_linux
     ```
@@ -1868,7 +1968,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 
 #### Why
 
-If you have `sudo` [configured properly](#limit-who-can-use-sudo), then the **root** account will mostly never need to log in directly -- either at the terminal or remotely.
+If you have sudo [configured properly](#limit-who-can-use-sudo), then the **root** account will mostly never need to log in directly -- either at the terminal or remotely.
 
 #### Why Not
 
@@ -1877,9 +1977,9 @@ If you have `sudo` [configured properly](#limit-who-can-use-sudo), then the **ro
 If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like Debian) to drop to a **root** console during boot failures, then locking the **root** account will prevent `sulogin` from opening the **root** shell and you will get this error:
 
     Cannot open access to console, the root account is locked.
-    
+
     See sulogin(8) man page for more details.
-    
+
     Press Enter to continue.
 
 To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
@@ -1915,13 +2015,13 @@ An alternative to locking the **root** acount is set a long/complicated **root**
 
 ([Table of Contents](#table-of-contents))
 
-### Change Default `umask`
+### Change Default umask
 
 <details><summary>!! PROCEED AT YOUR OWN RISK !!</summary>
 
 #### Why
 
-`umask` controls the **default** permissions of files/folders when they are created. Insecure file/folder permissions give other accounts potentially unauthorized access to your data. This may include the ability to make configuration changes.
+umask controls the **default** permissions of files/folders when they are created. Insecure file/folder permissions give other accounts potentially unauthorized access to your data. This may include the ability to make configuration changes.
 
 - For **non-root** accounts, there is no need for other accounts to get any access to the account's files/folders **by default**.
 - For the **root** account, there is no need for the file/folder primary group or other accounts to have any access to **root**'s files/folders **by default**.
@@ -1930,20 +2030,20 @@ When and if other accounts need access to a file/folder, you want to explicitly 
 
 #### Why Not
 
-Changing the default `umask` can create unexpected problems. For example, if you set `umask` to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications that do not run with **root** privileges.
+Changing the default umask can create unexpected problems. For example, if you set umask to `0077` for **root**, then **non-root** accounts **will not** have access to application configuration files/folders in `/etc/` which could break applications that do not run with **root** privileges.
 
 #### How It Works
 
-In order to explain how `umask` works I'd have to explain how Linux file/folder permissions work. As that is a rather complicated question, I will defer you to the references below for further reading.
+In order to explain how umask works I'd have to explain how Linux file/folder permissions work. As that is a rather complicated question, I will defer you to the references below for further reading.
 
 #### Goals
 
-- set default `umask` for **non-root** accounts to **0027**
-- set default `umask` for the **root** account to **0077**
+- set default umask for **non-root** accounts to **0027**
+- set default umask for the **root** account to **0077**
 
 #### Notes
 
-- `umask` is a Bash built-in which means a user can change their own `umask` setting.
+- umask is a Bash built-in which means a user can change their own umask setting.
 
 #### References
 
@@ -1954,46 +2054,48 @@ In order to explain how `umask` works I'd have to explain how Linux file/folder 
 
 #### Steps
 
-1. Set default `umask` for **non-root** accounts to **0027** by adding this line to `/etc/profile` and `/etc/bash.bashrc`:
-    
-    ```
-    umask 0027
-    ```
-    
-    [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+1. Make a backup of files we'll be editing:
+
     ``` bash
     sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
     sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
-    
+    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
+    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Set default umask for **non-root** accounts to **0027** by adding this line to `/etc/profile` and `/etc/bash.bashrc`:
+
+    ```
+    umask 0027
+    ```
+
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+
+    ``` bash
     echo -e "\numask 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/profile /etc/bash.bashrc
     ```
 
 1. We also need to add this line to `/etc/login.defs`:
-    
+
     ```
     UMASK 0027
     ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
-    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\nUMASK 0027         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/login.defs
     ```
 
-1. Set default `umask` for the **root** account to **0077** by adding this line to `/root/.bashrc`:
-    
+1. Set default umask for the **root** account to **0077** by adding this line to `/root/.bashrc`:
+
     ```
     umask 0077
     ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
-    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
-    
     echo -e "\numask 0077         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /root/.bashrc
     ```
 
@@ -2015,33 +2117,33 @@ As you use your system, and you install and uninstall software, you'll eventuall
 
 #### Debian Based Systems
 
-On Debian based systems, you can use [`deborphan`](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages.
+On Debian based systems, you can use [deborphan](http://freshmeat.sourceforge.net/projects/deborphan/) to find orphaned packages.
 
 ##### <a name="orphaned-software-why-not"></a>Why Not
 
-Keep in mind, `deborphan` finds packages that have **no package dependencies**. That does not mean they are not used. You could very well have a package you use every day that has no dependencies that you wouldn't want to remove. And, if `deborphan` gets anything wrong, then removing critical packages may break your system.
+Keep in mind, deborphan finds packages that have **no package dependencies**. That does not mean they are not used. You could very well have a package you use every day that has no dependencies that you wouldn't want to remove. And, if deborphan gets anything wrong, then removing critical packages may break your system.
 
 ##### Steps
 
-1. Install `deborphan`.
-       
+1. Install deborphan.
+
     ``` bash
     sudo apt install deborphan
     ```
-       
-1. Run `deborphan` as **root** to see a list of orphaned packages:
+
+1. Run deborphan as **root** to see a list of orphaned packages:
 
     ``` bash
     sudo deborphan
     ```
-    
+
     > ```
     > libxapian30
     > libpipeline1
     > ```
-       
-1. [Assuming you want to remove all of the packages `deborphan` finds](#orphaned-software-why-not), you can pass it's output to `apt` to remove them:
-       
+
+1. [Assuming you want to remove all of the packages deborphan finds](#orphaned-software-why-not), you can pass it's output to `apt` to remove them:
+
     ``` bash
     sudo apt --autoremove purge $(deborphan)
     ```
@@ -2054,9 +2156,159 @@ Keep in mind, `deborphan` finds packages that have **no package dependencies**. 
 
 ## The Auditing
 
-### `netstat` (WIP)
+### logwatch - system log analyzer and reporter
 
-WIP
+#### Why
+
+Your server will be generating a lot of logs that may contain important information. Unless you plan on checking your server everyday, you'll want a way to get e-mail summary of your server's logs. To accomplish this we'll use [logwatch](https://sourceforge.net/projects/logwatch/).
+
+#### How It Works
+
+logwatch scans system log files and summarizes them. You can run it directly from the command line or schedule it to run on a recurring schedule. logwatch uses service files to know how to read/summarize a log file. You can see all of the stock service files in `/usr/share/logwatch/scripts/services`.
+
+logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` specifies default options. You can override them via command line arguments.
+
+#### Goal
+
+- Logwatch configured to send a daily e-mail summary of all of the server's status and logs
+
+#### Notes
+
+- Your server will need to be able to send e-mails for this to work
+- The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+
+#### References
+
+- Thanks to [amacheema](https://github.com/amacheema) for fixing some issues with the steps and letting me know of a long line bug with exim4 as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
+- https://sourceforge.net/projects/logwatch/
+- https://www.digitalocean.com/community/tutorials/how-to-install-and-use-logwatch-log-analyzer-and-reporter-on-a-vps
+
+#### Steps
+
+1. Install logwatch.
+
+    On Debian based systems:
+
+    ``` bash
+    sudo apt install logwatch
+    ```
+
+1. To see a sample of what logwatch collects you can run it directly:
+
+    ``` bash
+    sudo /usr/sbin/logwatch --output stdout --format text --range yesterday --service all
+    ```
+
+    > ```
+    > 
+    >  ################### Logwatch 7.4.3 (12/07/16) ####################
+    >         Processing Initiated: Mon Mar  4 00:05:50 2019
+    >         Date Range Processed: yesterday
+    >                               ( 2019-Mar-03 )
+    >                               Period is day.
+    >         Detail Level of Output: 5
+    >         Type of Output/Format: stdout / text
+    >         Logfiles for Host: host
+    >  ##################################################################
+    > 
+    >  --------------------- Cron Begin ------------------------
+    > ...
+    > ...
+    >  ---------------------- Disk Space End -------------------------
+    > 
+    > 
+    >  ###################### Logwatch End #########################
+    > ```
+
+1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
+
+1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
+
+    ``` bash
+    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch.$(date +"%Y%m%d%H%M%S")
+    sudo chmod -x /etc/cron.daily/00logwatch.*
+    ```
+
+1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
+
+    ```
+    /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
+    ```
+
+    > ```
+    > #!/bin/bash
+    > 
+    > #Check if removed-but-not-purged
+    > test -x /usr/share/logwatch/scripts/logwatch.pl || exit 0
+    > 
+    > #execute
+    > /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
+    > 
+    > #Note: It's possible to force the recipient in above command
+    > #Just pass --mailto address@a.com instead of --output mail
+    > ```
+
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s,^($(sudo which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(sudo which logwatch) --output mail --format html --mailto root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
+    ```
+
+1. You can test the cron job by executing it:
+
+    ``` bash
+    sudo /etc/cron.daily/00logwatch
+    ```
+    
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+
+([Table of Contents](#table-of-contents))
+
+### ss - Seeing Ports Your Server Is Listening On
+
+#### Why
+
+Ports are how applications, services, and processes communicate with each other -- either locally within your server or with other devices on the network. When you have an application or service (like SSH or Apache) running on your server, they listen for requests on specific ports.
+
+Obviously we don't want your server listening on ports we don't know about. We'll use `ss` to see all the ports that services are listening on. This will help us track down and stop rogue, potentially dangerous, services.
+
+#### Goals
+
+- find out non-localhost what ports are open and listening for connections
+
+#### References
+
+- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
+- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egs1rev/
+- https://www.tecmint.com/find-open-ports-in-linux/
+- `man ss`
+
+#### Steps
+
+1. To see the all the ports listening for traffic:
+
+    ``` bash
+    sudo ss -lntup
+    ```
+    
+    > ```
+    > Netid  State      Recv-Q Send-Q     Local Address:Port     Peer Address:Port
+    > udp    UNCONN     0      0                      *:68                  *:*        users:(("dhclient",pid=389,fd=6))
+    > tcp    LISTEN     0      128                    *:22                  *:*        users:(("sshd",pid=4390,fd=3))
+    > tcp    LISTEN     0      128                   :::22                 :::*        users:(("sshd",pid=4390,fd=4))
+    > ```
+    
+    **Switch Explanations**:
+    - `l` = display listening sockets
+    - `n` = do now try to resolve service names
+    - `t` = display TCP sockets
+    - `u` = display UDP sockets
+    - `p` = show process information
+
+1. If you see anything suspicious, like a port you're not aware of or a process you don't know, investigate and remediate as necessary.
+
+([Table of Contents](#table-of-contents))
 
 ### Lynis - Linux Security Auditing
 
@@ -2083,16 +2335,16 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
 
 #### Steps
 
-1. Install `lynis`. https://cisofy.com/lynis/#installation has detailed instructions on how to install it for your distribution.
-    
+1. Install lynis. https://cisofy.com/lynis/#installation has detailed instructions on how to install it for your distribution.
+
     On Debian based systems, using CISOFY's community software repository:
-    
+
     ``` bash
+    sudo apt install apt-transport-https ca-certificates host
     sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
-    sudo apt install apt-transport-https
     sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
     sudo apt update
-    sudo apt install lynis
+    sudo apt install lynis host
     ```
 
 1. Update it:
@@ -2106,14 +2358,8 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     ``` bash
     sudo lynis audit system
     ```
-    
+
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
-
-([Table of Contents](#table-of-contents))
-
-### CIS-CAT (WIP)
-
-WIP
 
 ([Table of Contents](#table-of-contents))
 
@@ -2129,36 +2375,39 @@ You can use any Gmail account. I recommend you create one specific for this serv
 
 There are many guides on-line that cover how to configure Gmail as MTA using STARTTLS including a [previous version of this guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/tree/cc5edcae1cf846dd250e76b121e721d836481d2f#configure-gmail-as-mta). With STARTTLS, an initial **unencrypted** connection is made and then upgraded to an encrypted TLS or SSL connection. Instead, with the approach outlined below, an encrypted TLS connection is made from the start.
 
+Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29) and [here](https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender), exim4 will fail for messages with long lines. We'll fix this in this section too.
+
 #### Goals
 
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
+- long line support for exim4
 
 #### References
-- Special thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS.
-- https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24
+- Thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS as documented in [issue #24](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24) and [pull request #26](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/pull/26).
 - https://wiki.debian.org/Exim
 - https://wiki.debian.org/GmailAndExim4
 - https://www.exim.org/exim-html-current/doc/html/spec_html/ch-encrypted_smtp_connections_using_tlsssl.html
 - https://php.quicoto.com/setup-exim4-to-use-gmail-in-ubuntu/
 - https://www.fastmail.com/help/technical/ssltlsstarttls.html
+- exim4 fails for messages with long lines - [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29) and https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender
 
 #### Steps
 
-1. Install `exim4`.
+1. Install exim4. You will also need openssl and ca-certificates.
 
     On Debian based systems:
-    
+
     ``` bash
-    sudo apt install exim4
+    sudo apt install exim4 openssl ca-certificates
     ```
 
-1. Configure `exim4`:
-    
+1. Configure exim4:
+
     For Debian based systems:
     ``` bash
     sudo dpkg-reconfigure exim4-config
     ```
-    
+
     You'll be prompted with some questions:
 
     |Prompt|Answer|
@@ -2173,13 +2422,13 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     |Split configuration into small files?|`No`|
 
 1. Make a backup of `/etc/exim4/passwd.client`:
-    
+
     ``` bash
     sudo cp --preserve /etc/exim4/passwd.client /etc/exim4/passwd.client.$(date +"%Y%m%d%H%M%S")
     ```
-    
+
 1. Add a line like this to `/etc/exim4/passwd.client`
-    
+
     ```
     *.google.com:yourAccount@gmail.com:yourPassword
     ```
@@ -2195,12 +2444,12 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     sudo chmod 640 /etc/exim4/passwd.client
     ```
 
-1. The next step is to create an TLS certificate that `exim4` will use to make the encrypted connection to `smtp.gmail.com`. You can use your own certificate, like one from [Let's Encrypt](https://letsencrypt.org/), or create one yourself using `openssl`. We will use a script that comes with `exim4` that calls `openssl` to make our certificate:
-    
+1. The next step is to create an TLS certificate that exim4 will use to make the encrypted connection to `smtp.gmail.com`. You can use your own certificate, like one from [Let's Encrypt](https://letsencrypt.org/), or create one yourself using openssl. We will use a script that comes with exim4 that calls openssl to make our certificate:
+
     ``` bash
     sudo bash /usr/share/doc/exim4-base/examples/exim-gencert
     ```
-    
+
     > ```
     > [*] Creating a self signed SSL certificate for Exim!
     >     This may be sufficient to establish encrypted connections but for
@@ -2232,33 +2481,35 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     >     over at /usr/share/doc/exim4-base/ for an idea on how to enable TLS
     >     support in your mail transfer agent.
     > ```
-    
-1. Instruct `exim4` to use TLS and port 465 by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
+
+1. Instruct exim4 to use TLS and port 465, and [fix exim4's long lines issue](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29), by creating the file `/etc/exim4/exim4.conf.localmacros` and adding:
 
     ```
     MAIN_TLS_ENABLE = 1
     REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS = *
     TLS_ON_CONNECT_PORTS = 465
     REQUIRE_PROTOCOL = smtps
+    IGNORE_SMTP_LINE_LENGTH_LIMIT = true
     ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
     cat << EOF | sudo tee /etc/exim4/exim4.conf.localmacros
     MAIN_TLS_ENABLE = 1
     REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS = *
     TLS_ON_CONNECT_PORTS = 465
     REQUIRE_PROTOCOL = smtps
+    IGNORE_SMTP_LINE_LENGTH_LIMIT = true
     EOF
     ```
-    
-1. We need to change some `exim4` settings so take a backup of `/etc/exim4/exim4.conf.template`:
+
+1. Make a backup of exim4's configuration file `/etc/exim4/exim4.conf.template`:
 
     ``` bash
     sudo cp --preserve /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template.$(date +"%Y%m%d%H%M%S")
     ```
-    
+
 1. Add the below to `/etc/exim4/exim4.conf.template` after the `.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS ... .endif` block:
 
     ```
@@ -2266,7 +2517,7 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
       protocol = REQUIRE_PROTOCOL
     .endif
     ```
-    
+
     > ```
     > .ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS
     >   hosts_require_tls = REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS
@@ -2278,68 +2529,71 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
     >   headers_rewrite = REMOTE_SMTP_HEADERS_REWRITE
     > .endif
     > ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
-    WIP: gotta figure this out
-    
+
+    ``` bash
+    sudo sed -i -r -e '/^.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS$/I { :a; n; /^.endif$/!ba; a\# added by '"$(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")"'\n.ifdef REQUIRE_PROTOCOL\n    protocol = REQUIRE_PROTOCOL\n.endif\n# end add' -e '}' /etc/exim4/exim4.conf.template
+    ```
+
 1. Add the below to `/etc/exim4/exim4.conf.template` inside the `.ifdef MAIN_TLS_ENABLE` block:
-    
+
     ```
     .ifdef TLS_ON_CONNECT_PORTS
       tls_on_connect_ports = TLS_ON_CONNECT_PORTS
     .endif
     ```
-    
+
     > ```
     > .ifdef MAIN_TLS_ENABLE
     > .ifdef TLS_ON_CONNECT_PORTS
     >     tls_on_connect_ports = TLS_ON_CONNECT_PORTS
     > .endif
     > ```
-        
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
     sudo sed -i -r -e "/\.ifdef MAIN_TLS_ENABLE/ a # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n.ifdef TLS_ON_CONNECT_PORTS\n    tls_on_connect_ports = TLS_ON_CONNECT_PORTS\n.endif\n# end add" /etc/exim4/exim4.conf.template
     ```
-
-1. Update `exim4` configuration to use TLS and then restart the service:
     
+1. Update exim4 configuration to use TLS and then restart the service:
+
     ``` bash
     sudo update-exim4.conf
     sudo service exim4 restart
     ```
-    
+
 1. If you're using [UFW](#ufw-uncomplicated-firewall), you'll need to allow outbound traffic on 465. To do this we'll create a custom UFW application profile and then enable it. Create the file `/etc/ufw/applications.d/smtptls`, add this, then run `ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'`:
 
     ```
     [SMTPTLS]
-    title=SMTP through TLS 
+    title=SMTP through TLS
     description=This opens up the TLS port 465 for use with SMPT to send e-mails.
     ports=465/tcp
     ```
-    
+
     [For the lazy](#editing-configuration-files---for-the-lazy):
-    
+
     ``` bash
     cat << EOF | sudo tee /etc/ufw/applications.d/smtptls
     [SMTPTLS]
-    title=SMTP through TLS 
+    title=SMTP through TLS
     description=This opens up the TLS port 465 for use with SMPT to send e-mails.
     ports=465/tcp
     EOF
-    ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'
+
+    sudo ufw allow out smtptls comment 'open TLS port 465 for use with SMPT to send e-mails'
     ```
 
 1. Add some mail aliases so we can send e-mails to local accounts by adding lines like this to `/etc/aliases`:
-    
+
     ```
     user1: user1@gmail.com
     user2: user2@gmail.com
     ...
     ```
-    
+
     You'll need to add all the local accounts that exist on your server.
 
 1. Test your setup:
@@ -2351,11 +2605,11 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
 
 ([Table of Contents](#table-of-contents))
 
-### Separate `iptables` Log File
+### Separate iptables Log File
 
 #### Why
 
-There will come a time when you'll need to look through your `iptables` logs. Having all the `iptables` logs go to their own file will make it a lot easier to find what you're looking for.
+There will come a time when you'll need to look through your iptables logs. Having all the iptables logs go to their own file will make it a lot easier to find what you're looking for.
 
 #### References
 
@@ -2365,9 +2619,9 @@ There will come a time when you'll need to look through your `iptables` logs. Ha
 
 #### Steps
 
-1. The first step is by telling your firewall to prefix all log entries with some unique string. If you're using `iptables` directly, you would do something like `--log-prefix "[IPTABLES] "` for all the rules. We took care of this in step [step 4 of installing `psad`](#psad_step4).
+1. The first step is by telling your firewall to prefix all log entries with some unique string. If you're using iptables directly, you would do something like `--log-prefix "[IPTABLES] "` for all the rules. We took care of this in step [step 4 of installing psad](#psad_step4).
 
-1. After you've added a prefix to the firewall logs, we need to tell `rsyslog` to send those lines to its own file. Do this by creating the file `/etc/rsyslog.d/10-iptables.conf` and adding this:
+1. After you've added a prefix to the firewall logs, we need to tell rsyslog to send those lines to its own file. Do this by creating the file `/etc/rsyslog.d/10-iptables.conf` and adding this:
 
     ```
     :msg, contains, "[IPTABLES] " /var/log/iptables.log
@@ -2380,16 +2634,33 @@ There will come a time when you'll need to look through your `iptables` logs. Ha
     :msg, contains, "[IPTABLES] " -/var/log/iptables.log
     & stop
     ```
-    
-    **Note**: Remember to change the prefix to whatever you use.
 
-1. Since we're logging firewall messages to a different file, we need to tell `psad` where the new file is. Edit `/etc/psad/psad.conf` and set `IPT_SYSLOG_FILE` to the path of the log file. For example:
+    **Note**: Remember to change the prefix to whatever you use.
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+
+    ``` bash
+    cat << EOF | sudo tee /etc/rsyslog.d/10-iptables.conf
+    :msg, contains, "[IPTABLES] " /var/log/iptables.log
+    & stop
+    EOF
+    ```
+
+1. Since we're logging firewall messages to a different file, we need to tell psad where the new file is. Edit `/etc/psad/psad.conf` and set `IPT_SYSLOG_FILE` to the path of the log file. For example:
 
     ```
     IPT_SYSLOG_FILE /var/log/iptables.log;
     ```
+    
+    **Note**: Remember to change the prefix to whatever you use.
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s/^(IPT_SYSLOG_FILE\s+)([^;]+)(;)$/# \1\2\3       # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1\/var\/log\/iptables.log\3       # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/psad/psad.conf 
+    ```
 
-1. Restart `psad` and `rsyslog` to activate the changes (or reboot):
+1. Restart psad and rsyslog to activate the changes (or reboot):
 
     ``` bash
     sudo psad -R
@@ -2398,7 +2669,7 @@ There will come a time when you'll need to look through your `iptables` logs. Ha
     sudo service rsyslog restart
     ```
 
-1. The last thing we have to do is tell `logrotate` to rotate the new log file so it doesn't get to big and fill up our disk. Create the file `/etc/logrotate.d/iptables` and add this:
+1. The last thing we have to do is tell logrotate to rotate the new log file so it doesn't get to big and fill up our disk. Create the file `/etc/logrotate.d/iptables` and add this:
 
     ```
     /var/log/iptables.log
@@ -2414,7 +2685,26 @@ There will come a time when you'll need to look through your `iptables` logs. Ha
         endscript
     }
     ```
-   
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    cat << EOF | sudo tee /etc/logrotate.d/iptables
+    /var/log/iptables.log
+    {
+        rotate 7
+        daily
+        missingok
+        notifempty
+        delaycompress
+        compress
+        postrotate
+            invoke-rc.d rsyslog rotate > /dev/null
+        endscript
+    }
+    EOF
+    ```
+
 ([Table of Contents](#table-of-contents))
 
 ## Left Over
