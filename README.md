@@ -132,6 +132,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
 - [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] CIS-CAT - https://learn.cisecurity.org/cis-cat-landing-page
+- [ ] debsums - https://blog.sleeplessbeastie.eu/2015/03/02/how-to-verify-installed-packages/
 
 ([Table of Contents](#table-of-contents))
 
