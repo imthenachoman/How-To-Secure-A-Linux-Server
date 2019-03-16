@@ -1175,13 +1175,7 @@ We will use unattended-upgrades to apply **critical security patches**. We can a
     sudo dpkg-reconfigure apt-listchanges
     ```
 
-1. Install apticron:
-
-    ``` bash
-    sudo apt install apticron
-    ```
-
-    The default settings are good enough but you can check them in `/etc/apticron/apticron.conf` if you want to change them. For example, my configuration looks like this:
+1. For apticron, the default settings are good enough but you can check them in `/etc/apticron/apticron.conf` if you want to change them. For example, my configuration looks like this:
 
     > ```
     > EMAIL="root"
