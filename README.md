@@ -130,7 +130,9 @@ There are many guides provided by experts, industry leaders, and the distributio
     - https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
     - https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
-- [ ] Tripwire - https://news.ycombinator.com/item?id=19180856
+- [ ] File/Directory Integrity Monitoring
+    - AIDE
+    - Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] CIS-CAT - https://learn.cisecurity.org/cis-cat-landing-page
 - [ ] debsums - https://blog.sleeplessbeastie.eu/2015/03/02/how-to-verify-installed-packages/
 
@@ -424,7 +426,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 `/etc/ssh/sshd_config` is the default configuration file that the SSH server uses. We will use this file to tell what options the SSH server should use.
 
-#### Goal
+#### Goals
 
 - a secure SSH configuration
 
@@ -584,7 +586,7 @@ Per [Mozilla's OpenSSH guidelines for OpenSSH 6.7+](https://infosec.mozilla.org/
 
 The Diffie-Hellman algorithm is used by SSH to establish a secure connection. The larger the moduli (key size) the stronger the encryption.
 
-#### Goal
+#### Goals
 
 - remove all Diffie-Hellman keys that are less than 3072 bits long
 
@@ -936,7 +938,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 
 To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 
-> When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some file system configuration tweaks, we can change this behavior and improve the security of the system.
+> When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some filesystem configuration tweaks, we can change this behavior and improve the security of the system.
 
 #### Goals
 
@@ -990,7 +992,7 @@ On Linux, PAM is responsible for authentication. There are four tasks to PAM tha
 
 When there is a need to set or change an account password, the password task of PAM handles the request. In this section we will tell PAM's password task to pass the requested new password to libpam-pwquality to make sure it meets our requirements. If the requirements are met it is used/set; if it does not meet the requirements it errors and lets the user know.
 
-#### Goal
+#### Goals
 
 - enforced strong passwords
 
@@ -1208,7 +1210,7 @@ The Linux kernel provides capabilities to monitor and control network traffic. T
 
 You can create rules by explicitly specifying the ports or with application configurations that specify the ports.
 
-#### Goal
+#### Goals
 
  - all network traffic, input and output, blocked except those we explicitly allow
 
@@ -1626,7 +1628,7 @@ But what about the applications/services your server is running, like SSH and Ap
 
 Fail2ban monitors the logs of your applications (like SSH and Apache) to detect and prevent potential intrusions. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span).
 
-#### Goal
+#### Goals
 
 - network monitoring for suspicious activity with automatic banning of offending IPs
 
@@ -1768,6 +1770,8 @@ This sections cover things that are high risk because there is a possibility the
 
 <details><summary>!! PROCEED AT YOUR OWN RISK !!</summary>
 
+([Table of Contents](#table-of-contents))
+
 ### Table of Contents
 
 - [Linux Kernel sysctl Hardening](#linux-kernel-sysctl-hardening)
@@ -1775,6 +1779,8 @@ This sections cover things that are high risk because there is a possibility the
 - [Disable Root Login](#disable-root-login)
 - [Change Default umask](#change-default-umask)
 - [Orphaned Software](#orphaned-software)
+
+([Table of Contents](#table-of-contents))
 
 ### Linux Kernel sysctl Hardening
 
@@ -1981,7 +1987,7 @@ To work around this, you can use the `--force` option for `sulogin`. Some distri
 
 An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
 
-#### Goal
+#### Goals
 
 - locked **root** account that nobody can use to log in as **root**
 
@@ -2163,7 +2169,7 @@ logwatch scans system log files and summarizes them. You can run it directly fro
 
 logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` specifies default options. You can override them via command line arguments.
 
-#### Goal
+#### Goals
 
 - Logwatch configured to send a daily e-mail summary of all of the server's status and logs
 
@@ -2378,6 +2384,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 - long line support for exim4
 
 #### References
+
 - Thanks to [remyabel](https://github.com/remyabel) for figuring out how to get this to work with TLS as documented in [issue #24](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/24) and [pull request #26](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/pull/26).
 - https://wiki.debian.org/Exim
 - https://wiki.debian.org/GmailAndExim4
