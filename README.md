@@ -6,6 +6,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -39,11 +40,13 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
   - [Fail2ban: Application Intrusion Detection And Prevention](#fail2ban-application-intrusion-detection-and-prevention)
-- [The Danger Zone](#the-danger-zone)
 - [The Auditing](#the-auditing)
+  - [AIDE - File/Folder Integrity Monitoring (WIP)](#aide---filefolder-integrity-monitoring-wip)
+  - [ClamAV Antivirus (WIP)](#clamav-antivirus-wip)
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
+- [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
   - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
@@ -1762,9 +1765,15 @@ fail2ban-client set sshd unbanip 192.168.1.100
 
 #### Why
 
+WIP
+
 #### How It Works
 
+WIP
+
 #### Goals
+
+WIP
 
 #### References
 
@@ -1963,9 +1972,13 @@ Every time you make changes to files/folders that AIDE monitors, you will need t
 sudo aideinit -y -f
 ```
 
+([Table of Contents](#table-of-contents))
+
 ### ClamAV Antivirus (WIP)
 
 #### Why
+
+WIP
 
 #### How It Works
 
@@ -1974,6 +1987,8 @@ sudo aideinit -y -f
 - ClamAV-Daemon keeps the `clamd` process running to make scanning faster
 
 #### Goals
+
+WIP
 
 #### Notes
 
@@ -2071,6 +2086,8 @@ sudo aideinit -y -f
 - To scan a directory: `clamscan -r /path/to/folder`.
 - You can use the `-i` switch to only print infected files.
 - Check `clamscan`'s `man` pages for other switches/options.
+
+([Table of Contents](#table-of-contents))
 
 ### logwatch - system log analyzer and reporter
 
