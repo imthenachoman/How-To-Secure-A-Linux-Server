@@ -36,6 +36,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
+  - [More Secure Random Entropy Pool (WIP)](#more-secure-random-entropy-pool-wip)
 - [The Network](#the-network)
   - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
   - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
@@ -1182,6 +1183,40 @@ We will use unattended-upgrades to apply **critical security patches**. We can a
     > EMAIL="root"
     > NOTIFY_NO_UPDATES="1"
     > ```
+
+([Table of Contents](#table-of-contents))
+
+### More Secure Random Entropy Pool (WIP)
+
+#### Why
+
+WIP
+
+#### How It Works
+
+WIP
+
+#### Goals
+
+WIP
+
+#### References
+
+- Thanks to [branneman](https://github.com/branneman) for this idea as submitted in [issue #33](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/33).
+- https://hackaday.com/2017/11/02/what-is-entropy-and-how-do-i-get-more-of-it/
+- https://www.2uo.de/myths-about-urandom
+- https://www.gnu.org/software/hurd/user/tlecarrour/rng-tools.html
+- https://wiki.archlinux.org/index.php/Rng-tools
+
+#### Steps
+
+1. Install rng-tools.
+    
+    On Debian based systems:
+
+    ``` bash
+    sudo apt-get install rng-tools
+    ```
 
 ([Table of Contents](#table-of-contents))
 
