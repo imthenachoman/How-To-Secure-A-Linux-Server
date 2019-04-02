@@ -123,16 +123,12 @@ There are many guides provided by experts, industry leaders, and the distributio
        - https://security.stackexchange.com/questions/29378/comparison-between-apparmor-and-selinux
         - http://www.insanitybit.com/2012/06/01/why-i-like-apparmor-more-than-selinux-5/
 - [ ] disk encryption
-- [ ] Antivirus
 - [ ] Rkhunter and chrootkit
     - http://www.chkrootkit.org/
     - http://rkhunter.sourceforge.net/
     - https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
     - https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/
 - [ ] shipping/backing up logs - https://news.ycombinator.com/item?id=19178681
-- [ ] File/Directory Integrity Monitoring
-    - AIDE
-    - Tripwire - https://news.ycombinator.com/item?id=19180856
 - [ ] CIS-CAT - https://learn.cisecurity.org/cis-cat-landing-page
 - [ ] debsums - https://blog.sleeplessbeastie.eu/2015/03/02/how-to-verify-installed-packages/
 
@@ -1760,6 +1756,529 @@ fail2ban-client set sshd unbanip 192.168.1.100
 
 ([Table of Contents](#table-of-contents))
 
+## The Auditing
+
+### AIDE - File/Folder Integrity Monitoring (WIP)
+
+#### Why
+
+#### How It Works
+
+#### Goals
+
+#### References
+
+- https://aide.github.io/
+- https://www.hiroom2.com/2017/06/09/debian-8-file-integrity-check-with-aide/
+- https://blog.rapid7.com/2017/06/30/how-to-install-and-configure-aide-on-ubuntu-linux/
+- https://www.stephenrlang.com/2016/03/using-aide-for-file-integrity-monitoring-fim-on-ubuntu/
+- https://www.howtoforge.com/how-to-configure-the-aide-advanced-intrusion-detection-environment-file-integrity-scanner-for-your-website
+- https://www.tecmint.com/check-integrity-of-file-and-directory-using-aide-in-linux/
+- https://www.cyberciti.biz/faq/debian-ubuntu-linux-software-integrity-checking-with-aide/
+
+#### Steps
+
+1. Install AIDE.
+
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install aide
+    ```
+    
+1. Make a backup of ClamAV's defaults file:
+
+    ``` bash
+    sudo cp -p /etc/default/aide /etc/default/aide.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. Go through `/etc/default/aide` and set AIDE's defaults per your requirements. If you want AIDE to run daily and e-mail you, be sure to set `CRON_DAILY_RUN` to `yes`.
+
+1. Make a backup of ClamAV's configuration files:
+
+    ``` bash
+    sudo cp -pr /etc/aide /etc/aide.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. On Debian based systems:
+
+    - ClamAV's configuration files are in `/etc/aide/aide.conf.d/`.
+    - You'll want to go through ClamAV's documentation and the configuration files in to set them per your requirements.
+    - If you want new settings, to monitor a new folder for example, you'll want to add them to `/etc/aide/aide.conf` or `/etc/aide/aide.conf.d/`.
+    - Take a backup of the stock configuration files: `sudo cp -pr /etc/aide /etc/aide.$(date +"%Y%m%d%H%M%S")`.
+
+1. Create a new database, and install it.
+    
+    On Debian based systems:
+
+    ``` bash
+    sudo aideinit
+    ```
+    
+    > ```
+    > Running aide --init...
+    > Start timestamp: 2019-04-01 21:23:37 -0400 (AIDE 0.16)
+    > AIDE initialized database at /var/lib/aide/aide.db.new
+    > Verbose level: 6
+    > 
+    > Number of entries:      25973
+    > 
+    > ---------------------------------------------------
+    > The attributes of the (uncompressed) database(s):
+    > ---------------------------------------------------
+    > 
+    > /var/lib/aide/aide.db.new
+    >   RMD160   : moyQ1YskQQbidX+Lusv3g2wf1gQ=
+    >   TIGER    : 7WoOgCrXzSpDrlO6I3PyXPj1gRiaMSeo
+    >   SHA256   : gVx8Fp7r3800WF2aeXl+/KHCzfGsNi7O
+    >              g16VTPpIfYQ=
+    >   SHA512   : GYfa0DJwWgMLl4Goo5VFVOhu4BphXCo3
+    >              rZnk49PYztwu50XjaAvsVuTjJY5uIYrG
+    >              tV+jt3ELvwFzGefq4ZBNMg==
+    >   CRC32    : /cusZw==
+    >   HAVAL    : E/i5ceF3YTjwenBfyxHEsy9Kzu35VTf7
+    >              CPGQSW4tl14=
+    >   GOST     : n5Ityzxey9/1jIs7LMc08SULF1sLBFUc
+    >              aMv7Oby604A=
+    > 
+    > 
+    > End timestamp: 2019-04-01 21:24:45 -0400 (run time: 1m 8s)
+    > ```
+
+1. Test everything works with no changes.
+
+    On Debian based systems:
+
+    ``` bash
+    sudo aide.wrapper --check
+    ```
+    
+    > ```
+    > Start timestamp: 2019-04-01 21:24:45 -0400 (AIDE 0.16)
+    > AIDE found NO differences between database and filesystem. Looks okay!!
+    > Verbose level: 6
+    > 
+    > Number of entries:      25973
+    > 
+    > ---------------------------------------------------
+    > The attributes of the (uncompressed) database(s):
+    > ---------------------------------------------------
+    > 
+    > /var/lib/aide/aide.db
+    >   RMD160   : moyQ1YskQQbidX+Lusv3g2wf1gQ=
+    >   TIGER    : 7WoOgCrXzSpDrlO6I3PyXPj1gRiaMSeo
+    >   SHA256   : gVx8Fp7r3800WF2aeXl+/KHCzfGsNi7O
+    >              g16VTPpIfYQ=
+    >   SHA512   : GYfa0DJwWgMLl4Goo5VFVOhu4BphXCo3
+    >              rZnk49PYztwu50XjaAvsVuTjJY5uIYrG
+    >              tV+jt3ELvwFzGefq4ZBNMg==
+    >   CRC32    : /cusZw==
+    >   HAVAL    : E/i5ceF3YTjwenBfyxHEsy9Kzu35VTf7
+    >              CPGQSW4tl14=
+    >   GOST     : n5Ityzxey9/1jIs7LMc08SULF1sLBFUc
+    >              aMv7Oby604A=
+    > 
+    > 
+    > End timestamp: 2019-04-01 21:26:03 -0400 (run time: 1m 18s)
+    > ```
+
+1. Test everything works after making some changes.
+
+    On Debian based systems:
+
+    ``` bash
+    sudo touch /etc/test.sh
+    sudo touch /root/test.sh
+    
+    sudo aide.wrapper --check
+    
+    sudo rm /etc/test.sh
+    sudo rm /root/test.sh
+    
+    sudo aideinit -y -f
+    ```
+    
+    > ```
+    > Start timestamp: 2019-04-01 21:37:37 -0400 (AIDE 0.16)
+    > AIDE found differences between database and filesystem!!
+    > Verbose level: 6
+    > 
+    > Summary:
+    >   Total number of entries:      25972
+    >   Added entries:                2
+    >   Removed entries:              0
+    >   Changed entries:              1
+    > 
+    > ---------------------------------------------------
+    > Added entries:
+    > ---------------------------------------------------
+    > 
+    > f++++++++++++++++: /etc/test.sh
+    > f++++++++++++++++: /root/test.sh
+    > 
+    > ---------------------------------------------------
+    > Changed entries:
+    > ---------------------------------------------------
+    > 
+    > d =.... mc.. .. .: /root
+    > 
+    > ---------------------------------------------------
+    > Detailed information about changes:
+    > ---------------------------------------------------
+    > 
+    > Directory: /root
+    >   Mtime    : 2019-04-01 21:35:07 -0400        | 2019-04-01 21:37:36 -0400
+    >   Ctime    : 2019-04-01 21:35:07 -0400        | 2019-04-01 21:37:36 -0400
+    > 
+    > 
+    > ---------------------------------------------------
+    > The attributes of the (uncompressed) database(s):
+    > ---------------------------------------------------
+    > 
+    > /var/lib/aide/aide.db
+    >   RMD160   : qF9WmKaf2PptjKnhcr9z4ueCPTY=
+    >   TIGER    : zMo7MvvYJcq1hzvTQLPMW7ALeFiyEqv+
+    >   SHA256   : LSLLVjjV6r8vlSxlbAbbEsPcQUB48SgP
+    >              pdVqEn6ZNbQ=
+    >   SHA512   : Qc4U7+ZAWCcitapGhJ1IrXCLGCf1IKZl
+    >              02KYL1gaZ0Fm4dc7xLqjiquWDMSEbwzW
+    >              oz49NCquqGz5jpMIUy7UxA==
+    >   CRC32    : z8ChEA==
+    >   HAVAL    : YapzS+/cdDwLj3kHJEq8fufLp3DPKZDg
+    >              U12KCSkrO7Y=
+    >   GOST     : 74sLV4HkTig+GJhokvxZQm7CJD/NR0mG
+    >              6jV7zdt5AXQ=
+    > 
+    > 
+    > End timestamp: 2019-04-01 21:38:50 -0400 (run time: 1m 13s)
+    > ```
+    
+1. That's it. If you set `CRON_DAILY_RUN` to `yes` in `/etc/default/aide` then cron will execute `/etc/cron.daily/aide` every day and e-mail you the output.
+
+#### Updating The Database
+
+Every time you make changes to files/folders that AIDE monitors, you will need to update the database to capture those changes. To do that on Debian based systems:
+
+``` bash
+sudo aideinit -y -f
+```
+
+### ClamAV Antivirus (WIP)
+
+#### Why
+
+#### How It Works
+
+- ClamAV is a virus scanner
+- ClamAV-Freshclam is a service that keeps the virus definitions updated
+- ClamAV-Daemon keeps the `clamd` process running to make scanning faster
+
+#### Goals
+
+#### Notes
+
+- These instructions **do not** tell you how to enable the ClamAV daemon service to ensure `clamd` is running all the time. `clamd` is only if you're running a mail server and does not provide real-time monitoring of files. Instead, you'd want to scan files manually or on a schedule.
+
+#### References
+
+- https://www.clamav.net/documents/installation-on-debian-and-ubuntu-linux-distributions
+- https://wiki.debian.org/ClamAV
+- https://www.osradar.com/install-clamav-debian-9-ubuntu-18/
+- https://www.lisenet.com/2014/automate-clamav-to-perform-daily-system-scan-and-send-email-notifications-on-linux/
+- https://www.howtoforge.com/tutorial/configure-clamav-to-scan-and-notify-virus-and-malware/
+- https://serverfault.com/questions/741299/is-there-a-way-to-keep-clamav-updated-on-debian-8
+- https://askubuntu.com/questions/250290/how-do-i-scan-for-viruses-with-clamav
+- https://ngothang.com/how-to-install-clamav-and-configure-daily-scanning-on-centos/
+
+#### Steps
+
+1. Install ClamAV.
+
+    On Debian based systems:
+
+    ``` bash
+    sudo apt install clamav clamav-freshclam clamav-daemon
+    ```
+
+1. Make a backup of `clamav-freshclam`'s configuration file `/etc/clamav/freshclam.conf`:
+
+    ``` bash
+    sudo cp --preserve /etc/clamav/freshclam.conf /etc/clamav/freshclam.conf.$(date +"%Y%m%d%H%M%S")
+    ```
+    
+1. `clamav-freshclam`'s default settings are probably good enough but if you want to change them, you can either edit the file `/etc/clamav/freshclam.conf` or use `dpkg-reconfigure`:
+
+    ``` bash
+    sudo dpkg-reconfigure clamav-freshclam
+    ```
+    
+    **Note**: The default settings will update the definitions 24 times in a day. To change the interval, check the `Checks` setting in `/etc/clamav/freshclam.conf` or use `dpkg-reconfigure`.
+
+1. Start the `clamav-freshclam` service:
+
+    ``` bash
+    sudo service clamav-freshclam start
+    ```
+    
+1. You can make sure `clamav-freshclam` running:
+
+    ``` bash
+    sudo service clamav-freshclam status
+    ```
+    
+    > ```
+    > ● clamav-freshclam.service - ClamAV virus database updater
+    >    Loaded: loaded (/lib/systemd/system/clamav-freshclam.service; enabled; vendor preset: enabled)   Active: active (running) since Sat 2019-03-16 22:57:07 EDT; 2min 13s ago
+    >      Docs: man:freshclam(1)
+    >            man:freshclam.conf(5)
+    >            https://www.clamav.net/documents
+    >  Main PID: 1288 (freshclam)
+    >    CGroup: /system.slice/clamav-freshclam.service
+    >            └─1288 /usr/bin/freshclam -d --foreground=true
+    > 
+    > Mar 16 22:57:08 host freshclam[1288]: Sat Mar 16 22:57:08 2019 -> ^Local version: 0.100.2 Recommended version: 0.101.1
+    > Mar 16 22:57:08 host freshclam[1288]: Sat Mar 16 22:57:08 2019 -> DON'T PANIC! Read https://www.clamav.net/documents/upgrading-clamav
+    > Mar 16 22:57:15 host freshclam[1288]: Sat Mar 16 22:57:15 2019 -> Downloading main.cvd [100%]
+    > Mar 16 22:57:38 host freshclam[1288]: Sat Mar 16 22:57:38 2019 -> main.cvd updated (version: 58, sigs: 4566249, f-level: 60, builder: sigmgr)
+    > Mar 16 22:57:40 host freshclam[1288]: Sat Mar 16 22:57:40 2019 -> Downloading daily.cvd [100%]
+    > Mar 16 22:58:13 host freshclam[1288]: Sat Mar 16 22:58:13 2019 -> daily.cvd updated (version: 25390, sigs: 1520006, f-level: 63, builder: raynman)
+    > Mar 16 22:58:14 host freshclam[1288]: Sat Mar 16 22:58:14 2019 -> Downloading bytecode.cvd [100%]
+    > Mar 16 22:58:16 host freshclam[1288]: Sat Mar 16 22:58:16 2019 -> bytecode.cvd updated (version: 328, sigs: 94, f-level: 63, builder: neo)
+    > Mar 16 22:58:24 host freshclam[1288]: Sat Mar 16 22:58:24 2019 -> Database updated (6086349 signatures) from db.local.clamav.net (IP: 104.16.219.84)
+    > Mar 16 22:58:24 host freshclam[1288]: Sat Mar 16 22:58:24 2019 -> ^Clamd was NOT notified: Can't connect to clamd through /var/run/clamav/clamd.ctl: No such file or directory
+    > ```
+    
+    **Note**: Don't worry about that `Local version` line. Check https://serverfault.com/questions/741299/is-there-a-way-to-keep-clamav-updated-on-debian-8 for more details.
+
+1. Make a backup of `clamav-daemon`'s configuration file `/etc/clamav/clamd.conf`:
+
+    ``` bash
+    sudo cp --preserve /etc/clamav/clamd.conf /etc/clamav/clamd.conf.$(date +"%Y%m%d%H%M%S")
+    ```
+    
+1. You can change `clamav-daemon`'s settings by editing the file `/etc/clamav/clamd.conf` or useing `dpkg-reconfigure`:
+
+    ``` bash
+    sudo dpkg-reconfigure clamav-daemon
+    ```
+
+#### Scanning Files/Folders
+
+- To scan files/folders use the `clamscan` program.
+- `clamscan` runs as the user it is executed as so it needs read permissions to the files/folders it is scanning. 
+- Using `clamscan` as `root` is dangerous because if a file is in fact a virus there is risk that it could use the root privileges.
+- To scan a file: `clamscan /path/to/file`.
+- To scan a directory: `clamscan -r /path/to/folder`.
+- You can use the `-i` switch to only print infected files.
+- Check `clamscan`'s `man` pages for other switches/options.
+
+### logwatch - system log analyzer and reporter
+
+#### Why
+
+Your server will be generating a lot of logs that may contain important information. Unless you plan on checking your server everyday, you'll want a way to get e-mail summary of your server's logs. To accomplish this we'll use [logwatch](https://sourceforge.net/projects/logwatch/).
+
+#### How It Works
+
+logwatch scans system log files and summarizes them. You can run it directly from the command line or schedule it to run on a recurring schedule. logwatch uses service files to know how to read/summarize a log file. You can see all of the stock service files in `/usr/share/logwatch/scripts/services`.
+
+logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` specifies default options. You can override them via command line arguments.
+
+#### Goals
+
+- Logwatch configured to send a daily e-mail summary of all of the server's status and logs
+
+#### Notes
+
+- Your server will need to be able to send e-mails for this to work
+- The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+
+#### References
+
+- Thanks to [amacheema](https://github.com/amacheema) for fixing some issues with the steps and letting me know of a long line bug with exim4 as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
+- https://sourceforge.net/projects/logwatch/
+- https://www.digitalocean.com/community/tutorials/how-to-install-and-use-logwatch-log-analyzer-and-reporter-on-a-vps
+
+#### Steps
+
+1. Install logwatch.
+
+    On Debian based systems:
+
+    ``` bash
+    sudo apt install logwatch
+    ```
+
+1. To see a sample of what logwatch collects you can run it directly:
+
+    ``` bash
+    sudo /usr/sbin/logwatch --output stdout --format text --range yesterday --service all
+    ```
+
+    > ```
+    > 
+    >  ################### Logwatch 7.4.3 (12/07/16) ####################
+    >         Processing Initiated: Mon Mar  4 00:05:50 2019
+    >         Date Range Processed: yesterday
+    >                               ( 2019-Mar-03 )
+    >                               Period is day.
+    >         Detail Level of Output: 5
+    >         Type of Output/Format: stdout / text
+    >         Logfiles for Host: host
+    >  ##################################################################
+    > 
+    >  --------------------- Cron Begin ------------------------
+    > ...
+    > ...
+    >  ---------------------- Disk Space End -------------------------
+    > 
+    > 
+    >  ###################### Logwatch End #########################
+    > ```
+
+1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
+
+1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
+
+    ``` bash
+    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch.$(date +"%Y%m%d%H%M%S")
+    sudo chmod -x /etc/cron.daily/00logwatch.*
+    ```
+
+1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
+
+    ```
+    /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
+    ```
+
+    > ```
+    > #!/bin/bash
+    > 
+    > #Check if removed-but-not-purged
+    > test -x /usr/share/logwatch/scripts/logwatch.pl || exit 0
+    > 
+    > #execute
+    > /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
+    > 
+    > #Note: It's possible to force the recipient in above command
+    > #Just pass --mailto address@a.com instead of --output mail
+    > ```
+
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    sudo sed -i -r -e "s,^($(sudo which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(sudo which logwatch) --output mail --format html --mailto root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
+    ```
+
+1. You can test the cron job by executing it:
+
+    ``` bash
+    sudo /etc/cron.daily/00logwatch
+    ```
+    
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+
+([Table of Contents](#table-of-contents))
+
+### ss - Seeing Ports Your Server Is Listening On
+
+#### Why
+
+Ports are how applications, services, and processes communicate with each other -- either locally within your server or with other devices on the network. When you have an application or service (like SSH or Apache) running on your server, they listen for requests on specific ports.
+
+Obviously we don't want your server listening on ports we don't know about. We'll use `ss` to see all the ports that services are listening on. This will help us track down and stop rogue, potentially dangerous, services.
+
+#### Goals
+
+- find out non-localhost what ports are open and listening for connections
+
+#### References
+
+- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
+- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egs1rev/
+- https://www.tecmint.com/find-open-ports-in-linux/
+- `man ss`
+
+#### Steps
+
+1. To see the all the ports listening for traffic:
+
+    ``` bash
+    sudo ss -lntup
+    ```
+    
+    > ```
+    > Netid  State      Recv-Q Send-Q     Local Address:Port     Peer Address:Port
+    > udp    UNCONN     0      0                      *:68                  *:*        users:(("dhclient",pid=389,fd=6))
+    > tcp    LISTEN     0      128                    *:22                  *:*        users:(("sshd",pid=4390,fd=3))
+    > tcp    LISTEN     0      128                   :::22                 :::*        users:(("sshd",pid=4390,fd=4))
+    > ```
+    
+    **Switch Explanations**:
+    - `l` = display listening sockets
+    - `n` = do now try to resolve service names
+    - `t` = display TCP sockets
+    - `u` = display UDP sockets
+    - `p` = show process information
+
+1. If you see anything suspicious, like a port you're not aware of or a process you don't know, investigate and remediate as necessary.
+
+([Table of Contents](#table-of-contents))
+
+### Lynis - Linux Security Auditing
+
+#### Why
+
+From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
+
+> Lynis is a battle-tested security tool for systems running Linux, macOS, or Unix-based operating system. It performs an extensive health scan of your systems to support system hardening and compliance testing.
+
+#### Goals
+
+- Lynis installed
+
+#### Notes
+
+- CISOFY offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specific installation instructions.
+
+#### References
+
+- https://cisofy.com/documentation/lynis/get-started/
+- https://packages.cisofy.com/community/#debian-ubuntu
+- https://thelinuxcode.com/audit-lynis-ubuntu-server/
+- https://www.vultr.com/docs/install-lynis-on-debian-8
+
+#### Steps
+
+1. Install lynis. https://cisofy.com/lynis/#installation has detailed instructions on how to install it for your distribution.
+
+    On Debian based systems, using CISOFY's community software repository:
+
+    ``` bash
+    sudo apt install apt-transport-https ca-certificates host
+    sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
+    sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
+    sudo apt update
+    sudo apt install lynis host
+    ```
+
+1. Update it:
+
+    ``` bash
+    sudo lynis update info
+    ```
+
+1. Run a security audit:
+
+    ``` bash
+    sudo lynis audit system
+    ```
+
+    This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
+
+([Table of Contents](#table-of-contents))
+
 ## The Danger Zone
 
 ### Proceed At Your Own Risk
@@ -2152,215 +2671,6 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 </details>
 
 </details><br />
-
-([Table of Contents](#table-of-contents))
-
-## The Auditing
-
-### logwatch - system log analyzer and reporter
-
-#### Why
-
-Your server will be generating a lot of logs that may contain important information. Unless you plan on checking your server everyday, you'll want a way to get e-mail summary of your server's logs. To accomplish this we'll use [logwatch](https://sourceforge.net/projects/logwatch/).
-
-#### How It Works
-
-logwatch scans system log files and summarizes them. You can run it directly from the command line or schedule it to run on a recurring schedule. logwatch uses service files to know how to read/summarize a log file. You can see all of the stock service files in `/usr/share/logwatch/scripts/services`.
-
-logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` specifies default options. You can override them via command line arguments.
-
-#### Goals
-
-- Logwatch configured to send a daily e-mail summary of all of the server's status and logs
-
-#### Notes
-
-- Your server will need to be able to send e-mails for this to work
-- The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
-- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
-
-#### References
-
-- Thanks to [amacheema](https://github.com/amacheema) for fixing some issues with the steps and letting me know of a long line bug with exim4 as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29).
-- https://sourceforge.net/projects/logwatch/
-- https://www.digitalocean.com/community/tutorials/how-to-install-and-use-logwatch-log-analyzer-and-reporter-on-a-vps
-
-#### Steps
-
-1. Install logwatch.
-
-    On Debian based systems:
-
-    ``` bash
-    sudo apt install logwatch
-    ```
-
-1. To see a sample of what logwatch collects you can run it directly:
-
-    ``` bash
-    sudo /usr/sbin/logwatch --output stdout --format text --range yesterday --service all
-    ```
-
-    > ```
-    > 
-    >  ################### Logwatch 7.4.3 (12/07/16) ####################
-    >         Processing Initiated: Mon Mar  4 00:05:50 2019
-    >         Date Range Processed: yesterday
-    >                               ( 2019-Mar-03 )
-    >                               Period is day.
-    >         Detail Level of Output: 5
-    >         Type of Output/Format: stdout / text
-    >         Logfiles for Host: host
-    >  ##################################################################
-    > 
-    >  --------------------- Cron Begin ------------------------
-    > ...
-    > ...
-    >  ---------------------- Disk Space End -------------------------
-    > 
-    > 
-    >  ###################### Logwatch End #########################
-    > ```
-
-1. Go through logwatch's self-documented configuration file `/usr/share/logwatch/default.conf/logwatch.conf` before continuing. There is no need to change anything here but pay special attention to the `Output`, `Format`, `MailTo`, `Range`, and `Service` as those are the ones we'll be using. For our purposes, instead of specifying our options in the configuration file, we will pass them as command line arguments in the daily cron job that executes logwatch. That way, if the configuration file is ever modified (e.g. during an update), our options will still be there.
-
-1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
-
-    ``` bash
-    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch.$(date +"%Y%m%d%H%M%S")
-    sudo chmod -x /etc/cron.daily/00logwatch.*
-    ```
-
-1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
-
-    ```
-    /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
-    ```
-
-    > ```
-    > #!/bin/bash
-    > 
-    > #Check if removed-but-not-purged
-    > test -x /usr/share/logwatch/scripts/logwatch.pl || exit 0
-    > 
-    > #execute
-    > /usr/sbin/logwatch --output mail --format html --mailto root --range yesterday --service all
-    > 
-    > #Note: It's possible to force the recipient in above command
-    > #Just pass --mailto address@a.com instead of --output mail
-    > ```
-
-    [For the lazy](#editing-configuration-files---for-the-lazy):
-    
-    ``` bash
-    sudo sed -i -r -e "s,^($(sudo which logwatch).*?),# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n$(sudo which logwatch) --output mail --format html --mailto root --range yesterday --service all         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")," /etc/cron.daily/00logwatch
-    ```
-
-1. You can test the cron job by executing it:
-
-    ``` bash
-    sudo /etc/cron.daily/00logwatch
-    ```
-    
-    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
-
-([Table of Contents](#table-of-contents))
-
-### ss - Seeing Ports Your Server Is Listening On
-
-#### Why
-
-Ports are how applications, services, and processes communicate with each other -- either locally within your server or with other devices on the network. When you have an application or service (like SSH or Apache) running on your server, they listen for requests on specific ports.
-
-Obviously we don't want your server listening on ports we don't know about. We'll use `ss` to see all the ports that services are listening on. This will help us track down and stop rogue, potentially dangerous, services.
-
-#### Goals
-
-- find out non-localhost what ports are open and listening for connections
-
-#### References
-
-- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egrib6o/
-- https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/egs1rev/
-- https://www.tecmint.com/find-open-ports-in-linux/
-- `man ss`
-
-#### Steps
-
-1. To see the all the ports listening for traffic:
-
-    ``` bash
-    sudo ss -lntup
-    ```
-    
-    > ```
-    > Netid  State      Recv-Q Send-Q     Local Address:Port     Peer Address:Port
-    > udp    UNCONN     0      0                      *:68                  *:*        users:(("dhclient",pid=389,fd=6))
-    > tcp    LISTEN     0      128                    *:22                  *:*        users:(("sshd",pid=4390,fd=3))
-    > tcp    LISTEN     0      128                   :::22                 :::*        users:(("sshd",pid=4390,fd=4))
-    > ```
-    
-    **Switch Explanations**:
-    - `l` = display listening sockets
-    - `n` = do now try to resolve service names
-    - `t` = display TCP sockets
-    - `u` = display UDP sockets
-    - `p` = show process information
-
-1. If you see anything suspicious, like a port you're not aware of or a process you don't know, investigate and remediate as necessary.
-
-([Table of Contents](#table-of-contents))
-
-### Lynis - Linux Security Auditing
-
-#### Why
-
-From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
-
-> Lynis is a battle-tested security tool for systems running Linux, macOS, or Unix-based operating system. It performs an extensive health scan of your systems to support system hardening and compliance testing.
-
-#### Goals
-
-- Lynis installed
-
-#### Notes
-
-- CISOFY offers packages for many distributions. Check https://packages.cisofy.com/ for distribution specific installation instructions.
-
-#### References
-
-- https://cisofy.com/documentation/lynis/get-started/
-- https://packages.cisofy.com/community/#debian-ubuntu
-- https://thelinuxcode.com/audit-lynis-ubuntu-server/
-- https://www.vultr.com/docs/install-lynis-on-debian-8
-
-#### Steps
-
-1. Install lynis. https://cisofy.com/lynis/#installation has detailed instructions on how to install it for your distribution.
-
-    On Debian based systems, using CISOFY's community software repository:
-
-    ``` bash
-    sudo apt install apt-transport-https ca-certificates host
-    sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
-    sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
-    sudo apt update
-    sudo apt install lynis host
-    ```
-
-1. Update it:
-
-    ``` bash
-    sudo lynis update info
-    ```
-
-1. Run a security audit:
-
-    ``` bash
-    sudo lynis audit system
-    ```
-
-    This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
 
 ([Table of Contents](#table-of-contents))
 
