@@ -6,7 +6,6 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -38,12 +37,14 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
   - [More Secure Random Entropy Pool (WIP)](#more-secure-random-entropy-pool-wip)
 - [The Network](#the-network)
-  - [UFW: Uncomplicated Firewall](#ufw-uncomplicated-firewall)
-  - [PSAD: iptables Intrusion Detection And Prevention](#psad-iptables-intrusion-detection-and-prevention)
-  - [Fail2ban: Application Intrusion Detection And Prevention](#fail2ban-application-intrusion-detection-and-prevention)
+  - [Firewall With UFW (Uncomplicated Firewall)](#firewall-with-ufw-uncomplicated-firewall)
+  - [iptables Intrusion Detection And Prevention with PSAD](#iptables-intrusion-detection-and-prevention-with-psad)
+  - [Application Intrusion Detection And Prevention With Fail2Ban](#application-intrusion-detection-and-prevention-with-fail2ban)
 - [The Auditing](#the-auditing)
-  - [AIDE - File/Folder Integrity Monitoring (WIP)](#aide---filefolder-integrity-monitoring-wip)
-  - [ClamAV Antivirus (WIP)](#clamav-antivirus-wip)
+  - [File/Folder Integrity Monitoring With AIDE (WIP)](#filefolder-integrity-monitoring-with-aide-wip)
+  - [Anti-Virus Scanning With ClamAV (WIP)](#anti-virus-scanning-with-clamav-wip)
+  - [Rootkit Detection With Rkhunter (WIP)](#rootkit-detection-with-rkhunter-wip)
+  - [Rootkit Detection With chrootkit (WIP)](#rootkit-detection-with-chrootkit-wip)
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
@@ -1222,7 +1223,7 @@ WIP
 
 ## The Network
 
-### UFW: Uncomplicated Firewall
+### Firewall With UFW (Uncomplicated Firewall)
 
 #### Why
 
@@ -1492,7 +1493,7 @@ sudo ufw allow plexmediaserver
 
 ([Table of Contents](#table-of-contents))
 
-### PSAD: iptables Intrusion Detection And Prevention
+### iptables Intrusion Detection And Prevention with PSAD
 
 #### Why
 
@@ -1650,7 +1651,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 
 ([Table of Contents](#table-of-contents))
 
-### Fail2ban: Application Intrusion Detection And Prevention
+### Application Intrusion Detection And Prevention With Fail2Ban
 
 #### Why
 
@@ -1796,7 +1797,7 @@ fail2ban-client set sshd unbanip 192.168.1.100
 
 ## The Auditing
 
-### AIDE - File/Folder Integrity Monitoring (WIP)
+### File/Folder Integrity Monitoring With AIDE (WIP)
 
 #### Why
 
@@ -2009,7 +2010,7 @@ sudo aideinit -y -f
 
 ([Table of Contents](#table-of-contents))
 
-### ClamAV Antivirus (WIP)
+### Anti-Virus Scanning With ClamAV (WIP)
 
 #### Why
 
@@ -2121,6 +2122,159 @@ WIP
 - To scan a directory: `clamscan -r /path/to/folder`.
 - You can use the `-i` switch to only print infected files.
 - Check `clamscan`'s `man` pages for other switches/options.
+
+([Table of Contents](#table-of-contents))
+
+### Rootkit Detection With Rkhunter (WIP)
+
+#### Why
+
+WIP
+
+#### How It Works
+
+WIP
+
+#### Goals
+
+WIP
+
+#### References
+
+- http://rkhunter.sourceforge.net/
+- https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
+- https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/
+
+#### Steps
+
+1. Install Rkhunter.
+
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install rkhunter
+    ```
+
+1. Make a backup of rkhunter' defaults file:
+
+    ``` bash
+    sudo cp -p /etc/default/rkhunter /etc/default/rkhunter.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. rkhunter's configuration file is `/etc/rkhunter.conf`. Instead of making changes to it, create and use the file `/etc/rkhunter.conf.local` instead:
+
+    ``` bash
+    sudo cp -p /etc/rkhunter.conf /etc/rkhunter.conf.local
+    ```
+    
+1. Go through the configuration file `/etc/rkhunter.conf.local` and set to your requirements. My recommendations:
+
+    |Setting|Note|
+    |--|--|
+    |`UPDATE_MIRRORS=1`||
+    |`MIRRORS_MODE=0`||
+    |`MAIL-ON-WARNING=root`||
+    |`COPY_LOG_ON_ERROR=1`|to save a copy of the log if there is an error|
+    |`PKGMGR=...`|set to the appropriate value per the documentation|
+    |`PHALANX2_DIRTEST=1`|read the documentation for why|
+    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|    
+    |`USE_LOCKING=1`|to prevent issues with rkhunter running multiple times|
+    |`SHOW_SUMMARY_WARNINGS_NUMBER=1`|to see the actual number of warnings found|
+
+1. You want rkhunter to run every day and e-mail you the result. You can write your own script or check https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/ for a sample cron script you can use.
+    
+    On Debian based system, rkhunter comes with cron scripts. To enable them check `/etc/default/rkhunter` or use `dpkg-reconfigure` and say `Yes` to all of the questions:
+    
+    ``` bash
+    sudo dpkg-reconfigure rkhunter
+    ```
+
+1. After you've finished with all of the changes, make sure all the settings are valid:
+
+    ``` bash
+    sudo rkhunter -C
+    ```
+
+1. Update rkhunter and its database:
+
+    ``` bash
+    sudo rkhunter --versioncheck
+    sudo rkhunter --update
+    sudo rkhunter --propupd
+    ```
+
+1. If you want to do a manual scan and see the output:
+
+    ``` bash
+    sudo rkhunter --check
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Rootkit Detection With chrootkit (WIP)
+
+#### Why
+
+WIP
+
+#### How It Works
+
+WIP
+
+#### Goals
+
+WIP
+
+#### References
+
+- http://www.chkrootkit.org/
+- https://www.cyberciti.biz/faq/howto-check-linux-rootkist-with-detectors-software/
+- https://askubuntu.com/questions/258658/eth0-packet-sniffer-sbin-dhclient
+
+#### Steps
+
+1. Install chkrootkit.
+
+    On Debian based systems:
+    
+    ``` bash
+    sudo apt install chkrootkit
+    ```
+
+1. Do a manual scan:
+
+    ``` bash
+    sudo chkrootkit
+    ```
+    
+    > ```
+    > ROOTDIR is `/'
+    > Checking `amd'...                                           not found
+    > Checking `basename'...                                      not infected
+    > Checking `biff'...                                          not found
+    > Checking `chfn'...                                          not infected
+    > Checking `chsh'...                                          not infected
+    > ...
+    > Checking `scalper'...                                       not infected
+    > Checking `slapper'...                                       not infected
+    > Checking `z2'...                                            chklastlog: nothing deleted
+    > Checking `chkutmp'...                                       chkutmp: nothing deleted
+    > Checking `OSX_RSPLUG'...                                    not infected
+    > ```
+
+1. Make a backup of chkrootkit's configuration file `/etc/chkrootkit.conf`:
+
+    ``` bash
+    sudo cp --preserve /etc/chkrootkit.conf /etc/chkrootkit.conf.$(date +"%Y%m%d%H%M%S")
+    ```
+
+1. You want chkrootkit to run every day and e-mail you the result.
+   
+    On Debian based system, chkrootkit comes with cron scripts. To enable them check `/etc/chkrootkit.conf` or use `dpkg-reconfigure` and say `Yes` to the first question:
+    
+    ``` bash
+    sudo dpkg-reconfigure chkrootkit
+    ```
 
 ([Table of Contents](#table-of-contents))
 
