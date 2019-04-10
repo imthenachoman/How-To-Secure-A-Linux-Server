@@ -1831,7 +1831,7 @@ WIP
     sudo apt install aide
     ```
     
-1. Make a backup of ClamAV's defaults file:
+1. Make a backup of AIDE's defaults file:
 
     ``` bash
     sudo cp -p /etc/default/aide /etc/default/aide.$(date +"%Y%m%d%H%M%S")
@@ -1839,7 +1839,7 @@ WIP
 
 1. Go through `/etc/default/aide` and set AIDE's defaults per your requirements. If you want AIDE to run daily and e-mail you, be sure to set `CRON_DAILY_RUN` to `yes`.
 
-1. Make a backup of ClamAV's configuration files:
+1. Make a backup of AIDE's configuration files:
 
     ``` bash
     sudo cp -pr /etc/aide /etc/aide.$(date +"%Y%m%d%H%M%S")
@@ -1847,8 +1847,8 @@ WIP
 
 1. On Debian based systems:
 
-    - ClamAV's configuration files are in `/etc/aide/aide.conf.d/`.
-    - You'll want to go through ClamAV's documentation and the configuration files in to set them per your requirements.
+    - AIDE's configuration files are in `/etc/aide/aide.conf.d/`.
+    - You'll want to go through AIDE's documentation and the configuration files in to set them per your requirements.
     - If you want new settings, to monitor a new folder for example, you'll want to add them to `/etc/aide/aide.conf` or `/etc/aide/aide.conf.d/`.
     - Take a backup of the stock configuration files: `sudo cp -pr /etc/aide /etc/aide.$(date +"%Y%m%d%H%M%S")`.
 
