@@ -50,7 +50,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
-  - [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls)
+  - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
   - [Contacting Me](#contacting-me)
@@ -250,7 +250,7 @@ Where applicable, use the expert install option so you have tighter control of w
   - Creating the initial user accounts
   - Installing core software you'll want like `man`
   - Etc...
-- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls).
+- Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls).
 - I would also recommend you go through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide.
 
 ([Table of Contents](#table-of-contents))
@@ -2298,7 +2298,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
 - Your server will need to be able to send e-mails for this to work
 - The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
-- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls) then we already took care of this in step #7.
 
 #### References
 
@@ -2383,7 +2383,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     sudo /etc/cron.daily/00logwatch
     ```
     
-    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Configure Gmail As MTA With Implicit TLS](#configure-gmail-as-mta-with-implicit-tls) then we already took care of this in step #7.
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls) then we already took care of this in step #7.
 
 ([Table of Contents](#table-of-contents))
 
@@ -2882,7 +2882,7 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 
 ## The Miscellaneous
 
-### Configure Gmail As MTA With Implicit TLS
+### Gmail and Exim4 As MTA With Implicit TLS
 
 #### Why
 
