@@ -1218,6 +1218,7 @@ WIP
     ``` bash
     sudo apt-get install rng-tools
     ```
+To Lazy: sed -i 's/#HRNGDEVICE='/'dev'/'null'/'HRNGDEVICE='/'dev'/'urandom/' /etc/default/rng-tools
 
 ([Table of Contents](#table-of-contents))
 
