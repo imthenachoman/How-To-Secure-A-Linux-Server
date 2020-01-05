@@ -2948,6 +2948,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 1. Add a line like this to `/etc/exim4/passwd.client`
 
     ```
+    smtp.gmail.com:yourAccount@gmail.com:yourPassword
     *.google.com:yourAccount@gmail.com:yourPassword
     ```
 
