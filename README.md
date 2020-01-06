@@ -50,6 +50,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
+  - [SSMTP (Simple Sendmail) with google](#ssmtp)
   - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
@@ -2881,6 +2882,40 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 ([Table of Contents](#table-of-contents))
 
 ## The Miscellaneous
+
+### The Simple way with SSMTP(#ssmtp)
+
+#### Why
+
+Well I will SIMPLIFY this method, to only output email using google mail account (and others). True Simple! :)
+
+    ``` bash
+    #!/bin/bash
+    ###### PLEASE .... EDIT IT...
+    MYEMAIL="mail@gmail.com"
+    PWDEMAIL="plalala"  ## ATTENTION DONT USE Special Chars.. like as SPACE # and some others not all. Feel free to test ;)
+    MAILPROV="smtp.google.com:583"
+    DOMPROV="gmail.com"
+    USERLOC="root"
+    #######
+    apt install -y ssmtp
+    cp -r --preserve /etc/ssmtp /etc/ssmtp.bck
+    echo "AuthUser=$MYEMAIL
+    AuthPass=$PWDEMAIL
+    root=$MYEMAIL
+    mailhub=$MAILPROV
+    hostname=$HOSTNAME
+    FromLineOverride=YES
+    UseTLS=Yes
+    UseSTARTTLS=YES
+    RewriteDomain=$DOMPROV" > /etc/ssmtp/ssmtp.conf
+    echo "$USERLOC:$MYEMAIL:$MAILPROV" >> /etc/ssmtp/revaliases ## USERLOC = root
+    chmod -R 0640 /etc/ssmtp
+    sleep 1
+    echo "Test message from Hardened Linux server using ssmtp" | sendmail -v $MYEMAIL
+    ```
+    
+DONE!! ;)
 
 ### Gmail and Exim4 As MTA With Implicit TLS
 
