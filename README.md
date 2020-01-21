@@ -449,7 +449,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 1. Make a backup of OpenSSH server's configuration file `/etc/ssh/sshd_config` and remove comments to make it easier to read:
 
     ``` bash
-    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ssh/sshd_config /etc/ssh/sshd_config-COPY-$(date +"%Y%m%d%H%M%S")
     sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
     ```
 
@@ -602,7 +602,7 @@ The Diffie-Hellman algorithm is used by SSH to establish a secure connection. Th
 1. Make a backup of SSH's moduli file `/etc/ssh/moduli`:
 
     ``` bash
-    sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ssh/moduli /etc/ssh/moduli-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Remove short moduli:
@@ -721,7 +721,7 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
 1. Make a backup of PAM's SSH configuration file `/etc/pam.d/sshd`:
 
     ``` bash
-    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/pam.d/sshd /etc/pam.d/sshd-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Now we need to enable it as an authentication method for SSH by adding this line to `/etc/pam.d/sshd`:
@@ -798,7 +798,7 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 1. Make a backup of the sudo's configuration file `/etc/sudoers`:
 
     ``` bash
-    sudo cp --preserve /etc/sudoers /etc/sudoers-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/sudoers /etc/sudoers-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Edit sudo's configuration file `/etc/sudoers`:
@@ -850,7 +850,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 1. Make a backup of the NTP client's configuration file `/etc/ntp.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/ntp.conf /etc/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ntp.conf /etc/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
@@ -956,7 +956,7 @@ To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 1. Make a backup of `/etc/fstab`:
 
     ``` bash
-    sudo cp --preserve /etc/fstab /etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/fstab /etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Add this line to `/etc/fstab` to have `/proc` mounted with `hidepid=2`:
@@ -1010,7 +1010,7 @@ When there is a need to set or change an account password, the password task of 
 1. Make a backup of PAM's password configuration file `/etc/pam.d/common-password`:
 
     ``` bash
-    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/pam.d/common-password /etc/pam.d/common-password-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Tell PAM to use libpam-pwquality to enforce strong passwords by editing the file `/etc/pam.d/common-password` and change the line that starts like this:
@@ -1529,7 +1529,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 1. Make a backup of psad's configuration file `/etc/psad/psad.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/psad/psad.conf /etc/psad/psad.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/psad/psad.conf /etc/psad/psad.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Review and update configuration options in `/etc/psad/psad.conf`. Pay special attention to these:
@@ -1549,8 +1549,8 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
     Make backups:
 
     ``` bash
-    sudo cp --preserve /etc/ufw/before.rules /etc/ufw/before.rules-COPY-$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/ufw/before6.rules /etc/ufw/before6.rules-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ufw/before.rules /etc/ufw/before.rules-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ufw/before6.rules /etc/ufw/before6.rules-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
     Edit the files:
@@ -2054,7 +2054,7 @@ WIP
 1. Make a backup of `clamav-freshclam`'s configuration file `/etc/clamav/freshclam.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/clamav/freshclam.conf /etc/clamav/freshclam.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/clamav/freshclam.conf /etc/clamav/freshclam.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
     
 1. `clamav-freshclam`'s default settings are probably good enough but if you want to change them, you can either edit the file `/etc/clamav/freshclam.conf` or use `dpkg-reconfigure`:
@@ -2104,7 +2104,7 @@ WIP
 1. Make a backup of `clamav-daemon`'s configuration file `/etc/clamav/clamd.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/clamav/clamd.conf /etc/clamav/clamd.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/clamav/clamd.conf /etc/clamav/clamd.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
     
 1. You can change `clamav-daemon`'s settings by editing the file `/etc/clamav/clamd.conf` or useing `dpkg-reconfigure`:
@@ -2265,7 +2265,7 @@ WIP
 1. Make a backup of chkrootkit's configuration file `/etc/chkrootkit.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/chkrootkit.conf /etc/chkrootkit.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/chkrootkit.conf /etc/chkrootkit.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. You want chkrootkit to run every day and e-mail you the result.
@@ -2348,7 +2348,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
 
     ``` bash
-    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch-COPY-$(date +"%Y%m%d%H%M%S")
     sudo chmod -x /etc/cron.daily/00logwatch.*
     ```
 
@@ -2666,7 +2666,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 1. Make a backup of GRUB's configuration file `/etc/grub.d/10_linux` that we'll be modifying and unset the execute bit so `update-grub` doesn't try to run it:
 
     ``` bash
-    sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/grub.d/10_linux /etc/grub.d/10_linux-COPY-$(date +"%Y%m%d%H%M%S")
     sudo chmod a-x /etc/grub.d/10_linux.*
     ```
 
@@ -2783,10 +2783,10 @@ In order to explain how umask works I'd have to explain how Linux file/folder pe
 1. Make a backup of files we'll be editing:
 
     ``` bash
-    sudo cp --preserve /etc/profile /etc/profile-COPY-$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc-COPY-$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/login.defs /etc/login.defs-COPY-$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /root/.bashrc /root/.bashrc-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/profile /etc/profile-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/bash.bashrc /etc/bash.bashrc-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/login.defs /etc/login.defs-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /root/.bashrc /root/.bashrc-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Set default umask for **non-root** accounts to **0027** by adding this line to `/etc/profile` and `/etc/bash.bashrc`:
@@ -2942,7 +2942,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 1. Make a backup of `/etc/exim4/passwd.client`:
 
     ``` bash
-    sudo cp --preserve /etc/exim4/passwd.client /etc/exim4/passwd.client-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/exim4/passwd.client /etc/exim4/passwd.client-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Add a line like this to `/etc/exim4/passwd.client`
@@ -3026,7 +3026,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 1. Make a backup of exim4's configuration file `/etc/exim4/exim4.conf.template`:
 
     ``` bash
-    sudo cp --preserve /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Add the below to `/etc/exim4/exim4.conf.template` after the `.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS ... .endif` block:
