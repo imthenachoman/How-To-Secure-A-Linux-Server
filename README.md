@@ -822,6 +822,46 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 
 ([Table of Contents](#table-of-contents))
 
+### Limit Who Can Use su
+
+#### Why
+
+su also lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use su.
+
+#### Goals
+
+- su privileges limited to those who are in a group we specify
+
+#### References
+
+- Thanks to [olavim](https://github.com/olavim) for sharing [this idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/41)
+
+#### Steps
+
+1. Create a group:
+
+    ``` bash
+    sudo groupadd suusers
+    ```
+
+1. Add account(s) to the group:
+
+    ``` bash
+    sudo usermod -a -G suusers user1
+    sudo usermod -a -G suusers user2
+    sudo usermod -a -G suusers  ...
+    ```
+
+    You'll need to do this for every account on your server that needs sudo privileges.
+
+1. Make it so only users in this group can execute `/bin/su`:
+
+    ``` bash
+    sudo dpkg-statoverride --update --add root suusers 4750 /bin/su
+    ```
+
+([Table of Contents](#table-of-contents))
+
 ### NTP Client
 
 #### Why
