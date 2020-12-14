@@ -1208,6 +1208,7 @@ WIP
 - https://www.2uo.de/myths-about-urandom
 - https://www.gnu.org/software/hurd/user/tlecarrour/rng-tools.html
 - https://wiki.archlinux.org/index.php/Rng-tools
+- https://www.howtoforge.com/helping-the-random-number-generator-to-gain-enough-entropy-with-rng-tools-debian-lenny
 
 #### Steps
 
@@ -1218,7 +1219,18 @@ WIP
     ``` bash
     sudo apt-get install rng-tools
     ```
-To Lazy: sed -i 's/#HRNGDEVICE='/'dev'/'null'/'HRNGDEVICE='/'dev'/'urandom/' /etc/default/rng-tools
+
+1. Now we need to set the hardware device used to generate random numbers by adding this to `/etc/default/rng-tools`:
+
+    ```
+    HRNGDEVICE=/dev/urandom
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
+    ```
 
 ([Table of Contents](#table-of-contents))
 
