@@ -266,6 +266,12 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ## The SSH Server
 
+### Important Not Before You Make SSH Changes
+
+It is highly advised you keep a 2nd terminal open to your server **before you make and apply SSH configuration changes**. This way if you lock yourself out of your 1st terminal session, you still have one sesssion connected so you can fix it.
+
+Thank you to [Sonnenbrand](https://github.com/Sonnenbrand) for this [idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/56).
+
 ### SSH Public/Private Keys
 
 #### Why
