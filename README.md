@@ -443,6 +443,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 - https://www.techbrown.com/harden-ssh-secure-linux-vps-server/
 - https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server/660325
 - `man sshd_config`
+- Thanks to [than0s](https://github.com/than0s) for [how to find duplicate settings](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/38).
 
 #### Steps
 
@@ -782,7 +783,7 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 - Your installation may have already done this, or may already have a special group intended for this purpose so check first.
   - Debian creates the sudo group
   - RedHat creates the wheel group
-- See [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39) for a note on some distributions making it so `sudo` does not require a password. 
+- See [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39) for a note on some distributions making it so `sudo` does not require a password. Thanks to [sbrl](https://github.com/sbrl) for sharing.
 
 #### Steps
 
@@ -988,7 +989,7 @@ To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 
 > When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some filesystem configuration tweaks, we can change this behavior and improve the security of the system.
 
-**Note**: This may break on some `systemd` systems. Please see [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37) for more information.
+**Note**: This may break on some `systemd` systems. Please see [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37) for more information. Thanks to [nlgranger](https://github.com/nlgranger) for sharing.
 
 #### Goals
 
