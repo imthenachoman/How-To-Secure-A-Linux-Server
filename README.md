@@ -455,7 +455,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 1. Edit `/etc/ssh/sshd_config` then find and edit or add these settings that should be applied regardless of your configuration/setup:
 
-    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
+    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. 
 
     ```
     ########################################################################################################
@@ -538,6 +538,12 @@ SSH is a door into your server. This is especially true if you are opening ports
     |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
 
     Check `man sshd_config` for more details what these settings mean.
+
+1. Make sure there are no duplicate settings that contradict each other. The below command should not have any output.
+
+    ```bash
+    awk 'NF && $1!~/^(#|HostKey)/{print $1}' /etc/ssh/sshd_config | sort | uniq -c | grep -v ' 1 '
+    ```
 
 1. Restart ssh:
 
@@ -854,7 +860,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     ```
 
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
-    
+	
     ```
     pool pool.ntp.org iburst
     ```
@@ -940,6 +946,8 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 
 > When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some filesystem configuration tweaks, we can change this behavior and improve the security of the system.
+
+**Note**: This may break on some `systemd` systems. Please see [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37) for more information.
 
 #### Goals
 
@@ -1039,7 +1047,7 @@ When there is a need to set or change an account password, the password task of 
 
 
     [For the lazy](#editing-configuration-files---for-the-lazy):
-
+    
     ``` bash
     sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
     ```
@@ -1213,7 +1221,7 @@ WIP
 #### Steps
 
 1. Install rng-tools.
-    
+   
     On Debian based systems:
 
     ``` bash
@@ -1752,12 +1760,12 @@ Fail2ban monitors the logs of your applications (like SSH and Apache) to detect 
 
 1. In the above we tell fail2ban to use the ufw as the `banaction`. Fail2ban ships with an action configuration file for ufw. You can see it in `/etc/fail2ban/action.d/ufw.conf`
 
-1. Enable fail2ban and the jail for SSH:
+1. Enable fail2ban:
 
     ``` bash
     sudo fail2ban-client start
     sudo fail2ban-client reload
-    sudo fail2ban-client add sshd
+    sudo fail2ban-client add sshd # This may fail on some systems if the sshd jail was added by default
     ```
 
 1. To check the status:
@@ -1866,7 +1874,7 @@ WIP
     - Take a backup of the stock configuration files: `sudo cp -pr /etc/aide /etc/aide-COPY-$(date +"%Y%m%d%H%M%S")`.
 
 1. Create a new database, and install it.
-    
+   
     On Debian based systems:
 
     ``` bash
@@ -2190,12 +2198,12 @@ WIP
     |`COPY_LOG_ON_ERROR=1`|to save a copy of the log if there is an error|
     |`PKGMGR=...`|set to the appropriate value per the documentation|
     |`PHALANX2_DIRTEST=1`|read the documentation for why|
-    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|    
+    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|
     |`USE_LOCKING=1`|to prevent issues with rkhunter running multiple times|
     |`SHOW_SUMMARY_WARNINGS_NUMBER=1`|to see the actual number of warnings found|
 
 1. You want rkhunter to run every day and e-mail you the result. You can write your own script or check https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/ for a sample cron script you can use.
-    
+   
     On Debian based system, rkhunter comes with cron scripts. To enable them check `/etc/default/rkhunter` or use `dpkg-reconfigure` and say `Yes` to all of the questions:
     
     ``` bash
@@ -2716,9 +2724,9 @@ If you have sudo [configured properly](#limit-who-can-use-sudo), then the **root
 If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like Debian) to drop to a **root** console during boot failures, then locking the **root** account will prevent `sulogin` from opening the **root** shell and you will get this error:
 
     Cannot open access to console, the root account is locked.
-
+    
     See sulogin(8) man page for more details.
-
+    
     Press Enter to continue.
 
 To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
