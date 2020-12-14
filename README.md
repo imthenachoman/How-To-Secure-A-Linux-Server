@@ -782,6 +782,7 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 - Your installation may have already done this, or may already have a special group intended for this purpose so check first.
   - Debian creates the sudo group
   - RedHat creates the wheel group
+- See [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39) for a note on some distributions making it so `sudo` does not require a password. 
 
 #### Steps
 
