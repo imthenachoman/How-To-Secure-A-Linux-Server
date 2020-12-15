@@ -1587,7 +1587,8 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 - https://www.thefanclub.co.za/how-to/how-install-psad-intrusion-detection-ubuntu-1204-lts-server
 - https://serverfault.com/a/447604/289829
 - https://serverfault.com/a/770424/289829
-- https://gist.github.com/netson/c45b2dc4e835761fbccc-
+- https://gist.github.com/netson/c45b2dc4e835761fbccc
+- Thanks to [sysadt](https://github.com/sysadt) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
 
 #### Steps
 
@@ -1611,6 +1612,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
    |--|--|
    |[`EMAIL_ADDRESSES`](http://www.cipherdyne.org/psad/docs/config.html#EMAIL_ADDRESSES)|your email address(s)|
    |`HOSTNAME`|your server's hostname|
+   |`ENABLE_PSADWATCHD`|`ENABLE_PSADWATCHD Y;`|
    |[`ENABLE_AUTO_IDS`](http://www.cipherdyne.org/psad/docs/config.html#ENABLE_AUTO_IDS)|`ENABLE_AUTO_IDS Y;`|
    |`ENABLE_AUTO_IDS_EMAILS`|`ENABLE_AUTO_IDS_EMAILS Y;`|
    |`EXPECT_TCP_OPTIONS`|`EXPECT_TCP_OPTIONS Y;`|
