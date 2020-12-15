@@ -6,6 +6,8 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 
 ## Table of Contents
 
+# Table of contents
+
 - [Introduction](#introduction)
   - [Guide Objective](#guide-objective)
   - [Why Secure Your Server](#why-secure-your-server)
@@ -24,6 +26,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
 - [The SSH Server](#the-ssh-server)
+  - [Important Not Before You Make SSH Changes](#important-not-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
@@ -31,6 +34,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [2FA/MFA for SSH](#2famfa-for-ssh)
 - [The Basics](#the-basics)
   - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
+  - [Limit Who Can Use su](#limit-who-can-use-su)
   - [NTP Client](#ntp-client)
   - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
