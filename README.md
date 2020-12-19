@@ -1290,6 +1290,13 @@ WIP
     echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
     ```
 
+1. Restart the service:
+
+    ``` bash
+    sudo systemctl status rng-tools.service
+    ```
+   
+
 ([Table of Contents](#table-of-contents))
 
 ## The Network
