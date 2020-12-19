@@ -1267,6 +1267,7 @@ WIP
 - https://www.gnu.org/software/hurd/user/tlecarrour/rng-tools.html
 - https://wiki.archlinux.org/index.php/Rng-tools
 - https://www.howtoforge.com/helping-the-random-number-generator-to-gain-enough-entropy-with-rng-tools-debian-lenny
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
 
 #### Steps
 
@@ -1295,6 +1296,10 @@ WIP
     ``` bash
     sudo systemctl status rng-tools.service
     ```
+
+1. Test randomness:
+    - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
+    - https://wiki.archlinux.org/index.php/Rng-tools
    
 
 ([Table of Contents](#table-of-contents))
