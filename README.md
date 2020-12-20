@@ -488,7 +488,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     # Use kernel sandbox mechanisms where possible in unprivileged processes
     # Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
     # Note: This setting is deprecated in OpenSSH 7.5 (https://www.openssh.com/txt/release-7.5)
-    UsePrivilegeSeparation sandbox
+    # UsePrivilegeSeparation sandbox
 
     ########################################################################################################
     # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
