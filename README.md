@@ -1294,7 +1294,8 @@ WIP
 1. Restart the service:
 
     ``` bash
-    sudo systemctl status rng-tools.service
+    sudo systemctl stop rng-tools.service
+    sudo systemctl start rng-tools.service
     ```
 
 1. Test randomness:
