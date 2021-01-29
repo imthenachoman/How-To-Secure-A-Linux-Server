@@ -24,6 +24,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
 - [The SSH Server](#the-ssh-server)
+  - [Important Not Before You Make SSH Changes](#important-not-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
@@ -31,6 +32,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [2FA/MFA for SSH](#2famfa-for-ssh)
 - [The Basics](#the-basics)
   - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
+  - [Limit Who Can Use su](#limit-who-can-use-su)
   - [NTP Client](#ntp-client)
   - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
@@ -266,6 +268,12 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ## The SSH Server
 
+### Important Not Before You Make SSH Changes
+
+It is highly advised you keep a 2nd terminal open to your server **before you make and apply SSH configuration changes**. This way if you lock yourself out of your 1st terminal session, you still have one sesssion connected so you can fix it.
+
+Thank you to [Sonnenbrand](https://github.com/Sonnenbrand) for this [idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/56).
+
 ### SSH Public/Private Keys
 
 #### Why
@@ -443,6 +451,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 - https://www.techbrown.com/harden-ssh-secure-linux-vps-server/
 - https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server/660325
 - `man sshd_config`
+- Thanks to [than0s](https://github.com/than0s) for [how to find duplicate settings](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/38).
 
 #### Steps
 
@@ -455,7 +464,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
 1. Edit `/etc/ssh/sshd_config` then find and edit or add these settings that should be applied regardless of your configuration/setup:
 
-    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
+    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. 
 
     ```
     ########################################################################################################
@@ -471,7 +480,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
     Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
 
-    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
 
     # LogLevel VERBOSE logs user's key fingerprint on login. Needed to have a clear audit track of which key was using to log in.
     LogLevel VERBOSE
@@ -479,7 +488,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     # Use kernel sandbox mechanisms where possible in unprivileged processes
     # Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
     # Note: This setting is deprecated in OpenSSH 7.5 (https://www.openssh.com/txt/release-7.5)
-    UsePrivilegeSeparation sandbox
+    # UsePrivilegeSeparation sandbox
 
     ########################################################################################################
     # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
@@ -538,6 +547,12 @@ SSH is a door into your server. This is especially true if you are opening ports
     |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
 
     Check `man sshd_config` for more details what these settings mean.
+
+1. Make sure there are no duplicate settings that contradict each other. The below command should not have any output.
+
+    ```bash
+    awk 'NF && $1!~/^(#|HostKey)/{print $1}' /etc/ssh/sshd_config | sort | uniq -c | grep -v ' 1 '
+    ```
 
 1. Restart ssh:
 
@@ -776,6 +791,7 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 - Your installation may have already done this, or may already have a special group intended for this purpose so check first.
   - Debian creates the sudo group
   - RedHat creates the wheel group
+- See [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39) for a note on some distributions making it so `sudo` does not require a password. Thanks to [sbrl](https://github.com/sbrl) for sharing.
 
 #### Steps
 
@@ -811,6 +827,46 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 
     ```
     %sudousers   ALL=(ALL:ALL) ALL
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Limit Who Can Use su
+
+#### Why
+
+su also lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use su.
+
+#### Goals
+
+- su privileges limited to those who are in a group we specify
+
+#### References
+
+- Thanks to [olavim](https://github.com/olavim) for sharing [this idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/41)
+
+#### Steps
+
+1. Create a group:
+
+    ``` bash
+    sudo groupadd suusers
+    ```
+
+1. Add account(s) to the group:
+
+    ``` bash
+    sudo usermod -a -G suusers user1
+    sudo usermod -a -G suusers user2
+    sudo usermod -a -G suusers  ...
+    ```
+
+    You'll need to do this for every account on your server that needs sudo privileges.
+
+1. Make it so only users in this group can execute `/bin/su`:
+
+    ``` bash
+    sudo dpkg-statoverride --update --add root suusers 4750 /bin/su
     ```
 
 ([Table of Contents](#table-of-contents))
@@ -854,7 +910,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
     ```
 
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
-    
+	
     ```
     pool pool.ntp.org iburst
     ```
@@ -940,6 +996,8 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 
 > When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some filesystem configuration tweaks, we can change this behavior and improve the security of the system.
+
+**Note**: This may break on some `systemd` systems. Please see [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37) for more information. Thanks to [nlgranger](https://github.com/nlgranger) for sharing.
 
 #### Goals
 
@@ -1039,7 +1097,7 @@ When there is a need to set or change an account password, the password task of 
 
 
     [For the lazy](#editing-configuration-files---for-the-lazy):
-
+    
     ``` bash
     sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
     ```
@@ -1208,16 +1266,42 @@ WIP
 - https://www.2uo.de/myths-about-urandom
 - https://www.gnu.org/software/hurd/user/tlecarrour/rng-tools.html
 - https://wiki.archlinux.org/index.php/Rng-tools
+- https://www.howtoforge.com/helping-the-random-number-generator-to-gain-enough-entropy-with-rng-tools-debian-lenny
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
 
 #### Steps
 
 1. Install rng-tools.
-    
+   
     On Debian based systems:
 
     ``` bash
     sudo apt-get install rng-tools
     ```
+
+1. Now we need to set the hardware device used to generate random numbers by adding this to `/etc/default/rng-tools`:
+
+    ```
+    HRNGDEVICE=/dev/urandom
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
+    ```
+
+1. Restart the service:
+
+    ``` bash
+    sudo systemctl stop rng-tools.service
+    sudo systemctl start rng-tools.service
+    ```
+
+1. Test randomness:
+    - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
+    - https://wiki.archlinux.org/index.php/Rng-tools
+   
 
 ([Table of Contents](#table-of-contents))
 
@@ -1514,7 +1598,8 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 - https://www.thefanclub.co.za/how-to/how-install-psad-intrusion-detection-ubuntu-1204-lts-server
 - https://serverfault.com/a/447604/289829
 - https://serverfault.com/a/770424/289829
-- https://gist.github.com/netson/c45b2dc4e835761fbccc-
+- https://gist.github.com/netson/c45b2dc4e835761fbccc
+- Thanks to [sysadt](https://github.com/sysadt) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
 
 #### Steps
 
@@ -1538,6 +1623,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
    |--|--|
    |[`EMAIL_ADDRESSES`](http://www.cipherdyne.org/psad/docs/config.html#EMAIL_ADDRESSES)|your email address(s)|
    |`HOSTNAME`|your server's hostname|
+   |`ENABLE_PSADWATCHD`|`ENABLE_PSADWATCHD Y;`|
    |[`ENABLE_AUTO_IDS`](http://www.cipherdyne.org/psad/docs/config.html#ENABLE_AUTO_IDS)|`ENABLE_AUTO_IDS Y;`|
    |`ENABLE_AUTO_IDS_EMAILS`|`ENABLE_AUTO_IDS_EMAILS Y;`|
    |`EXPECT_TCP_OPTIONS`|`EXPECT_TCP_OPTIONS Y;`|
@@ -1739,12 +1825,12 @@ Fail2ban monitors the logs of your applications (like SSH and Apache) to detect 
 
 1. In the above we tell fail2ban to use the ufw as the `banaction`. Fail2ban ships with an action configuration file for ufw. You can see it in `/etc/fail2ban/action.d/ufw.conf`
 
-1. Enable fail2ban and the jail for SSH:
+1. Enable fail2ban:
 
     ``` bash
     sudo fail2ban-client start
     sudo fail2ban-client reload
-    sudo fail2ban-client add sshd
+    sudo fail2ban-client add sshd # This may fail on some systems if the sshd jail was added by default
     ```
 
 1. To check the status:
@@ -1853,7 +1939,7 @@ WIP
     - Take a backup of the stock configuration files: `sudo cp -pr /etc/aide /etc/aide-COPY-$(date +"%Y%m%d%H%M%S")`.
 
 1. Create a new database, and install it.
-    
+   
     On Debian based systems:
 
     ``` bash
@@ -2177,12 +2263,12 @@ WIP
     |`COPY_LOG_ON_ERROR=1`|to save a copy of the log if there is an error|
     |`PKGMGR=...`|set to the appropriate value per the documentation|
     |`PHALANX2_DIRTEST=1`|read the documentation for why|
-    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|    
+    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|
     |`USE_LOCKING=1`|to prevent issues with rkhunter running multiple times|
     |`SHOW_SUMMARY_WARNINGS_NUMBER=1`|to see the actual number of warnings found|
 
 1. You want rkhunter to run every day and e-mail you the result. You can write your own script or check https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/ for a sample cron script you can use.
-    
+   
     On Debian based system, rkhunter comes with cron scripts. To enable them check `/etc/default/rkhunter` or use `dpkg-reconfigure` and say `Yes` to all of the questions:
     
     ``` bash
@@ -2349,7 +2435,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
     ``` bash
     sudo cp --archive /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch-COPY-$(date +"%Y%m%d%H%M%S")
-    sudo chmod -x /etc/cron.daily/00logwatch.*
+    sudo chmod -x /etc/cron.daily/00logwatch-COPY*
     ```
 
 1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
@@ -2703,9 +2789,9 @@ If you have sudo [configured properly](#limit-who-can-use-sudo), then the **root
 If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like Debian) to drop to a **root** console during boot failures, then locking the **root** account will prevent `sulogin` from opening the **root** shell and you will get this error:
 
     Cannot open access to console, the root account is locked.
-
+    
     See sulogin(8) man page for more details.
-
+    
     Press Enter to continue.
 
 To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
