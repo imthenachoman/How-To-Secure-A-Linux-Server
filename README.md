@@ -50,6 +50,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
+  - [OSSEC - Host Intrusion Detection](#ossec---host-intrusion-detection)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
   - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
@@ -2568,6 +2569,65 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     ```
 
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
+
+([Table of Contents](#table-of-contents))
+
+### OSSEC - Host Intrusion Detection
+
+#### Why
+From [https://github.com/ossec/ossec-hids](https://github.com/ossec/ossec-hids)
+> OSSEC is a full platform to monitor and control your systems. It mixes together all the aspects of HIDS (host-based intrusion detection), log monitoring and SIM/SIEM together in a simple, powerful and open source solution.
+
+#### Goals
+
+- OSSEC-HIDS installed
+
+#### References
+
+- https://www.ossec.net/docs/
+
+#### Steps
+
+1. Install OSSEC-HIDS from sources
+    ```bash
+    sudo apt install libz-dev libssl-dev libpcre2-dev build-essential
+    wget https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
+    tar xzf 3.6.0.tar.gz
+    cd ossec-hids-3.6.0/
+    sudo ./install.sh
+    ```
+
+1. Useful commands:
+
+**Agent information**
+
+   ```bash
+    sudo /var/ossec/bin/agent_control -i <AGENT_ID>
+   ```
+`AGENT_ID` by default is `000`, to be sure the command `sudo /var/ossec/bin/agent_control -l` can be used.
+
+**Run integrity/rootkit checking**
+
+OSSEC by default run rootkit check each 2 hours.
+
+   ```bash
+    sudo /var/ossec/bin/agent_control -u <AGENT_ID> -r 
+   ```
+
+**Alerts**
+
+- All:
+    ```bash
+    tail -f /var/ossec/logs/alerts/alerts.log
+    ```
+- Integrity check:
+    ```bash
+    sudo cat /var/ossec/logs/alerts/alerts.log | grep -A4  -i integrity
+    ```
+- Rootkit check:
+    ```bash
+     sudo cat /var/ossec/logs/alerts/alerts.log | grep -A4  "rootcheck,"
+    ```
 
 ([Table of Contents](#table-of-contents))
 
