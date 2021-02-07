@@ -33,6 +33,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 - [The Basics](#the-basics)
   - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
   - [Limit Who Can Use su](#limit-who-can-use-su)
+  - [Run applications in a sandbox with FireJail](#run-applications-in-a-sandbox-with-firejail)
   - [NTP Client](#ntp-client)
   - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
@@ -868,6 +869,60 @@ su also lets accounts run commands as other accounts, including **root**. We wan
 
     ``` bash
     sudo dpkg-statoverride --update --add root suusers 4750 /bin/su
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Run applications in a sandbox with FireJail
+
+#### Why
+
+It's absolutely better, for many applications, to run in a sandbox.
+
+Browsers (even more the Closed Source ones) and eMail Clients are highly suggested.
+
+#### Goals
+
+- confine applications in a jail (few safe directories) and block access to the resto of the system
+
+#### References
+
+- Thanks to [FireJail](https://firejail.wordpress.com/)
+
+#### Steps
+
+1. Install the software:
+
+    ``` bash
+    sudo apt install firejail firejail-profiles
+    ```
+    
+    Note: for Debian 10 Stable, official Backport is suggested:
+
+    ``` bash
+    sudo apt install -t buster-backports firejail firejail-profiles
+    ```
+
+2. Allow an application (installed in `/usr/bin` or `/bin`) to run only in a sandbox (see few examples below here):
+
+    ``` bash
+    sudo ln -s /usr/bin/firejail /usr/local/bin/google-chrome-stable
+    sudo ln -s /usr/bin/firejail /usr/local/bin/firefox
+    sudo ln -s /usr/bin/firejail /usr/local/bin/chromium
+    sudo ln -s /usr/bin/firejail /usr/local/bin/evolution
+    sudo ln -s /usr/bin/firejail /usr/local/bin/thunderbird
+    ```
+
+3. Run the application as usual (via terminal or launcher and check if is runnung in a jail:
+
+    ``` bash
+    firejail --list
+    ```
+
+4. Allow a sandboxed app to run again as it wase before (example: firefox)
+
+    ``` bash
+    sudo rm /usr/local/bin/firefox
     ```
 
 ([Table of Contents](#table-of-contents))
