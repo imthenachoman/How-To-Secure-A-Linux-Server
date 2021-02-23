@@ -1461,6 +1461,7 @@ You can create rules by explicitly specifying the ports or with application conf
 
     # allow traffic out on port 68 -- the DHCP client
     # you only need this if you're using DHCP
+    sudo ufw allow out 67 comment 'allow the DHCP client to update'
     sudo ufw allow out 68 comment 'allow the DHCP client to update'
     ```
 
