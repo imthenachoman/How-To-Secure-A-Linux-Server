@@ -24,6 +24,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
 - [The SSH Server](#the-ssh-server)
+  - [Important Not Before You Make SSH Changes](#important-not-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
@@ -31,6 +32,8 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [2FA/MFA for SSH](#2famfa-for-ssh)
 - [The Basics](#the-basics)
   - [Limit Who Can Use sudo](#limit-who-can-use-sudo)
+  - [Limit Who Can Use su](#limit-who-can-use-su)
+  - [Run applications in a sandbox with FireJail](#run-applications-in-a-sandbox-with-firejail)
   - [NTP Client](#ntp-client)
   - [Securing /proc](#securing-proc)
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
@@ -48,6 +51,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [logwatch - system log analyzer and reporter](#logwatch---system-log-analyzer-and-reporter)
   - [ss - Seeing Ports Your Server Is Listening On](#ss---seeing-ports-your-server-is-listening-on)
   - [Lynis - Linux Security Auditing](#lynis---linux-security-auditing)
+  - [OSSEC - Host Intrusion Detection](#ossec---host-intrusion-detection)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
   - [SSMTP (Simple Sendmail) with google](#ssmtp)
@@ -267,6 +271,12 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ## The SSH Server
 
+### Important Not Before You Make SSH Changes
+
+It is highly advised you keep a 2nd terminal open to your server **before you make and apply SSH configuration changes**. This way if you lock yourself out of your 1st terminal session, you still have one sesssion connected so you can fix it.
+
+Thank you to [Sonnenbrand](https://github.com/Sonnenbrand) for this [idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/56).
+
 ### SSH Public/Private Keys
 
 #### Why
@@ -444,19 +454,20 @@ SSH is a door into your server. This is especially true if you are opening ports
 - https://www.techbrown.com/harden-ssh-secure-linux-vps-server/
 - https://serverfault.com/questions/660160/openssh-difference-between-internal-sftp-and-sftp-server/660325
 - `man sshd_config`
+- Thanks to [than0s](https://github.com/than0s) for [how to find duplicate settings](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/38).
 
 #### Steps
 
 1. Make a backup of OpenSSH server's configuration file `/etc/ssh/sshd_config` and remove comments to make it easier to read:
 
     ``` bash
-    sudo cp --preserve /etc/ssh/sshd_config /etc/ssh/sshd_config.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ssh/sshd_config /etc/ssh/sshd_config-COPY-$(date +"%Y%m%d%H%M%S")
     sudo sed -i -r -e '/^#|^$/ d' /etc/ssh/sshd_config
     ```
 
 1. Edit `/etc/ssh/sshd_config` then find and edit or add these settings that should be applied regardless of your configuration/setup:
 
-    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. (If anyone knows a way to programatically do this I would [love to hear how](#contacting-me).)
+    **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. 
 
     ```
     ########################################################################################################
@@ -472,7 +483,7 @@ SSH is a door into your server. This is especially true if you are opening ports
 
     Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
 
-    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
 
     # LogLevel VERBOSE logs user's key fingerprint on login. Needed to have a clear audit track of which key was using to log in.
     LogLevel VERBOSE
@@ -480,7 +491,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     # Use kernel sandbox mechanisms where possible in unprivileged processes
     # Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
     # Note: This setting is deprecated in OpenSSH 7.5 (https://www.openssh.com/txt/release-7.5)
-    UsePrivilegeSeparation sandbox
+    # UsePrivilegeSeparation sandbox
 
     ########################################################################################################
     # end settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
@@ -539,6 +550,12 @@ SSH is a door into your server. This is especially true if you are opening ports
     |**Port**|any open/available port number|`Port 22`|port that `sshd` should listen on||
 
     Check `man sshd_config` for more details what these settings mean.
+
+1. Make sure there are no duplicate settings that contradict each other. The below command should not have any output.
+
+    ```bash
+    awk 'NF && $1!~/^(#|HostKey)/{print $1}' /etc/ssh/sshd_config | sort | uniq -c | grep -v ' 1 '
+    ```
 
 1. Restart ssh:
 
@@ -603,7 +620,7 @@ The Diffie-Hellman algorithm is used by SSH to establish a secure connection. Th
 1. Make a backup of SSH's moduli file `/etc/ssh/moduli`:
 
     ``` bash
-    sudo cp --preserve /etc/ssh/moduli /etc/ssh/moduli.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ssh/moduli /etc/ssh/moduli-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Remove short moduli:
@@ -722,7 +739,7 @@ What we will do is tell the server's SSH PAM configuration to ask the user for t
 1. Make a backup of PAM's SSH configuration file `/etc/pam.d/sshd`:
 
     ``` bash
-    sudo cp --preserve /etc/pam.d/sshd /etc/pam.d/sshd.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/pam.d/sshd /etc/pam.d/sshd-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Now we need to enable it as an authentication method for SSH by adding this line to `/etc/pam.d/sshd`:
@@ -777,6 +794,7 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 - Your installation may have already done this, or may already have a special group intended for this purpose so check first.
   - Debian creates the sudo group
   - RedHat creates the wheel group
+- See [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39) for a note on some distributions making it so `sudo` does not require a password. Thanks to [sbrl](https://github.com/sbrl) for sharing.
 
 #### Steps
 
@@ -799,7 +817,7 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 1. Make a backup of the sudo's configuration file `/etc/sudoers`:
 
     ``` bash
-    sudo cp --preserve /etc/sudoers /etc/sudoers.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/sudoers /etc/sudoers-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Edit sudo's configuration file `/etc/sudoers`:
@@ -812,6 +830,100 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 
     ```
     %sudousers   ALL=(ALL:ALL) ALL
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Limit Who Can Use su
+
+#### Why
+
+su also lets accounts run commands as other accounts, including **root**. We want to make sure that only the accounts we want can use su.
+
+#### Goals
+
+- su privileges limited to those who are in a group we specify
+
+#### References
+
+- Thanks to [olavim](https://github.com/olavim) for sharing [this idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/41)
+
+#### Steps
+
+1. Create a group:
+
+    ``` bash
+    sudo groupadd suusers
+    ```
+
+1. Add account(s) to the group:
+
+    ``` bash
+    sudo usermod -a -G suusers user1
+    sudo usermod -a -G suusers user2
+    sudo usermod -a -G suusers  ...
+    ```
+
+    You'll need to do this for every account on your server that needs sudo privileges.
+
+1. Make it so only users in this group can execute `/bin/su`:
+
+    ``` bash
+    sudo dpkg-statoverride --update --add root suusers 4750 /bin/su
+    ```
+
+([Table of Contents](#table-of-contents))
+
+### Run applications in a sandbox with FireJail
+
+#### Why
+
+It's absolutely better, for many applications, to run in a sandbox.
+
+Browsers (even more the Closed Source ones) and eMail Clients are highly suggested.
+
+#### Goals
+
+- confine applications in a jail (few safe directories) and block access to the resto of the system
+
+#### References
+
+- Thanks to [FireJail](https://firejail.wordpress.com/)
+
+#### Steps
+
+1. Install the software:
+
+    ``` bash
+    sudo apt install firejail firejail-profiles
+    ```
+    
+    Note: for Debian 10 Stable, official Backport is suggested:
+
+    ``` bash
+    sudo apt install -t buster-backports firejail firejail-profiles
+    ```
+
+2. Allow an application (installed in `/usr/bin` or `/bin`) to run only in a sandbox (see few examples below here):
+
+    ``` bash
+    sudo ln -s /usr/bin/firejail /usr/local/bin/google-chrome-stable
+    sudo ln -s /usr/bin/firejail /usr/local/bin/firefox
+    sudo ln -s /usr/bin/firejail /usr/local/bin/chromium
+    sudo ln -s /usr/bin/firejail /usr/local/bin/evolution
+    sudo ln -s /usr/bin/firejail /usr/local/bin/thunderbird
+    ```
+
+3. Run the application as usual (via terminal or launcher and check if is runnung in a jail:
+
+    ``` bash
+    firejail --list
+    ```
+
+4. Allow a sandboxed app to run again as it wase before (example: firefox)
+
+    ``` bash
+    sudo rm /usr/local/bin/firefox
     ```
 
 ([Table of Contents](#table-of-contents))
@@ -851,11 +963,11 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 1. Make a backup of the NTP client's configuration file `/etc/ntp.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/ntp.conf /etc/ntp.conf.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ntp.conf /etc/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
-    
+	
     ```
     pool pool.ntp.org iburst
     ```
@@ -942,6 +1054,8 @@ To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 
 > When looking in `/proc` you will discover a lot of files and directories. Many of them are just numbers, which represent the information about a particular process ID (PID). By default, Linux systems are deployed to allow all local users to see this all information. This includes process information from other users. This could include sensitive details that you may not want to share with other users. By applying some filesystem configuration tweaks, we can change this behavior and improve the security of the system.
 
+**Note**: This may break on some `systemd` systems. Please see [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/37) for more information. Thanks to [nlgranger](https://github.com/nlgranger) for sharing.
+
 #### Goals
 
 - `/proc` mounted with `hidepid=2` so users can only see information about their processes
@@ -957,7 +1071,7 @@ To quote https://linux-audit.com/linux-system-hardening-adding-hidepid-to-proc/:
 1. Make a backup of `/etc/fstab`:
 
     ``` bash
-    sudo cp --preserve /etc/fstab /etc/fstab.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/fstab /etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Add this line to `/etc/fstab` to have `/proc` mounted with `hidepid=2`:
@@ -1011,7 +1125,7 @@ When there is a need to set or change an account password, the password task of 
 1. Make a backup of PAM's password configuration file `/etc/pam.d/common-password`:
 
     ``` bash
-    sudo cp --preserve /etc/pam.d/common-password /etc/pam.d/common-password.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/pam.d/common-password /etc/pam.d/common-password-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Tell PAM to use libpam-pwquality to enforce strong passwords by editing the file `/etc/pam.d/common-password` and change the line that starts like this:
@@ -1040,7 +1154,7 @@ When there is a need to set or change an account password, the password task of 
 
 
     [For the lazy](#editing-configuration-files---for-the-lazy):
-
+    
     ``` bash
     sudo sed -i -r -e "s/^(password\s+requisite\s+pam_pwquality.so)(.*)$/# \1\2         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")\n\1 retry=3 minlen=10 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1 maxrepeat=3 gecoschec         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/pam.d/common-password
     ```
@@ -1209,16 +1323,42 @@ WIP
 - https://www.2uo.de/myths-about-urandom
 - https://www.gnu.org/software/hurd/user/tlecarrour/rng-tools.html
 - https://wiki.archlinux.org/index.php/Rng-tools
+- https://www.howtoforge.com/helping-the-random-number-generator-to-gain-enough-entropy-with-rng-tools-debian-lenny
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
 
 #### Steps
 
 1. Install rng-tools.
-    
+   
     On Debian based systems:
 
     ``` bash
     sudo apt-get install rng-tools
     ```
+
+1. Now we need to set the hardware device used to generate random numbers by adding this to `/etc/default/rng-tools`:
+
+    ```
+    HRNGDEVICE=/dev/urandom
+    ```
+    
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+    
+    ``` bash
+    echo "HRNGDEVICE=/dev/urandom" | sudo tee -a /etc/default/rng-tools
+    ```
+
+1. Restart the service:
+
+    ``` bash
+    sudo systemctl stop rng-tools.service
+    sudo systemctl start rng-tools.service
+    ```
+
+1. Test randomness:
+    - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
+    - https://wiki.archlinux.org/index.php/Rng-tools
+   
 
 ([Table of Contents](#table-of-contents))
 
@@ -1322,6 +1462,7 @@ You can create rules by explicitly specifying the ports or with application conf
 
     # allow traffic out on port 68 -- the DHCP client
     # you only need this if you're using DHCP
+    sudo ufw allow out 67 comment 'allow the DHCP client to update'
     sudo ufw allow out 68 comment 'allow the DHCP client to update'
     ```
 
@@ -1515,7 +1656,8 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 - https://www.thefanclub.co.za/how-to/how-install-psad-intrusion-detection-ubuntu-1204-lts-server
 - https://serverfault.com/a/447604/289829
 - https://serverfault.com/a/770424/289829
-- https://gist.github.com/netson/c45b2dc4e835761fbccc-
+- https://gist.github.com/netson/c45b2dc4e835761fbccc
+- Thanks to [sysadt](https://github.com/sysadt) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
 
 #### Steps
 
@@ -1530,7 +1672,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 1. Make a backup of psad's configuration file `/etc/psad/psad.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/psad/psad.conf /etc/psad/psad.conf.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/psad/psad.conf /etc/psad/psad.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Review and update configuration options in `/etc/psad/psad.conf`. Pay special attention to these:
@@ -1539,6 +1681,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
    |--|--|
    |[`EMAIL_ADDRESSES`](http://www.cipherdyne.org/psad/docs/config.html#EMAIL_ADDRESSES)|your email address(s)|
    |`HOSTNAME`|your server's hostname|
+   |`ENABLE_PSADWATCHD`|`ENABLE_PSADWATCHD Y;`|
    |[`ENABLE_AUTO_IDS`](http://www.cipherdyne.org/psad/docs/config.html#ENABLE_AUTO_IDS)|`ENABLE_AUTO_IDS Y;`|
    |`ENABLE_AUTO_IDS_EMAILS`|`ENABLE_AUTO_IDS_EMAILS Y;`|
    |`EXPECT_TCP_OPTIONS`|`EXPECT_TCP_OPTIONS Y;`|
@@ -1550,8 +1693,8 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
     Make backups:
 
     ``` bash
-    sudo cp --preserve /etc/ufw/before.rules /etc/ufw/before.rules.$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/ufw/before6.rules /etc/ufw/before6.rules.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ufw/before.rules /etc/ufw/before.rules-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ufw/before6.rules /etc/ufw/before6.rules-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
     Edit the files:
@@ -1740,12 +1883,12 @@ Fail2ban monitors the logs of your applications (like SSH and Apache) to detect 
 
 1. In the above we tell fail2ban to use the ufw as the `banaction`. Fail2ban ships with an action configuration file for ufw. You can see it in `/etc/fail2ban/action.d/ufw.conf`
 
-1. Enable fail2ban and the jail for SSH:
+1. Enable fail2ban:
 
     ``` bash
     sudo fail2ban-client start
     sudo fail2ban-client reload
-    sudo fail2ban-client add sshd
+    sudo fail2ban-client add sshd # This may fail on some systems if the sshd jail was added by default
     ```
 
 1. To check the status:
@@ -1835,7 +1978,7 @@ WIP
 1. Make a backup of AIDE's defaults file:
 
     ``` bash
-    sudo cp -p /etc/default/aide /etc/default/aide.$(date +"%Y%m%d%H%M%S")
+    sudo cp -p /etc/default/aide /etc/default/aide-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Go through `/etc/default/aide` and set AIDE's defaults per your requirements. If you want AIDE to run daily and e-mail you, be sure to set `CRON_DAILY_RUN` to `yes`.
@@ -1843,7 +1986,7 @@ WIP
 1. Make a backup of AIDE's configuration files:
 
     ``` bash
-    sudo cp -pr /etc/aide /etc/aide.$(date +"%Y%m%d%H%M%S")
+    sudo cp -pr /etc/aide /etc/aide-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. On Debian based systems:
@@ -1851,10 +1994,10 @@ WIP
     - AIDE's configuration files are in `/etc/aide/aide.conf.d/`.
     - You'll want to go through AIDE's documentation and the configuration files in to set them per your requirements.
     - If you want new settings, to monitor a new folder for example, you'll want to add them to `/etc/aide/aide.conf` or `/etc/aide/aide.conf.d/`.
-    - Take a backup of the stock configuration files: `sudo cp -pr /etc/aide /etc/aide.$(date +"%Y%m%d%H%M%S")`.
+    - Take a backup of the stock configuration files: `sudo cp -pr /etc/aide /etc/aide-COPY-$(date +"%Y%m%d%H%M%S")`.
 
 1. Create a new database, and install it.
-    
+   
     On Debian based systems:
 
     ``` bash
@@ -2055,7 +2198,7 @@ WIP
 1. Make a backup of `clamav-freshclam`'s configuration file `/etc/clamav/freshclam.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/clamav/freshclam.conf /etc/clamav/freshclam.conf.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/clamav/freshclam.conf /etc/clamav/freshclam.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
     
 1. `clamav-freshclam`'s default settings are probably good enough but if you want to change them, you can either edit the file `/etc/clamav/freshclam.conf` or use `dpkg-reconfigure`:
@@ -2105,7 +2248,7 @@ WIP
 1. Make a backup of `clamav-daemon`'s configuration file `/etc/clamav/clamd.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/clamav/clamd.conf /etc/clamav/clamd.conf.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/clamav/clamd.conf /etc/clamav/clamd.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
     
 1. You can change `clamav-daemon`'s settings by editing the file `/etc/clamav/clamd.conf` or useing `dpkg-reconfigure`:
@@ -2159,7 +2302,7 @@ WIP
 1. Make a backup of rkhunter' defaults file:
 
     ``` bash
-    sudo cp -p /etc/default/rkhunter /etc/default/rkhunter.$(date +"%Y%m%d%H%M%S")
+    sudo cp -p /etc/default/rkhunter /etc/default/rkhunter-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. rkhunter's configuration file is `/etc/rkhunter.conf`. Instead of making changes to it, create and use the file `/etc/rkhunter.conf.local` instead:
@@ -2178,12 +2321,12 @@ WIP
     |`COPY_LOG_ON_ERROR=1`|to save a copy of the log if there is an error|
     |`PKGMGR=...`|set to the appropriate value per the documentation|
     |`PHALANX2_DIRTEST=1`|read the documentation for why|
-    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|    
+    |`WEB_CMD=""`|this is to address an issue with the Debian package that disables the ability for rkhunter to self-update.|
     |`USE_LOCKING=1`|to prevent issues with rkhunter running multiple times|
     |`SHOW_SUMMARY_WARNINGS_NUMBER=1`|to see the actual number of warnings found|
 
 1. You want rkhunter to run every day and e-mail you the result. You can write your own script or check https://www.tecmint.com/install-rootkit-hunter-scan-for-rootkits-backdoors-in-linux/ for a sample cron script you can use.
-    
+   
     On Debian based system, rkhunter comes with cron scripts. To enable them check `/etc/default/rkhunter` or use `dpkg-reconfigure` and say `Yes` to all of the questions:
     
     ``` bash
@@ -2266,7 +2409,7 @@ WIP
 1. Make a backup of chkrootkit's configuration file `/etc/chkrootkit.conf`:
 
     ``` bash
-    sudo cp --preserve /etc/chkrootkit.conf /etc/chkrootkit.conf.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/chkrootkit.conf /etc/chkrootkit.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. You want chkrootkit to run every day and e-mail you the result.
@@ -2349,8 +2492,8 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 1. Make a backup of logwatch's daily cron file `/etc/cron.daily/00logwatch` and unset the execute bit:
 
     ``` bash
-    sudo cp --preserve /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch.$(date +"%Y%m%d%H%M%S")
-    sudo chmod -x /etc/cron.daily/00logwatch.*
+    sudo cp --archive /etc/cron.daily/00logwatch /etc/cron.daily/00logwatch-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo chmod -x /etc/cron.daily/00logwatch-COPY*
     ```
 
 1. By default, logwatch outputs to `stdout`. Since the goal is to get a daily e-mail, we need to change the output type that logwatch uses to send e-mail instead. We could do this through the configuration file above, but that would apply to every time it is run -- even when we run it manually and want to see the output to the screen. Instead, we'll change the cron job that executes logwatch to send e-mail. This way, when run manually, we'll still get output to `stdout` and when run by cron, it'll send an e-mail. We'll also make sure it checks for all services, and change the output format to html so it's easier to read regardless of what the configuration file says. In the file `/etc/cron.daily/00logwatch` find the execute line and change it to:
@@ -2483,6 +2626,65 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     ```
 
     This will scan your server, report its audit findings, and at the end it will give you suggestions. Spend some time going through the output and address gaps as necessary.
+
+([Table of Contents](#table-of-contents))
+
+### OSSEC - Host Intrusion Detection
+
+#### Why
+From [https://github.com/ossec/ossec-hids](https://github.com/ossec/ossec-hids)
+> OSSEC is a full platform to monitor and control your systems. It mixes together all the aspects of HIDS (host-based intrusion detection), log monitoring and SIM/SIEM together in a simple, powerful and open source solution.
+
+#### Goals
+
+- OSSEC-HIDS installed
+
+#### References
+
+- https://www.ossec.net/docs/
+
+#### Steps
+
+1. Install OSSEC-HIDS from sources
+    ```bash
+    sudo apt install libz-dev libssl-dev libpcre2-dev build-essential
+    wget https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
+    tar xzf 3.6.0.tar.gz
+    cd ossec-hids-3.6.0/
+    sudo ./install.sh
+    ```
+
+1. Useful commands:
+
+**Agent information**
+
+   ```bash
+    sudo /var/ossec/bin/agent_control -i <AGENT_ID>
+   ```
+`AGENT_ID` by default is `000`, to be sure the command `sudo /var/ossec/bin/agent_control -l` can be used.
+
+**Run integrity/rootkit checking**
+
+OSSEC by default run rootkit check each 2 hours.
+
+   ```bash
+    sudo /var/ossec/bin/agent_control -u <AGENT_ID> -r 
+   ```
+
+**Alerts**
+
+- All:
+    ```bash
+    tail -f /var/ossec/logs/alerts/alerts.log
+    ```
+- Integrity check:
+    ```bash
+    sudo cat /var/ossec/logs/alerts/alerts.log | grep -A4  -i integrity
+    ```
+- Rootkit check:
+    ```bash
+     sudo cat /var/ossec/logs/alerts/alerts.log | grep -A4  "rootcheck,"
+    ```
 
 ([Table of Contents](#table-of-contents))
 
@@ -2667,7 +2869,7 @@ If you forget the password, you'll have to go through [some work](https://www.cy
 1. Make a backup of GRUB's configuration file `/etc/grub.d/10_linux` that we'll be modifying and unset the execute bit so `update-grub` doesn't try to run it:
 
     ``` bash
-    sudo cp --preserve /etc/grub.d/10_linux /etc/grub.d/10_linux.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/grub.d/10_linux /etc/grub.d/10_linux-COPY-$(date +"%Y%m%d%H%M%S")
     sudo chmod a-x /etc/grub.d/10_linux.*
     ```
 
@@ -2704,9 +2906,9 @@ If you have sudo [configured properly](#limit-who-can-use-sudo), then the **root
 If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like Debian) to drop to a **root** console during boot failures, then locking the **root** account will prevent `sulogin` from opening the **root** shell and you will get this error:
 
     Cannot open access to console, the root account is locked.
-
+    
     See sulogin(8) man page for more details.
-
+    
     Press Enter to continue.
 
 To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
@@ -2784,10 +2986,10 @@ In order to explain how umask works I'd have to explain how Linux file/folder pe
 1. Make a backup of files we'll be editing:
 
     ``` bash
-    sudo cp --preserve /etc/profile /etc/profile.$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/bash.bashrc /etc/bash.bashrc.$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /etc/login.defs /etc/login.defs.$(date +"%Y%m%d%H%M%S")
-    sudo cp --preserve /root/.bashrc /root/.bashrc.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/profile /etc/profile-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/bash.bashrc /etc/bash.bashrc-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/login.defs /etc/login.defs-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /root/.bashrc /root/.bashrc-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Set default umask for **non-root** accounts to **0027** by adding this line to `/etc/profile` and `/etc/bash.bashrc`:
@@ -2977,12 +3179,13 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 1. Make a backup of `/etc/exim4/passwd.client`:
 
     ``` bash
-    sudo cp --preserve /etc/exim4/passwd.client /etc/exim4/passwd.client.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/exim4/passwd.client /etc/exim4/passwd.client-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Add a line like this to `/etc/exim4/passwd.client`
 
     ```
+    smtp.gmail.com:yourAccount@gmail.com:yourPassword
     *.google.com:yourAccount@gmail.com:yourPassword
     ```
 
@@ -3060,7 +3263,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 1. Make a backup of exim4's configuration file `/etc/exim4/exim4.conf.template`:
 
     ``` bash
-    sudo cp --preserve /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template.$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/exim4/exim4.conf.template /etc/exim4/exim4.conf.template-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. Add the below to `/etc/exim4/exim4.conf.template` after the `.ifdef REMOTE_SMTP_SMARTHOST_HOSTS_REQUIRE_TLS ... .endif` block:
