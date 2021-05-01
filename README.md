@@ -3085,7 +3085,7 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 
 ## The Miscellaneous
 
-### The Simple way with MSMTP(#msmtp)
+### The Simple way with MSMTP
 
 #### Why
 
@@ -3160,7 +3160,7 @@ Well I will SIMPLIFY this method, to only output email using google mail account
     ```
     
 DONE!! ;)
-
+([Table of Contents](#table-of-contents))
 
 ### Gmail and Exim4 As MTA With Implicit TLS
 
