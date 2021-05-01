@@ -54,7 +54,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [OSSEC - Host Intrusion Detection](#ossec---host-intrusion-detection)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
-  - [SSMTP (Simple Sendmail) with google](#ssmtp)
+  - [MSMTP (Simple Sendmail) with google](#msmtp)
   - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
@@ -3085,7 +3085,7 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 
 ## The Miscellaneous
 
-### The Simple way with SSMTP(#ssmtp)
+### The Simple way with MSMTP(#msmtp)
 
 #### Why
 
@@ -3094,30 +3094,73 @@ Well I will SIMPLIFY this method, to only output email using google mail account
     ``` bash
     #!/bin/bash
     ###### PLEASE .... EDIT IT...
-    MYEMAIL="mail@gmail.com"
-    PWDEMAIL="plalala"  ## ATTENTION DONT USE Special Chars.. like as SPACE # and some others not all. Feel free to test ;)
-    MAILPROV="smtp.google.com:583"
+    USRMAIL="usernameemail"
     DOMPROV="gmail.com"
+    PWDEMAIL="passwordStrong"  ## ATTENTION DONT USE Special Chars.. like as SPACE # and some others not all. Feel free to test ;)
+    MAILPROV="smtp.google.com:583"
+    MYMAIL="$USRMAIL@$DOMPROV"
     USERLOC="root"
     #######
-    apt install -y ssmtp
-    cp -r --preserve /etc/ssmtp /etc/ssmtp.bck
-    echo "AuthUser=$MYEMAIL
-    AuthPass=$PWDEMAIL
-    root=$MYEMAIL
-    mailhub=$MAILPROV
-    hostname=$HOSTNAME
-    FromLineOverride=YES
-    UseTLS=Yes
-    UseSTARTTLS=YES
-    RewriteDomain=$DOMPROV" > /etc/ssmtp/ssmtp.conf
-    echo "$USERLOC:$MYEMAIL:$MAILPROV" >> /etc/ssmtp/revaliases ## USERLOC = root
-    chmod -R 0640 /etc/ssmtp
-    sleep 1
-    echo "Test message from Hardened Linux server using ssmtp" | sendmail -v $MYEMAIL
+    apt install -y msmtp
+        ln -s /usr/bin/msmtp /usr/sbin/sendmail
+    #wget http://www.cacert.org/revoke.crl -O /etc/ssl/certs/revoke.crl
+    #chmod 644 /etc/ssl/certs/revoke.crl
+    touch /root/.msmtprc
+    cat <<EOF> .msmtprc
+    defaults
+    account gmail
+    host $MAILPROV
+    port $MAILPORT
+    #proxy_host 127.0.0.1
+    #proxy_port 9001
+    from $MYEMAIL
+    timeout off 
+    protocol smtp
+    #auto_from [(on|off)]
+    #from envelope_from
+    #maildomain [domain]
+    auth on
+    user $USRMAIL
+    passwordeval "gpg -q --for-your-eyes-only --no-tty -d /root/msmtp-mail.gpg"
+    #passwordeval "gpg --quiet --for-your-eyes-only --no-tty --decrypt /root/msmtp-mail.gpg"
+    tls on
+    tls_starttls on
+    tls_trust_file /etc/ssl/certs/ca-certificates.crt
+    #tls_crl_file /etc/ssl/certs/revoke.crl
+    #tls_fingerprint [fingerprint]
+    #tls_key_file [file]
+    #tls_cert_file [file]
+    tls_certcheck on
+    tls_force_sslv3 on
+    tls_min_dh_prime_bits 512
+    #tls_priorities [priorities]
+    #dsn_notify (off|condition)
+    #dsn_return (off|amount)
+    #domain argument
+    #keepbcc off
+    logfile /var/log/mail.log
+    syslog on
+    account default : gmail
+    EOF
+    chmod 0400 /root/.msmtprc
+    
+       ## In testing .. auto command
+    # echo -e "1\n4096\n\ny\n$MYUSRMAIL\n$MYEMAIL\nmy key\nO\n$PWDMAIL\n$PWDMAIL\n" | gpg --full-generate-key 
+    ##
+    gpg --full-generate-key
+    gpg --output revoke.asc --gen-revoke $MYEMAIL
+    echo -e "$PWDEMAIL\n" | gpg -e -o /root/msmtp-mail.gpg --recipient $MYEMAIL
+    echo "export GPG_TTY=\$(tty)" >> .baschrc	
+    chmod 400 msmtp-mail.gpg
+    
+    echo "Hello there" | msmtp --debug $MYEMAIL
+    echo"######################
+    ## MSMTP Configured ##
+    ######################"
     ```
     
 DONE!! ;)
+
 
 ### Gmail and Exim4 As MTA With Implicit TLS
 
