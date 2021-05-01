@@ -54,7 +54,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [OSSEC - Host Intrusion Detection](#ossec---host-intrusion-detection)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
-  - [MSMTP (Simple Sendmail) with google](#msmtp)
+  - [MSMTP (Simple Sendmail) with google](#msmtp-alternative)
   - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
@@ -3086,7 +3086,7 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 ## The Miscellaneous
 
 ### The Simple way with MSMTP
-
+(#msmtp-alternative)
 #### Why
 
 Well I will SIMPLIFY this method, to only output email using google mail account (and others). True Simple! :)
