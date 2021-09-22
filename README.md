@@ -54,6 +54,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [OSSEC - Host Intrusion Detection](#ossec---host-intrusion-detection)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
+  - [MSMTP (Simple Sendmail) with google](#msmtp-alternative)
   - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
@@ -3083,6 +3084,83 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 ([Table of Contents](#table-of-contents))
 
 ## The Miscellaneous
+
+### The Simple way with MSMTP
+(#msmtp-alternative)
+#### Why
+
+Well I will SIMPLIFY this method, to only output email using google mail account (and others). True Simple! :)
+
+    ``` bash
+    #!/bin/bash
+    ###### PLEASE .... EDIT IT...
+    USRMAIL="usernameemail"
+    DOMPROV="gmail.com"
+    PWDEMAIL="passwordStrong"  ## ATTENTION DONT USE Special Chars.. like as SPACE # and some others not all. Feel free to test ;)
+    MAILPROV="smtp.google.com:583"
+    MYMAIL="$USRMAIL@$DOMPROV"
+    USERLOC="root"
+    #######
+    apt install -y msmtp
+        ln -s /usr/bin/msmtp /usr/sbin/sendmail
+    #wget http://www.cacert.org/revoke.crl -O /etc/ssl/certs/revoke.crl
+    #chmod 644 /etc/ssl/certs/revoke.crl
+    touch /root/.msmtprc
+    cat <<EOF> .msmtprc
+    defaults
+    account gmail
+    host $MAILPROV
+    port $MAILPORT
+    #proxy_host 127.0.0.1
+    #proxy_port 9001
+    from $MYEMAIL
+    timeout off 
+    protocol smtp
+    #auto_from [(on|off)]
+    #from envelope_from
+    #maildomain [domain]
+    auth on
+    user $USRMAIL
+    passwordeval "gpg -q --for-your-eyes-only --no-tty -d /root/msmtp-mail.gpg"
+    #passwordeval "gpg --quiet --for-your-eyes-only --no-tty --decrypt /root/msmtp-mail.gpg"
+    tls on
+    tls_starttls on
+    tls_trust_file /etc/ssl/certs/ca-certificates.crt
+    #tls_crl_file /etc/ssl/certs/revoke.crl
+    #tls_fingerprint [fingerprint]
+    #tls_key_file [file]
+    #tls_cert_file [file]
+    tls_certcheck on
+    tls_force_sslv3 on
+    tls_min_dh_prime_bits 512
+    #tls_priorities [priorities]
+    #dsn_notify (off|condition)
+    #dsn_return (off|amount)
+    #domain argument
+    #keepbcc off
+    logfile /var/log/mail.log
+    syslog on
+    account default : gmail
+    EOF
+    chmod 0400 /root/.msmtprc
+    
+       ## In testing .. auto command
+    # echo -e "1\n4096\n\ny\n$MYUSRMAIL\n$MYEMAIL\nmy key\nO\n$PWDMAIL\n$PWDMAIL\n" | gpg --full-generate-key 
+    ##
+    gpg --full-generate-key
+    gpg --output revoke.asc --gen-revoke $MYEMAIL
+    echo -e "$PWDEMAIL\n" | gpg -e -o /root/msmtp-mail.gpg --recipient $MYEMAIL
+    echo "export GPG_TTY=\$(tty)" >> .baschrc	
+    chmod 400 msmtp-mail.gpg
+    
+    echo "Hello there" | msmtp --debug $MYEMAIL
+    echo"######################
+    ## MSMTP Configured ##
+    ######################"
+    ```
+    
+DONE!! ;)
+([Table of Contents](#table-of-contents))
 
 ### Gmail and Exim4 As MTA With Implicit TLS
 
