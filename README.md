@@ -24,7 +24,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
 - [The SSH Server](#the-ssh-server)
-  - [Important Not Before You Make SSH Changes](#important-not-before-you-make-ssh-changes)
+  - [Important Note Before You Make SSH Changes](#important-note-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
   - [Create SSH Group For AllowGroups](#create-ssh-group-for-allowgroups)
   - [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config)
@@ -271,7 +271,7 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ## The SSH Server
 
-### Important Not Before You Make SSH Changes
+### Important Note Before You Make SSH Changes
 
 It is highly advised you keep a 2nd terminal open to your server **before you make and apply SSH configuration changes**. This way if you lock yourself out of your 1st terminal session, you still have one sesssion connected so you can fix it.
 
