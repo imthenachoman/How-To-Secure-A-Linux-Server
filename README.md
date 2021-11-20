@@ -273,7 +273,7 @@ Where applicable, use the expert install option so you have tighter control of w
 
 ### Important Note Before You Make SSH Changes
 
-It is highly advised you keep a 2nd terminal open to your server **before you make and apply SSH configuration changes**. This way if you lock yourself out of your 1st terminal session, you still have one sesssion connected so you can fix it.
+It is highly advised you keep a 2nd terminal open to your server **before you make and apply SSH configuration changes**. This way if you lock yourself out of your 1st terminal session, you still have one session connected so you can fix it.
 
 Thank you to [Sonnenbrand](https://github.com/Sonnenbrand) for this [idea](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/56).
 
@@ -393,7 +393,7 @@ To make it easy to control who can SSH to the server. By using a group, we can q
 
 #### How It Works
 
-We will use the [AllowGroups option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config). to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in.
+We will use the [AllowGroups option](#AllowGroups) in SSH's configuration file [`/etc/ssh/sshd_config`](#secure-etcsshsshd_config) to tell the SSH server to only allow users to SSH in if they are a member of a certain UNIX group. Anyone not in the group will not be able to SSH in.
 
 #### Goals
 
@@ -884,7 +884,7 @@ Browsers (even more the Closed Source ones) and eMail Clients are highly suggest
 
 #### Goals
 
-- confine applications in a jail (few safe directories) and block access to the resto of the system
+- confine applications in a jail (few safe directories) and block access to the rest of the system
 
 #### References
 
@@ -914,13 +914,13 @@ Browsers (even more the Closed Source ones) and eMail Clients are highly suggest
     sudo ln -s /usr/bin/firejail /usr/local/bin/thunderbird
     ```
 
-3. Run the application as usual (via terminal or launcher and check if is runnung in a jail:
+3. Run the application as usual (via terminal or launcher and check if is running in a jail:
 
     ``` bash
     firejail --list
     ```
 
-4. Allow a sandboxed app to run again as it wase before (example: firefox)
+4. Allow a sandboxed app to run again as it was before (example: firefox)
 
     ``` bash
     sudo rm /usr/local/bin/firefox
