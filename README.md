@@ -914,7 +914,7 @@ Browsers (even more the Closed Source ones) and eMail Clients are highly suggest
     sudo ln -s /usr/bin/firejail /usr/local/bin/thunderbird
     ```
 
-3. Run the application as usual (via terminal or launcher and check if is running in a jail:
+3. Run the application as usual (via terminal or launcher and check if is running in a jail):
 
     ``` bash
     firejail --list
