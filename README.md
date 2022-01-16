@@ -240,7 +240,7 @@ Installing Linux is out-of-scope for this guide because each distribution does i
 1. boot your server from your install medium
 1. follow the prompts to install
 
-Where applicable, use the expert install option so you have tighter control of what is running on your server. **Only install what you absolutely need.** I, personally, do not install anything other than SSH. Also, thick the Disk Encryption option.
+Where applicable, use the expert install option so you have tighter control of what is running on your server. **Only install what you absolutely need.** I, personally, do not install anything other than SSH. Also, tick the Disk Encryption option.
 
 ([Table of Contents](#table-of-contents))
 
