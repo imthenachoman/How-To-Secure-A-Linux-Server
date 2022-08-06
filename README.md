@@ -2647,10 +2647,10 @@ From [https://github.com/ossec/ossec-hids](https://github.com/ossec/ossec-hids)
 
 1. Install OSSEC-HIDS from sources
     ```bash
-    sudo apt install libz-dev libssl-dev libpcre2-dev build-essential
-    wget https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
-    tar xzf 3.6.0.tar.gz
-    cd ossec-hids-3.6.0/
+    sudo apt install -y libz-dev libssl-dev libpcre2-dev build-essential libsystemd-dev
+    wget https://github.com/ossec/ossec-hids/archive/3.7.0.tar.gz
+    tar xzf 3.7.0.tar.gz
+    cd ossec-hids-3.7.0/
     sudo ./install.sh
     ```
 
