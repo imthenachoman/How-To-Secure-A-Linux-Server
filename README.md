@@ -1964,6 +1964,7 @@ WIP
 - https://www.howtoforge.com/how-to-configure-the-aide-advanced-intrusion-detection-environment-file-integrity-scanner-for-your-website
 - https://www.tecmint.com/check-integrity-of-file-and-directory-using-aide-in-linux/
 - https://www.cyberciti.biz/faq/debian-ubuntu-linux-software-integrity-checking-with-aide/
+- https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/83
 
 #### Steps
 
@@ -1972,7 +1973,7 @@ WIP
     On Debian based systems:
     
     ``` bash
-    sudo apt install aide
+    sudo apt install aide aide-common
     ```
     
 1. Make a backup of AIDE's defaults file:
