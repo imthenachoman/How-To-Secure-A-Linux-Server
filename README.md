@@ -3095,7 +3095,7 @@ Well I will SIMPLIFY this method, to only output email using google mail account
     ``` bash
     #!/bin/bash
     ###### PLEASE .... EDIT IT...
-    USRMAIL="usernameemail"
+    USEREMAIL="usernameemail"
     DOMPROV="gmail.com"
     PWDEMAIL="passwordStrong"  ## ATTENTION DONT USE Special Chars.. like as SPACE # and some others not all. Feel free to test ;)
     MAILPROV="smtp.google.com:583"
