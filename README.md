@@ -1465,6 +1465,8 @@ You can create rules by explicitly specifying the ports or with application conf
     sudo ufw allow out 67 comment 'allow the DHCP client to update'
     sudo ufw allow out 68 comment 'allow the DHCP client to update'
     ```
+    
+    **Note**: You'll need to allow HTTP/HTTPS for installing packages and many other things.
 
 1. Start ufw:
 
