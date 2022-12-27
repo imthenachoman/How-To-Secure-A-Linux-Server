@@ -1683,10 +1683,10 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
    |--|--|
    |[`EMAIL_ADDRESSES`](http://www.cipherdyne.org/psad/docs/config.html#EMAIL_ADDRESSES)|your email address(s)|
    |`HOSTNAME`|your server's hostname|
+   |`EXPECT_TCP_OPTIONS`|`EXPECT_TCP_OPTIONS Y;`|
    |`ENABLE_PSADWATCHD`|`ENABLE_PSADWATCHD Y;`|
    |[`ENABLE_AUTO_IDS`](http://www.cipherdyne.org/psad/docs/config.html#ENABLE_AUTO_IDS)|`ENABLE_AUTO_IDS Y;`|
    |`ENABLE_AUTO_IDS_EMAILS`|`ENABLE_AUTO_IDS_EMAILS Y;`|
-   |`EXPECT_TCP_OPTIONS`|`EXPECT_TCP_OPTIONS Y;`|
 
    Check the configuration file psad's documentation at http://www.cipherdyne.org/psad/docs/config.html for more details.
 
