@@ -401,7 +401,7 @@ We will use the [AllowGroups option](#AllowGroups) in SSH's configuration file [
 
 #### Notes
 
-- This is a per-requisite step to support the `AllowGroup` setting set in [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config).
+- This is a prerequisite step to support the `AllowGroup` setting set in [Secure `/etc/ssh/sshd_config`](#secure-etcsshsshd_config).
 
 #### References
 
