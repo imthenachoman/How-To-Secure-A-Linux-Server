@@ -1546,7 +1546,7 @@ You can create rules by explicitly specifying the ports or with application conf
     > 43/tcp (v6)                ALLOW OUT   Anywhere (v6)              # allow whois
     > ```
 
-7. Deleting a rule
+7. If you need to delete a rule
     
     ``` bash
     sudo ufw status numbered
