@@ -1445,10 +1445,10 @@ You can create rules by explicitly specifying the ports or with application conf
 1. Allow additional traffic as per your needs. Some common use-cases:
 
     ``` bash
-    # allow traffic out on port 53 -- DNS
+    # allow traffic out to port 53 -- DNS
     sudo ufw allow out 53 comment 'allow DNS calls out'
 	
-	# allow traffic out on port 123 -- NTP
+	# allow traffic out to port 123 -- NTP
     sudo ufw allow out 123 comment 'allow NTP out'
 
     # allow traffic out for HTTP, HTTPS, or FTP
@@ -1459,8 +1459,12 @@ You can create rules by explicitly specifying the ports or with application conf
 
     # allow whois
     sudo ufw allow out whois comment 'allow whois'
+    
+    # allow mails for status notifications -- choose port according to your provider
+    sudo ufw allow out 25 comment 'allow SMTP out'
+    sudo ufw allow out 587 comment 'allow SMTP out'
 
-    # allow traffic out on port 68 -- the DHCP client
+    # allow traffic out to port 68 -- the DHCP client
     # you only need this if you're using DHCP
     sudo ufw allow out 67 comment 'allow the DHCP client to update'
     sudo ufw allow out 68 comment 'allow the DHCP client to update'
@@ -1541,6 +1545,14 @@ You can create rules by explicitly specifying the ports or with application conf
     > 587/tcp (Mail submission (v6)) ALLOW OUT   Anywhere (v6)              # allow mail out
     > 43/tcp (v6)                ALLOW OUT   Anywhere (v6)              # allow whois
     > ```
+
+7. Deleting a rule
+    
+    ``` bash
+    sudo ufw status numbered
+    [...]
+    sudo ufw delete 3 #line number of the rule you want to delete
+    ```
 
 #### Default Applications
 
