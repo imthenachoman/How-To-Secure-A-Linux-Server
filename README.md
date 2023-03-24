@@ -792,7 +792,11 @@ sudo lets accounts run commands as other accounts, including **root**. We want t
 #### Notes
 
 - Your installation may have already done this, or may already have a special group intended for this purpose so check first.
-  - Debian creates the sudo group
+  - Debian creates the sudo group. To view users that are part of this group (thus have sudo privileges):
+	  
+	  ```
+	  cat /etc/group | grep "sudo"
+	  ```
   - RedHat creates the wheel group
 - See [https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/39) for a note on some distributions making it so `sudo` does not require a password. Thanks to [sbrl](https://github.com/sbrl) for sharing.
 
