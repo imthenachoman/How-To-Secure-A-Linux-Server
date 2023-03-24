@@ -105,7 +105,7 @@ IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www
 
 There are many guides provided by experts, industry leaders, and the distributions themselves. It is not practical, and sometimes against copyright, to include everything from those guides. I recommend you check them out before starting with this guide.
 
-- The [Center for Internet Security (CIS)](https://www.cisecurity.org/) provides [benchmarks](https://www.cisecurity.org/cis-benchmarks/) that are exhaustive, industry trusted, step-by-step instructions for securing many flavors of Linux. Check their [About Us](https://www.cisecurity.org/about-us/) page for details. My recommendation is to go through this guide first and then CIS's guide. That way their recommendations will trump anything in this guide.
+- The [Center for Internet Security (CIS)](https://www.cisecurity.org/) provides [benchmarks](https://www.cisecurity.org/cis-benchmarks/) that are exhaustive, industry trusted, step-by-step instructions for securing many flavors of Linux. Check their [About Us](https://www.cisecurity.org/about-us/) page for details. My recommendation is to go through this guide (the one you're reading here) first and THEN CIS's guide. That way their recommendations will trump anything in this guide.
 - For distribution specific hardening/security guides, check your distributions documentation.
 - https://security.utexas.edu/os-hardening-checklist/linux-7 - Red Hat Enterprise Linux 7 Hardening Checklist
 - https://cloudpro.zone/index.php/2018/01/18/debian-9-3-server-setup-guide-part-1/ - # Debian 9.3 server setup guide
@@ -256,7 +256,7 @@ Where applicable, use the expert install option so you have tighter control of w
   - Installing core software you'll want like `man`
   - Etc...
 - Your server will need to be able to send e-mails so you can get important security alerts. If you're not setting up a mail server check [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls).
-- I would also recommend you go through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide.
+- I would also recommend you **read** through the [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/) before you start with this guide just to digest/understand what they have to say. My recommendation is to go through this guide (the one you're reading here) first and THEN CIS's guide. That way their recommendations will trump anything in this guide.
 
 ([Table of Contents](#table-of-contents))
 
