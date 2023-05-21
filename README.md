@@ -2586,7 +2586,7 @@ Obviously we don't want your server listening on ports we don't know about. We'l
     
     **Switch Explanations**:
     - `l` = display listening sockets
-    - `n` = do now try to resolve service names
+    - `n` = do not try to resolve service names
     - `t` = display TCP sockets
     - `u` = display UDP sockets
     - `p` = show process information
