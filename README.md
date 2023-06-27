@@ -23,7 +23,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
-  - [Using Ansible Playbooks to secure your Linux Server](#ansible-playbooks-to-secure-your-linux-server)
+  - [Using Ansible Playbooks to secure your Linux Server](#using-ansible-playbooks-to-secure-your-linux-server)
 - [The SSH Server](#the-ssh-server)
   - [Important Note Before You Make SSH Changes](#important-note-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
