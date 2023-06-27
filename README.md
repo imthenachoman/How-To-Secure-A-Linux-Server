@@ -73,6 +73,8 @@ This guides purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
+Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible) by [sysadt](https://github.com/sysadt).
+
 ([Table of Contents](#table-of-contents))
 
 ### Why Secure Your Server
@@ -96,8 +98,6 @@ As I was going through research for my Debian build, I kept notes. At the end I 
 I've never found one guide that covers everything -- this guide is my attempt.
 
 Many of the things covered in this guide may be rather basic/trivial, but most of us do not install Linux every day and it is easy to forget those basic things.
-
-IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www.chef.io/), [Jenkins](https://jenkins.io/), [Puppet](https://puppet.com/), etc. help with the tedious task of installing/configuring a server but IMHO they are better suited for multiple or large scale deployments. IMHO, the overhead required to use those kinds of automation tools is wholly unnecessary for a one-time single server install for home use.
 
 ([Table of Contents](#table-of-contents))
 
@@ -3546,6 +3546,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 - https://news.ycombinator.com/item?id=19177435#19178618
 - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/
 - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/
+- https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible
 
 ([Table of Contents](#table-of-contents))
 
