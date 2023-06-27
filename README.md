@@ -1370,18 +1370,19 @@ WIP
 
 #### Why
 
-    A nice tool to add extra password security, against physical attack (In-Person) Ramson/Rob/assault methods.
+A nice tool to add extra password security, against physical attack (In-Person) Ramson/Rob/assault methods.
 
 #### How It Works
 
-    The pamduress will add to the X user a secondary password(Panic password), when this password match will start run a script (this script do what you what the user do, when he logins with THESE panic password.
-    Practical & real Example:
-    "Some Robber invade a home, and steal the server (containing IMPORTANT business backups, and ownlife memories and blablabla). Not exist any disk/boot encryption. Robber have start the server on their 'safe zone' and start an bruteforce attack. He have cracked the local password by SSH with from sudoer user 'admin' success, yeah a dummy password, not THE Strong one/primary. He starts SSH session/or physical session with that cracked dummy/panic password with 'admin' sudoer. He starts feeling the server seems to much busy in less than 2 minutes until to freeze.. 'wtf!?! lets reboot and continue steal info..'.. sorry friend. all data and system was destroyed.".
+The pamduress will add to the X user a secondary password(Panic password), when this password match will start run a script (this script do what you what the user do, when he logins with THESE panic password.
+
+Practical & real Example:
+"Some Robber invade a home, and steal the server (containing IMPORTANT business backups, and ownlife memories and blablabla). Not exist any disk/boot encryption. Robber have start the server on their 'safe zone' and start an bruteforce attack. He have cracked the local password by SSH with from sudoer user 'admin' success, yeah a dummy password, not THE Strong one/primary. He starts SSH session/or physical session with that cracked dummy/panic password with 'admin' sudoer. He starts feeling the server seems to much busy in less than 2 minutes until to freeze.. 'wtf!?! lets reboot and continue steal info..'.. sorry friend. all data and system was destroyed.".
     Conclusion, the robber cracked the dummy/panic/secondary password, and with this password its associated a script will do delete all files, config, system, boot and after than start charge the RAM and CPU to force robber reboot system.  
 
 #### Goals
 
-    Prevent access to malicious person to access server information when get an a password in force way (assault, gun, ransom, ...). Of course this is helpfull in other situations.
+Prevent access to malicious person to access server information when get an a password in force way (assault, gun, ransom, ...). Of course this is helpfull in other situations.
 
 #### References
 
