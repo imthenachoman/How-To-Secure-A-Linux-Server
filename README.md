@@ -23,6 +23,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
+  - [Using Ansible Playbooks to secure your Linux Server](#ansible-playbooks-to-secure-your-linux-server)
 - [The SSH Server](#the-ssh-server)
   - [Important Note Before You Make SSH Changes](#important-note-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
@@ -266,6 +267,52 @@ Where applicable, use the expert install option so you have tighter control of w
 - File paths and settings also may differ slightly -- check with your distribution's documentation if you have issues.
 - Read the whole guide before you start. Your use-case and/or principals may call for not doing something or for changing the order.
 - Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
+
+([Table of Contents](#table-of-contents))
+
+### Using Ansible playbooks to secure your Linux Server
+Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible).
+
+Make sure to edit the variables according to your needs and read all tasks beforehand to confirm it does not break your system. After running the playbooks ensure that all settings are configured to your needs!
+
+1. Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+2. git clone [How To Secure A Linux Server With Ansible](https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible)
+3. [Create SSH-Public/Private-Keys](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#ssh-publicprivate-keys)
+  ```
+  ssh-keygen -t ed25519
+  ```
+   
+5. Change all variables in *group_vars/variables.yml* according to your needs.
+6. Enable SSH root access before running the playbooks:
+   
+  ```
+  nano /etc/ssh/sshd_config
+  [...]
+  PermitRootLogin yes
+  [...]
+  ```
+
+7. Recommended: configure static IP address on your system.
+8. Add your systems IP address to *hosts.yml*.
+
+&nbsp;
+
+Run the requirements playbook using the root password you specified while installing the server:
+
+    ansible-playbook --inventory hosts.yml --ask-pass requirements-playbook.yml
+
+&nbsp;
+
+Run the main playbook with the new users password you specified in the *variables.yml* file:
+
+    ansible-playbook --inventory hosts.yml --ask-pass main-playbook.yml
+
+&nbsp;
+
+If you need to run the playbooks multiple times remember to use the SSH key and the new SSH port:
+
+    ansible-playbook --inventory hosts.yml -e ansible_ssh_port=SSH_PORT --key-file /PATH/TO/SSH/KEY main-playbook.yml
+
 
 ([Table of Contents](#table-of-contents))
 
