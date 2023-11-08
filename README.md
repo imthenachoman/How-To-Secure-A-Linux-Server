@@ -3240,6 +3240,8 @@ There are many guides on-line that cover how to configure Gmail as MTA using STA
 
 Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29) and [here](https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender), exim4 will fail for messages with long lines. We'll fix this in this section too.
 
+** **IMPORTANT** ** As mentioned in [#106](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/106), Google no longer lets you use your account's password for authentication. You have to enable 2FA and then use an app-password.
+
 #### Goals
 
 - `mail` configured to send e-mails from your server using [Gmail](https://mail.google.com/)
@@ -3254,6 +3256,7 @@ Also, as discussed in [issue #29](https://github.com/imthenachoman/How-To-Secure
 - https://php.quicoto.com/setup-exim4-to-use-gmail-in-ubuntu/
 - https://www.fastmail.com/help/technical/ssltlsstarttls.html
 - exim4 fails for messages with long lines - [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29) and https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender
+- https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/106
 
 #### Steps
 
