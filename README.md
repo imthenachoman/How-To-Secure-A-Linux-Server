@@ -1651,6 +1651,36 @@ Then you can enable it like any other app:
 sudo ufw allow plexmediaserver
 ```
 
+#### Automatic IP-Blacklisting
+
+The [IPSum](https://github.com/stamparm/ipsum) project is hosting a blacklist of known malicious IP addresses which gets updated daily. You can automatically import these with UFW and [these scripts](https://github.com/sysadt/UFW-Automatic-IP-Blacklisting).
+
+Create a directory for your blacklist and the scripts:
+```
+mkdir /opt/ip-blacklist
+```
+
+Download the scripts to the created directory:
+```
+wget https://raw.githubusercontent.com/sysadt/UFW-Automatic-IP-Blacklisting/main/ip-blacklist.sh -P /opt/ip-blacklist
+wget https://raw.githubusercontent.com/sysadt/UFW-Automatic-IP-Blacklisting/main/update-blacklist.sh -P /opt/ip-blacklist
+```
+
+Change permissions:
+```
+chmod 700 /opt/ip-blacklist/ip-blacklist.sh
+chmod 700 /opt/ip-blacklist/update-blacklist.sh
+```
+
+Add the scripts to a daily cronjob:
+```
+crontab -e
+```
+```
+0 6 * * * /opt/ip-blacklist/update-blacklist.sh
+10 6 * * * /opt/ip-blacklist/ip-blacklist.sh
+```
+
 ([Table of Contents](#table-of-contents))
 
 ### iptables Intrusion Detection And Prevention with PSAD
