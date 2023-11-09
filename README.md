@@ -1674,7 +1674,7 @@ chmod 700 /opt/ip-blacklist/update-blacklist.sh
 
 Add the scripts to a daily cronjob:
 ```
-crontab -e
+sudo crontab -e
 ```
 ```
 0 6 * * * /opt/ip-blacklist/update-blacklist.sh
