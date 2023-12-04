@@ -40,6 +40,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Force Accounts To Use Secure Passwords](#force-accounts-to-use-secure-passwords)
   - [Automatic Security Updates and Alerts](#automatic-security-updates-and-alerts)
   - [More Secure Random Entropy Pool (WIP)](#more-secure-random-entropy-pool-wip)
+  - [Add Panic/Secondary/Fake password Login Security System](#add-panic-secondary-fake-password-login-security-system)
 - [The Network](#the-network)
   - [Firewall With UFW (Uncomplicated Firewall)](#firewall-with-ufw-uncomplicated-firewall)
   - [iptables Intrusion Detection And Prevention with PSAD](#iptables-intrusion-detection-and-prevention-with-psad)
@@ -1409,7 +1410,98 @@ WIP
 1. Test randomness:
     - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-encryption-using_the_random_number_generator
     - https://wiki.archlinux.org/index.php/Rng-tools
-   
+
+([Table of Contents](#table-of-contents))
+
+### Add Panic/Secondary/Fake password Login Security System
+
+#### Why
+
+A nice tool to add extra password security, against physical attack (In-Person) Ramson/Rob/assault methods.
+
+#### How It Works
+
+The pamduress will add to the X user a secondary password(Panic password), when this password match will start run a script (this script do what you what the user do, when he logins with THESE panic password.
+
+Practical & real Example:
+"Some Robber invade a home, and steal the server (containing IMPORTANT business backups, and ownlife memories and blablabla). Not exist any disk/boot encryption. Robber have start the server on their 'safe zone' and start an bruteforce attack. He have cracked the local password by SSH with from sudoer user 'admin' success, yeah a dummy password, not THE Strong one/primary. He starts SSH session/or physical session with that cracked dummy/panic password with 'admin' sudoer. He starts feeling the server seems to much busy in less than 2 minutes until to freeze.. 'wtf!?! lets reboot and continue steal info..'.. sorry friend. all data and system was destroyed.".
+    Conclusion, the robber cracked the dummy/panic/secondary password, and with this password its associated a script will do delete all files, config, system, boot and after than start charge the RAM and CPU to force robber reboot system.  
+
+#### Goals
+
+Prevent access to malicious person to access server information when get an a password in force way (assault, gun, ransom, ...). Of course this is helpfull in other situations.
+
+#### References
+
+- Thanks to [nuvious](https://github.com/nuvious/pam-duress) for this tool
+- Thanks to [hellresistor](https://gist.github.com/hellresistor/a4c542415a2d437e21afc235260d2366) for this Lazy-Tool-Script
+
+#### Steps
+
+1. Run this (hellresistor Lazy-Tool-Script).
+
+ ```` bash
+#!/bin/bash
+myownscript(){
+#######################################################
+## ***** EDIT THIS SCRIPT TO YOUR PROPOSES *****#
+
+cat > "$ScriptFile" <<-EOF
+#!/bin/bash
+sudo rm -rf /home
+#### FINISHED OWN SCRIPT ####
+EOF
+#######################################################
+}
+echo "Lets Config a PANIC PASSWORD ;)" && sleep 1
+read -r -p "Want you REALLY configure A PANIC PASSWORD?? Write [ OK ] : " PAMDUR
+if [[ "$PAMDUR" = "OK" ]]; then
+ echo "Lets Config a PANIC USER, PASSWORD and SCRIPT ;)" && sleep 1
+ while [ -z "$PANICUSR" ]
+ do
+  read -r -p "WRITE a Panic User to your pam-duress user [ root ]: " PANICUSR
+  PANICUSR=${PANICUSR:=root}
+ done
+ if [ -z "$ScriptLoc" ]; then
+  read -r -p "SET Script Directory with FULL PATH [ /root/.duress ]: " ScriptLoc
+  ScriptLoc=${ScriptLoc:=/root/.duress}
+  ScriptFile="$ScriptLoc/PanicScript.sh"
+ fi
+else
+ echo "NOT Use PAM DURESS aKa Panic Password!!! Bye"
+ exit 1
+fi
+
+sudo apt install -y git build-essential libpam0g-dev libssl-dev
+
+cd "$HOME" || exit 1
+git clone https://github.com/nuvious/pam-duress.git
+cd pam-duress || exit 1
+make 
+sudo make install
+make clean
+#make uninstall
+
+mkdir -p $ScriptLoc
+sudo mkdir -p /etc/duress.d
+myownscript
+duress_sign $ScriptFile
+chmod -R 500 $ScriptLoc
+chmod 400 $ScriptLoc/*.sha256
+chown -R $PANICUSR $ScriptLoc
+
+sudo cp --preserve /etc/pam.d/common-auth /etc/pam.d/common-auth.bck
+
+echo "
+auth   	[success=2 default=ignore]	     pam_unix.so nullok_secure
+auth    [success=1 default=ignore]      pam_duress.so
+auth	   requisite	                    		pam_deny.so
+auth	   required	                     		pam_permit.so
+" | sudo tee /etc/pam.d/common-auth
+
+read -r -p "Press <Enter> Key to Finish PAM DURESS Script!"
+exit 0
+ ````
 
 ([Table of Contents](#table-of-contents))
 
