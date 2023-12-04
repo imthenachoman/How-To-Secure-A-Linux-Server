@@ -74,7 +74,7 @@ This guides purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
-Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible) by [sysadt](https://github.com/sysadt).
+Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible) by [moltenbit](https://github.com/moltenbit).
 
 ([Table of Contents](#table-of-contents))
 
@@ -271,12 +271,12 @@ Where applicable, use the expert install option so you have tighter control of w
 ([Table of Contents](#table-of-contents))
 
 ### Using Ansible playbooks to secure your Linux Server
-Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible).
+Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible).
 
 Make sure to edit the variables according to your needs and read all tasks beforehand to confirm it does not break your system. After running the playbooks ensure that all settings are configured to your needs!
 
 1. Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
-2. git clone [How To Secure A Linux Server With Ansible](https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible)
+2. git clone [How To Secure A Linux Server With Ansible](https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible)
 3. [Create SSH-Public/Private-Keys](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#ssh-publicprivate-keys)
   ```
   ssh-keygen -t ed25519
@@ -1722,7 +1722,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 - https://serverfault.com/a/447604/289829
 - https://serverfault.com/a/770424/289829
 - https://gist.github.com/netson/c45b2dc4e835761fbccc
-- Thanks to [sysadt](https://github.com/sysadt) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
+- Thanks to [moltenbit](https://github.com/moltenbit) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
 
 #### Steps
 
@@ -3596,7 +3596,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 - https://news.ycombinator.com/item?id=19177435#19178618
 - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/
 - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/
-- https://github.com/sysadt/How-To-Secure-A-Linux-Server-With-Ansible
+- https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible
 
 ([Table of Contents](#table-of-contents))
 
