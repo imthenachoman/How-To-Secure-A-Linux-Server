@@ -23,6 +23,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [Installing Linux](#installing-linux)
   - [Pre/Post Installation Requirements](#prepost-installation-requirements)
   - [Other Important Notes](#other-important-notes)
+  - [Using Ansible Playbooks to secure your Linux Server](#using-ansible-playbooks-to-secure-your-linux-server)
 - [The SSH Server](#the-ssh-server)
   - [Important Note Before You Make SSH Changes](#important-note-before-you-make-ssh-changes)
   - [SSH Public/Private Keys](#ssh-publicprivate-keys)
@@ -73,6 +74,8 @@ This guides purpose is to teach you how to secure a Linux server.
 
 There are a lot of things you can do to secure a Linux server and this guide will attempt to cover as many of them as possible. More topics/material will be added as I learn, or as folks [contribute](#contributing).
 
+Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible) by [moltenbit](https://github.com/moltenbit).
+
 ([Table of Contents](#table-of-contents))
 
 ### Why Secure Your Server
@@ -96,8 +99,6 @@ As I was going through research for my Debian build, I kept notes. At the end I 
 I've never found one guide that covers everything -- this guide is my attempt.
 
 Many of the things covered in this guide may be rather basic/trivial, but most of us do not install Linux every day and it is easy to forget those basic things.
-
-IT automation tools like [Ansible](https://www.ansible.com/), [Chef](https://www.chef.io/), [Jenkins](https://jenkins.io/), [Puppet](https://puppet.com/), etc. help with the tedious task of installing/configuring a server but IMHO they are better suited for multiple or large scale deployments. IMHO, the overhead required to use those kinds of automation tools is wholly unnecessary for a one-time single server install for home use.
 
 ([Table of Contents](#table-of-contents))
 
@@ -266,6 +267,52 @@ Where applicable, use the expert install option so you have tighter control of w
 - File paths and settings also may differ slightly -- check with your distribution's documentation if you have issues.
 - Read the whole guide before you start. Your use-case and/or principals may call for not doing something or for changing the order.
 - Do not **blindly** copy-and-paste without understanding what you're pasting. Some commands will need to be modified for your needs before they'll work -- usernames for example.
+
+([Table of Contents](#table-of-contents))
+
+### Using Ansible playbooks to secure your Linux Server
+Ansible playbooks of this guide are available at [How To Secure A Linux Server With Ansible](https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible).
+
+Make sure to edit the variables according to your needs and read all tasks beforehand to confirm it does not break your system. After running the playbooks ensure that all settings are configured to your needs!
+
+1. Install [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+2. git clone [How To Secure A Linux Server With Ansible](https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible)
+3. [Create SSH-Public/Private-Keys](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#ssh-publicprivate-keys)
+  ```
+  ssh-keygen -t ed25519
+  ```
+   
+5. Change all variables in *group_vars/variables.yml* according to your needs.
+6. Enable SSH root access before running the playbooks:
+   
+  ```
+  nano /etc/ssh/sshd_config
+  [...]
+  PermitRootLogin yes
+  [...]
+  ```
+
+7. Recommended: configure static IP address on your system.
+8. Add your systems IP address to *hosts.yml*.
+
+&nbsp;
+
+Run the requirements playbook using the root password you specified while installing the server:
+
+    ansible-playbook --inventory hosts.yml --ask-pass requirements-playbook.yml
+
+&nbsp;
+
+Run the main playbook with the new users password you specified in the *variables.yml* file:
+
+    ansible-playbook --inventory hosts.yml --ask-pass main-playbook.yml
+
+&nbsp;
+
+If you need to run the playbooks multiple times remember to use the SSH key and the new SSH port:
+
+    ansible-playbook --inventory hosts.yml -e ansible_ssh_port=SSH_PORT --key-file /PATH/TO/SSH/KEY main-playbook.yml
+
 
 ([Table of Contents](#table-of-contents))
 
@@ -1675,7 +1722,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
 - https://serverfault.com/a/447604/289829
 - https://serverfault.com/a/770424/289829
 - https://gist.github.com/netson/c45b2dc4e835761fbccc
-- Thanks to [sysadt](https://github.com/sysadt) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
+- Thanks to [moltenbit](https://github.com/moltenbit) for catching the issue ([#61](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/61)) with `psadwatchd`.
 
 #### Steps
 
@@ -3549,6 +3596,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 - https://news.ycombinator.com/item?id=19177435#19178618
 - https://www.reddit.com/r/linuxadmin/comments/arx7xo/howtosecurealinuxserver_an_evolving_howto_guide/
 - https://www.reddit.com/r/linux/comments/arx7st/howtosecurealinuxserver_an_evolving_howto_guide/
+- https://github.com/moltenbit/How-To-Secure-A-Linux-Server-With-Ansible
 
 ([Table of Contents](#table-of-contents))
 
