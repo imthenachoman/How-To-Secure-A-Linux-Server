@@ -2415,6 +2415,17 @@ WIP
     sudo dpkg-reconfigure clamav-daemon
     ```
 
+1. Add the following to the `Package-Whitelist` in your `/etc/apt/apt.conf.d/51myunattended-upgrades` file to ensure we get updates to ClamAV's malware registry:
+
+    ```
+    Unattended-Upgrade::Package-Whitelist {
+        "clamav*";
+        "clamav-base*";
+        "clamav-freshclam*";
+        "libclamav*";
+    };
+    ```
+
 #### Scanning Files/Folders
 
 - To scan files/folders use the `clamscan` program.
