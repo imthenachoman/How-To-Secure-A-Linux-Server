@@ -56,7 +56,7 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
   - [OSSEC - Host Intrusion Detection](#ossec---host-intrusion-detection)
 - [The Danger Zone](#the-danger-zone)
 - [The Miscellaneous](#the-miscellaneous)
-  - [MSMTP (Simple Sendmail) with google](#msmtp-alternative)
+  - [MSMTP (Simple Sendmail) with Google](#msmtp-alternative)
   - [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls)
   - [Separate iptables Log File](#separate-iptables-log-file)
 - [Left Over](#left-over)
@@ -83,9 +83,9 @@ Ansible playbooks of this guide are available at [How To Secure A Linux Server W
 
 I assume you're using this guide because you, hopefully, already understand why good security is important. That is a heavy topic onto itself and breaking it down is out-of-scope for this guide. If you don't know the answer to that question, I advise you research it first.
 
-At a high level, the second a  device, like a server, is in the public domain -- i.e visible to the outside world -- it becomes a target for bad-actors. An unsecured device is a playground for bad-actors who want access to your data, or to use your server as another node for their large-scale DDOS attacks.
+At a high level, the second a  device, like a server, is in the public domain -- i.e. visible to the outside world -- it becomes a target for bad-actors. An unsecured device is a playground for bad-actors who want access to your data, or to use your server as another node for their large-scale DDOS attacks.
 
-What's worse is, without good security, you may never know if your server has been compromised. A bad-actor may have gained unauthorized access to your server and copied your data without changing anything so you'd never know. Or your server may have been part of a DDOS attack and you wouldn't know. Look at many of the large scale data breaches in the news -- the companies often did not discover the data leak or intrusion until long after the bad-actors were gone.
+What's worse is, without good security, you may never know if your server has been compromised. A bad-actor may have gained unauthorized access to your server and copied your data without changing anything, so you'd never know. Or your server may have been part of a DDOS attack, and you wouldn't know. Look at many of the large scale data breaches in the news -- the companies often did not discover the data leak or intrusion until long after the bad-actors were gone.
 
 Contrary to popular belief, bad-actors don't always want to change something or [lock you out of your data for money](https://en.wikipedia.org/wiki/Ransomware). Sometimes they just want the data on your server for their data warehouses (there is big money in big data) or to covertly use your server for their nefarious purposes.
 
@@ -99,7 +99,7 @@ As I was going through research for my Debian build, I kept notes. At the end I 
 
 I've never found one guide that covers everything -- this guide is my attempt.
 
-Many of the things covered in this guide may be rather basic/trivial, but most of us do not install Linux every day and it is easy to forget those basic things.
+Many of the things covered in this guide may be rather basic/trivial, but most of us do not install Linux every day, and it is easy to forget those basic things.
 
 ([Table of Contents](#table-of-contents))
 
@@ -159,7 +159,7 @@ This guide...
 - ...**does not** teach you everything you need to know about security nor does it get into all aspects of system/server security. For example, physical security is out of scope for this guide.
 - ...**does not** talk about how programs/tools work, nor does it delve into their nook and crannies. Most of the programs/tools this guide references are very powerful and highly configurable. The goal is to cover the bare necessities -- enough to whet your appetite and make you hungry enough to want to go and learn more.
 - ...**aims** to make it easy by providing code you can copy-and-paste. You might need to modify the commands before you paste so keep your favorite [text editor](https://notepad-plus-plus.org/) handy.
-- ...**is** organized in an order that makes logical sense to me -- i.e. securing SSH before installing a firewall. As such, this guide is intended to be followed in the order it is presented but it is not necessary to do so. Just be careful if you do things in a different order -- some sections require previous sections to be completed.
+- ...**is** organized in an order that makes logical sense to me -- i.e. securing SSH before installing a firewall. As such, this guide is intended to be followed in the order it is presented, but it is not necessary to do so. Just be careful if you do things in a different order -- some sections require previous sections to be completed.
 
 ([Table of Contents](#table-of-contents))
 
@@ -189,7 +189,7 @@ The `code` snippets use basic commands like `echo`, `cat`, `sed`, `awk`, and `gr
 
 **Note**: The `code` snippets do not validate/verify the change went through -- i.e. the line was actually added or changed. I'll leave the verifying part in your capable hands. The steps in this guide do include taking backups of all files that will be changed.
 
-Not all changes can be automated with `code` snippets. Those changes need good, old fashioned, manual editing. For example, you can't just append a line to an [INI](https://en.wikipedia.org/wiki/INI_file) type file. Use your [favorite](https://en.wikipedia.org/wiki/Vi) Linux text editor.
+Not all changes can be automated with `code` snippets. Those changes need good, old-fashioned, manual editing. For example, you can't just append a line to an [INI](https://en.wikipedia.org/wiki/INI_file) type file. Use your [favorite](https://en.wikipedia.org/wiki/Vi) Linux text editor.
 
 ([Table of Contents](#table-of-contents))
 
@@ -229,7 +229,7 @@ You want a distribution that...
 - ...**is stable**. Unless you like debugging issues at 2 AM, you don't want an [unattended upgrade](#automatic-security-updates-and-alerts), or a manual package/system update, to render your server inoperable. But this also means you're okay with not running the latest, greatest, bleeding edge software.
 - ...**stays up-to-date with security patches**. You can secure everything on your server, but if the core OS or applications you're running have known vulnerabilities, you'll never be safe.
 - ...**you're familiar with.** If you don't know Linux, I would advise you play around with one before you try to secure it. You should be comfortable with it and know your way around, like how to install software, where configuration files are, etc...
-- ...**is well supported.** Even the most seasoned admin needs help every now and then. Having a place to go for help will save your sanity.
+- ...**is well-supported.** Even the most seasoned admin needs help every now and then. Having a place to go for help will save your sanity.
 
 ([Table of Contents](#table-of-contents))
 
@@ -340,7 +340,7 @@ Check the references below for more details but, at a high level, public/private
 
 For SSH, a public and private key is created on the client. You want to keep both keys secure, especially the private key. Even though the public key is meant to be public, it is wise to make sure neither keys fall in the wrong hands.
 
-When you connect to an SSH server, SSH will look for a public key that matches the client you're connecting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Another approach is to use use [`ssh-copy-id`](https://www.ssh.com/ssh/copy-id) to transfer and append the public key.
+When you connect to an SSH server, SSH will look for a public key that matches the client you're connecting from in the file `~/.ssh/authorized_keys` on the server you're connecting to. Notice the file is in the **home folder** of the ID you're trying to connect to. So, after creating the public key, you need to append it to `~/.ssh/authorized_keys`. One approach is to copy it to a USB stick and physically transfer it to the server. Another approach is to use [`ssh-copy-id`](https://www.ssh.com/ssh/copy-id) to transfer and append the public key.
 
 After the keys have been created and the public key has been appended to `~/.ssh/authorized_keys` on the host, SSH uses the public and private keys to verify identity and then establish a secure connection. How identity is verified is a complicated process but [Digital Ocean](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process) has a very nice write-up of how it works. At a high level, identity is verified by the server encrypting a challenge message with the public key, then sending it to the client. If the client cannot decrypt the challenge message with the private key, the identity can't be verified and a connection will not be established.
 
@@ -689,7 +689,7 @@ The Diffie-Hellman algorithm is used by SSH to establish a secure connection. Th
 
 Even though SSH is a pretty good security guard for your doors and windows, it is still a visible door that bad-actors can see and try to brute-force in. [Fail2ban](#fail2ban-application-intrusion-detection-and-prevention) will monitor for these brute-force attempts but there is no such thing as being too secure. Requiring two factors adds an extra layer of security.
 
-Using Two Factor Authentication (2FA) / Multi Factor Authentication (MFA) requires anyone entering to have **two** keys to enter which makes it harder for bad actors. The two keys are:
+Using Two-Factor Authentication (2FA) / Multi-Factor Authentication (MFA) requires anyone entering to have **two** keys to enter which makes it harder for bad actors. The two keys are:
 
 1. Their password
 1. A 6 digit token that changes every 30 seconds
@@ -969,7 +969,7 @@ Browsers (even more the Closed Source ones) and eMail Clients are highly suggest
     sudo ln -s /usr/bin/firejail /usr/local/bin/thunderbird
     ```
 
-3. Run the application as usual (via terminal or launcher) and check if is running in a jail:
+3. Run the application as usual (via terminal or launcher) and check if it's running in a jail:
 
     ``` bash
     firejail --list
@@ -1424,10 +1424,10 @@ A nice tool to add extra password security, against physical attack (In-Person) 
 
 #### How It Works
 
-The pamduress will add to the X user a secondary password(Panic password), when this password match will start run a script (this script do what you what the user do, when he logins with THESE panic password.
+The pamduress will add to the X user a secondary password (Panic password), when this password match will start run a script (this script do what you what the user do, when he logins with THESE panic password.
 
 Practical & real Example:
-"Some Robber invade a home, and steal the server (containing IMPORTANT business backups, and ownlife memories and blablabla). Not exist any disk/boot encryption. Robber have start the server on their 'safe zone' and start an bruteforce attack. He have cracked the local password by SSH with from sudoer user 'admin' success, yeah a dummy password, not THE Strong one/primary. He starts SSH session/or physical session with that cracked dummy/panic password with 'admin' sudoer. He starts feeling the server seems to much busy in less than 2 minutes until to freeze.. 'wtf!?! lets reboot and continue steal info..'.. sorry friend. all data and system was destroyed.".
+"Some Robber invade a home, and steal the server (containing IMPORTANT business backups, and ownlife memories and blablabla). Not exist any disk/boot encryption. Robber have start the server on their 'safe zone' and start an bruteforce attack. He have cracked the local password by SSH with from sudoer user 'admin' success, yeah a dummy password, not THE Strong one/primary. He starts SSH session/or physical session with that cracked dummy/panic password with 'admin' sudoer. He starts feeling the server seems too much busy in less than 2 minutes until to freeze.. 'wtf!?! lets reboot and continue steal info..'.. sorry friend. all data and system was destroyed.".
     Conclusion, the robber cracked the dummy/panic/secondary password, and with this password its associated a script will do delete all files, config, system, boot and after than start charge the RAM and CPU to force robber reboot system.  
 
 #### Goals
@@ -2603,7 +2603,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
 
 - Your server will need to be able to send e-mails for this to work
 - The below steps will result in logwatch running every day. If you want to change the schedule, modify the cronjob to your liking. You'll also want to change the `range` option to cover your recurrence window. See https://www.badpenguin.org/configure-logwatch-for-weekly-email-and-html-output-format for an example.
-- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls) then we already took care of this in step #7.
+- If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you followed [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls) then we already took care of this in step #7.
 
 #### References
 
@@ -2688,7 +2688,7 @@ logwatch's configuration file `/usr/share/logwatch/default.conf/logwatch.conf` s
     sudo /etc/cron.daily/00logwatch
     ```
     
-    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you you followed [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls) then we already took care of this in step #7.
+    **Note**: If logwatch fails to deliver mail due to the e-mail having long lines please check https://blog.dhampir.no/content/exim4-line-length-in-debian-stretch-mail-delivery-failed-returning-message-to-sender as documented in [issue #29](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/29). If you followed [Gmail and Exim4 As MTA With Implicit TLS](#gmail-and-exim4-as-mta-with-implicit-tls) then we already took care of this in step #7.
 
 ([Table of Contents](#table-of-contents))
 
@@ -3074,7 +3074,7 @@ If your installation uses [`sulogin`](https://linux.die.net/man/8/sulogin) (like
 
 To work around this, you can use the `--force` option for `sulogin`. Some distributions already include this, or some other, workaround.
 
-An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non digital format. That way you have it when/if you need it.
+An alternative to locking the **root** acount is set a long/complicated **root** password and store it in a secured, non-digital format. That way you have it when/if you need it.
 
 #### Goals
 
@@ -3250,7 +3250,7 @@ Keep in mind, deborphan finds packages that have **no package dependencies**. Th
 (#msmtp-alternative)
 #### Why
 
-Well I will SIMPLIFY this method, to only output email using google mail account (and others). True Simple! :)
+Well I will SIMPLIFY this method, to only output email using Google Mail account (and others). True Simple! :)
 
     ``` bash
     #!/bin/bash
@@ -3329,7 +3329,7 @@ DONE!! ;)
 
 Unless you're planning on setting up your own mail server, you'll need a way to send e-mails from your server. This will be important for system alerts/messages.
 
-You can use any Gmail account. I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled and you use an app password, there isn't much a bad-actor can do with just the app password, but why take the risk?
+You can use any Gmail account. I recommend you create one specific for this server. That way if your server **is** compromised, the bad-actor won't have any passwords for your primary account. Granted, if you have 2FA/MFA enabled, and you use an app password, there isn't much a bad-actor can do with just the app password, but why take the risk?
 
 There are many guides on-line that cover how to configure Gmail as MTA using STARTTLS including a [previous version of this guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/tree/cc5edcae1cf846dd250e76b121e721d836481d2f#configure-gmail-as-mta). With STARTTLS, an initial **unencrypted** connection is made and then upgraded to an encrypted TLS or SSL connection. Instead, with the approach outlined below, an encrypted TLS connection is made from the start.
 
@@ -3582,7 +3582,7 @@ There will come a time when you'll need to look through your iptables logs. Havi
 
 #### Steps
 
-1. The first step is by telling your firewall to prefix all log entries with some unique string. If you're using iptables directly, you would do something like `--log-prefix "[IPTABLES] "` for all the rules. We took care of this in step [step 4 of installing psad](#psad_step4).
+1. The first step is by telling your firewall to prefix all log entries with some unique string. If you're using iptables directly, you would do something like `--log-prefix "[IPTABLES] "` for all the rules. We took care of this in [step 4 of installing psad](#psad_step4).
 
 1. After you've added a prefix to the firewall logs, we need to tell rsyslog to send those lines to its own file. Do this by creating the file `/etc/rsyslog.d/10-iptables.conf` and adding this:
 
