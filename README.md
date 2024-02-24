@@ -580,6 +580,9 @@ SSH is a door into your server. This is especially true if you are opening ports
 
     # don't allow .rhosts or /etc/hosts.equiv
     HostbasedAuthentication no
+
+    # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/115
+    HashKnownHosts yes
     ```
 
 1. Then **find and edit or add** these settings, and set values as per your requirements:
