@@ -2139,8 +2139,8 @@ CrowdSec monitors the logs of your applications (like SSH and Apache) to detect 
     curl -s https://install.crowdsec.net | sudo sh
     ```
     
-    > [!TIP]
-    > if `curl | sh` is not your thing, you can find additional install methods [here](https://docs.crowdsec.net/u/getting_started/installation/linux).
+> [!TIP]
+> if `curl | sh` is not your thing, you can find additional install methods [here](https://docs.crowdsec.net/u/getting_started/installation/linux).
 
     Install the CrowdSec Security Engine:
     ``` bash
@@ -2157,8 +2157,8 @@ By default whilst CrowdSec is installing the Security Engine it will auto-discov
     sudo apt install crowdsec-firewall-bouncer-iptables
     ```
 
-    > ![!TIP]
-    > If your installation of UFW is not using `iptables` as the backend, you can alternatively install `crowdsec-firewall-bouncer-nftables`. There is no difference in the installed binaries, only the configuration file is different.
+> ![!TIP]
+> If your installation of UFW is not using `iptables` as the backend, you can alternatively install `crowdsec-firewall-bouncer-nftables`. There is no difference in the installed binaries, only the configuration file is different.
 
 By default whilst the Remediation Component is installing it will auto-configure the necessary settings to work with the Security Engine if deployed on the same host (and if the security engine is not within a container environment).
 
