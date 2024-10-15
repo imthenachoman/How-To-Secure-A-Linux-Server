@@ -44,7 +44,8 @@ An evolving how-to guide for securing a Linux server that, hopefully, also teach
 - [The Network](#the-network)
   - [Firewall With UFW (Uncomplicated Firewall)](#firewall-with-ufw-uncomplicated-firewall)
   - [iptables Intrusion Detection And Prevention with PSAD](#iptables-intrusion-detection-and-prevention-with-psad)
-  - [Application Intrusion Detection And Prevention With Fail2Ban](#application-intrusion-detection-and-prevention-with-fail2ban)
+  - [Application Intrusion Detection And Prevention With Fail2Ban](#application-intrusion-detection-and-prevention-with-fail2ban) 
+  - [Application Intrusion Detection And Prevention With CrowdSec](#application-intrusion-detection-and-prevention-with-crowdsec)
 - [The Auditing](#the-auditing)
   - [File/Folder Integrity Monitoring With AIDE (WIP)](#filefolder-integrity-monitoring-with-aide-wip)
   - [Anti-Virus Scanning With ClamAV (WIP)](#anti-virus-scanning-with-clamav-wip)
@@ -2098,6 +2099,193 @@ fail2ban-client set sshd unbanip 192.168.1.100
 ```
 
 ([Table of Contents](#table-of-contents))
+
+### Application Intrusion Detection And Prevention With CrowdSec
+
+#### Why
+
+UFW tells your server what doors to board up so nobody can see them, and what doors to allow authorized users through. PSAD monitors network activity to detect and prevent potential intrusions -- repeated attempts to get in. 
+
+CrowdSec is similar to Fail2Ban in that it monitors the logs of your applications (like SSH and Apache) to detect and prevent potential intrusions. However, CrowdSec is coupled with a community that shares threat intelligence back to CrowdSec to then distribute a Community Blocklist to all users.
+
+#### How It Works
+
+CrowdSec monitors the logs of your applications (like SSH and Apache) to detect and prevent potential intrusions. It will monitor network traffic/logs and prevent intrusions by blocking suspicious activity (e.g. multiple successive failed connections in a short time-span). Once a malicious IP is detected, it will be added to your local decision list and threat information is shared with CrowdSec to update the Community Blocklist on malicious IP addresses. Once an IP address hits a certain threshold of malicious activity, it will be automatically propogated to all other CrowdSec users to proactively block.
+
+#### Goals
+
+- network monitoring for suspicious activity with automatic banning of offending IPs
+
+#### Notes
+
+- As of right now, the only thing running on this server is SSH so we'll want CrowdSec to monitor SSH and ban as necessary.
+- As you install other programs, you'll need to install additional collections and configure the appropriate acquisitions.
+
+#### References
+
+- https://www.crowdsec.net/
+- [Read how CrowdSec curates the Community Blocklist](https://www.crowdsec.net/our-data)
+- [Read what threat intelligence is shared with CrowdSec](https://docs.crowdsec.net/docs/next/central_api/intro#signal-meta-data)
+- https://docs.crowdsec.net/
+
+#### Steps
+
+1. Install CrowdSec Security Engine. (IDS)
+
+    On any linux distro (including Debian based systems)
+    
+    Install the CrowdSec repository:
+    ``` bash
+    curl -s https://install.crowdsec.net | sudo sh
+    ```
+    
+    > [!TIP]
+    > if `curl | sh` is not your thing, you can find additional install methods [here](https://docs.crowdsec.net/u/getting_started/installation/linux).
+
+    Install the CrowdSec Security Engine:
+    ``` bash
+    sudo apt install crowdsec
+    ```
+
+By default whilst CrowdSec is installing the Security Engine it will auto-discover your installed applications and install the appropriate parsers and scenarios for them. Since we know most Linux servers are running ssh out of the box CrowdSec will automatically configured this for you.
+
+2. Install a Remediation Component. (IPS)
+
+    CrowdSec by itself is a detection engine, since in most modern infrastructures you may have an upstream firewall or WAF, CrowdSec will not block the IP addresses by itself. You can install a Remediation Component to block the IP addresses detected by CrowdSec.
+
+    ```bash
+    sudo apt install crowdsec-firewall-bouncer-iptables
+    ```
+
+    > ![!TIP]
+    > If your installation of UFW is not using `iptables` as the backend, you can alternatively install `crowdsec-firewall-bouncer-nftables`. There is no difference in the installed binaries, only the configuration file is different.
+
+By default whilst the Remediation Component is installing it will auto-configure the necessary settings to work with the Security Engine if deployed on the same host (and if the security engine is not within a container environment).
+
+3. Check detection and remediation is working as intended:
+
+    CrowdSec package comes with a CLI tool to check the status of the Security Engine and the Remediation Component.
+
+    ```bash
+    sudo cscli metrics
+    ```
+
+    ```bash
+    Acquisition Metrics:
+    ╭────────────────────────┬────────────┬──────────────┬────────────────┬────────────────────────┬───────────────────╮
+    │ Source                 │ Lines read │ Lines parsed │ Lines unparsed │ Lines poured to bucket │ Lines whitelisted │
+    ├────────────────────────┼────────────┼──────────────┼────────────────┼────────────────────────┼───────────────────┤
+    │ file:/var/log/auth.log │ 5          │ 4            │ 1              │ 10                     │ -                 │
+    │ file:/var/log/syslog   │ 30         │ -            │ 30             │ -                      │ -                 │
+    ╰────────────────────────┴────────────┴──────────────┴────────────────┴────────────────────────┴───────────────────╯
+
+    Local API Decisions:
+    ╭────────────────────────────────────────────┬────────┬────────┬───────╮
+    │ Reason                                     │ Origin │ Action │ Count │
+    ├────────────────────────────────────────────┼────────┼────────┼───────┤
+    │ crowdsecurity/http-backdoors-attempts      │ CAPI   │ ban    │ 73    │
+    │ crowdsecurity/http-bad-user-agent          │ CAPI   │ ban    │ 4836  │
+    │ crowdsecurity/http-path-traversal-probing  │ CAPI   │ ban    │ 87    │
+    │ crowdsecurity/http-probing                 │ CAPI   │ ban    │ 2010  │
+    │ crowdsecurity/thinkphp-cve-2018-20062      │ CAPI   │ ban    │ 88    │
+    │ crowdsecurity/CVE-2019-18935               │ CAPI   │ ban    │ 7     │
+    │ crowdsecurity/CVE-2023-49103               │ CAPI   │ ban    │ 5     │
+    │ crowdsecurity/http-admin-interface-probing │ CAPI   │ ban    │ 91    │
+    │ ltsich/http-w00tw00t                       │ CAPI   │ ban    │ 3     │
+    │ crowdsecurity/apache_log4j2_cve-2021-44228 │ CAPI   │ ban    │ 18    │
+    │ crowdsecurity/nginx-req-limit-exceeded     │ CAPI   │ ban    │ 280   │
+    │ crowdsecurity/ssh-slow-bf                  │ CAPI   │ ban    │ 3412  │
+    │ crowdsecurity/spring4shell_cve-2022-22965  │ CAPI   │ ban    │ 1     │
+    │ crowdsecurity/ssh-cve-2024-6387            │ CAPI   │ ban    │ 24    │
+    │ crowdsecurity/CVE-2023-22515               │ CAPI   │ ban    │ 2     │
+    │ crowdsecurity/http-cve-2021-41773          │ CAPI   │ ban    │ 172   │
+    │ crowdsecurity/netgear_rce                  │ CAPI   │ ban    │ 14    │
+    │ crowdsecurity/ssh-bf                       │ CAPI   │ ban    │ 2000  │
+    │ crowdsecurity/CVE-2022-35914               │ CAPI   │ ban    │ 1     │
+    │ crowdsecurity/http-cve-2021-42013          │ CAPI   │ ban    │ 2     │
+    │ crowdsecurity/jira_cve-2021-26086          │ CAPI   │ ban    │ 9     │
+    │ crowdsecurity/http-sensitive-files         │ CAPI   │ ban    │ 166   │
+    │ crowdsecurity/http-wordpress-scan          │ CAPI   │ ban    │ 272   │
+    │ crowdsecurity/CVE-2022-26134               │ CAPI   │ ban    │ 5     │
+    │ crowdsecurity/http-generic-bf              │ CAPI   │ ban    │ 7     │
+    │ crowdsecurity/http-open-proxy              │ CAPI   │ ban    │ 948   │
+    │ crowdsecurity/http-crawl-non_statics       │ CAPI   │ ban    │ 339   │
+    │ crowdsecurity/http-cve-probing             │ CAPI   │ ban    │ 5     │
+    │ crowdsecurity/CVE-2017-9841                │ CAPI   │ ban    │ 117   │
+    │ crowdsecurity/CVE-2022-37042               │ CAPI   │ ban    │ 1     │
+    │ crowdsecurity/fortinet-cve-2018-13379      │ CAPI   │ ban    │ 5     │
+    ╰────────────────────────────────────────────┴────────┴────────┴───────╯
+
+    Local API Metrics:
+    ╭──────────────────────┬────────┬──────╮
+    │ Route                │ Method │ Hits │
+    ├──────────────────────┼────────┼──────┤
+    │ /v1/alerts           │ GET    │ 2    │
+    │ /v1/decisions/stream │ GET    │ 5    │
+    │ /v1/usage-metrics    │ POST   │ 2    │
+    │ /v1/watchers/login   │ POST   │ 4    │
+    ╰──────────────────────┴────────┴──────╯
+
+    Local API Bouncers Metrics:
+    ╭────────────────────────────────┬──────────────────────┬────────┬──────╮
+    │ Bouncer                        │ Route                │ Method │ Hits │
+    ├────────────────────────────────┼──────────────────────┼────────┼──────┤
+    │ cs-firewall-bouncer-1729025592 │ /v1/decisions/stream │ GET    │ 5    │
+    ╰────────────────────────────────┴──────────────────────┴────────┴──────╯
+
+    Local API Machines Metrics:
+    ╭──────────────────────────────────────────────────┬────────────┬────────┬──────╮
+    │ Machine                                          │ Route      │ Method │ Hits │
+    ├──────────────────────────────────────────────────┼────────────┼────────┼──────┤
+    │ githubciXXXXXXXXXXXXXXXXXXXXXXXXMKwkERgwSCD4NchX │ /v1/alerts │ GET    │ 2    │
+    ╰──────────────────────────────────────────────────┴────────────┴────────┴──────╯
+
+    Parser Metrics:
+    ╭─────────────────────────────────┬──────┬────────┬──────────╮
+    │ Parsers                         │ Hits │ Parsed │ Unparsed │
+    ├─────────────────────────────────┼──────┼────────┼──────────┤
+    │ child-crowdsecurity/sshd-logs   │ 41   │ 4      │ 37       │
+    │ child-crowdsecurity/syslog-logs │ 35   │ 35     │ -        │
+    │ crowdsecurity/dateparse-enrich  │ 4    │ 4      │ -        │
+    │ crowdsecurity/sshd-logs         │ 5    │ 4      │ 1        │
+    │ crowdsecurity/syslog-logs       │ 35   │ 35     │ -        │
+    ╰─────────────────────────────────┴──────┴────────┴──────────╯
+
+    Scenario Metrics:
+    ╭─────────────────────────────────────┬───────────────┬───────────┬──────────────┬────────┬─────────╮
+    │ Scenario                            │ Current Count │ Overflows │ Instantiated │ Poured │ Expired │
+    ├─────────────────────────────────────┼───────────────┼───────────┼──────────────┼────────┼─────────┤
+    │ crowdsecurity/ssh-bf                │ 1             │ -         │ 1            │ 4      │ -       │
+    │ crowdsecurity/ssh-bf_user-enum      │ 1             │ -         │ 1            │ 1      │ -       │
+    │ crowdsecurity/ssh-slow-bf           │ 1             │ -         │ 1            │ 4      │ -       │
+    │ crowdsecurity/ssh-slow-bf_user-enum │ 1             │ -         │ 1            │ 1      │ -       │
+    ╰─────────────────────────────────────┴───────────────┴───────────┴──────────────┴────────┴─────────╯
+    ```
+
+The above output can be daunting, but it's a good way to check that the Security Engine is reading logs and the Remediation Component is blocking IP addresses. So a quick breakdown of each section:
+
+- **Acquisition Metrics**: This section shows the logs that the Security Engine is reading and parsing. If you see logs in the `Lines unparsed` column, it means the Security Engine is not able to parse the logs. This could be due to a misconfiguration or the logs are not in the expected format.
+- **Local API Decisions**: This section shows the decisions that the Security Engine has within the datbase. If you see logs in the `Count` column, it means the Security Engine has detected malicious activity and has blocked the IP address.
+    - Orgin: This is where the decision came from. In this case, it's from the Central API (CAPI).
+- **Local API Metrics**: This section shows the number of hits to the Local API. This is the API that the Security Engine uses to communicate with the Remediation Component.
+- **Local API Bouncers Metrics**: This section shows the number of hits to the Local API by the Remediation Component.
+- **Local API Machines Metrics**: This section shows the number of hits to the Local API by the Security Engine (if you run multiple Security Engine in a centralized setup you can see multiple ID's here).
+- **Parser Metrics**: This section shows the parsers that are being used by the Security Engine. If you see logs in the `Unparsed` column, it means the Security Engine is not able to parse the logs. This could be due to a misconfiguration or the logs are not in the expected format.
+- **Scenario Metrics**: This section shows the scenarios that are being used by the Security Engine. If you see logs in the `Current Count` column, it means the Security Engine has detected malicious activity and is tracking the IP address.
+
+#### Unban an IP
+
+To unban an IP use this command:
+
+``` bash
+cscli decisions delete --ip [IP]
+```
+
+`[IP]` is the IP address you want to unban. For example, to unaban `192.168.1.100` from SSH you would do:
+
+``` bash
+cscli decisions delete --ip 192.168.1.100
+```
 
 ## The Auditing
 
