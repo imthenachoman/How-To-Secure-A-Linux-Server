@@ -2138,14 +2138,14 @@ CrowdSec monitors the logs of your applications (like SSH and Apache) to detect 
     ``` bash
     curl -s https://install.crowdsec.net | sudo sh
     ```
-    
-> [!TIP]
-> if `curl | sh` is not your thing, you can find additional install methods [here](https://docs.crowdsec.net/u/getting_started/installation/linux).
 
     Install the CrowdSec Security Engine:
     ``` bash
     sudo apt install crowdsec
     ```
+
+> [!TIP]
+> if `curl | sh` is not your thing, you can find additional install methods [here](https://docs.crowdsec.net/u/getting_started/installation/linux).
 
 By default whilst CrowdSec is installing the Security Engine it will auto-discover your installed applications and install the appropriate parsers and scenarios for them. Since we know most Linux servers are running ssh out of the box CrowdSec will automatically configured this for you.
 
