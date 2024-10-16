@@ -2280,7 +2280,7 @@ To unban an IP use this command:
 cscli decisions delete --ip [IP]
 ```
 
-`[IP]` is the IP address you want to unban. For example, to unaban `192.168.1.100` from SSH you would do:
+`[IP]` is the IP address you want to unban. For example, to unban `192.168.1.100` from SSH you would do:
 
 ``` bash
 cscli decisions delete --ip 192.168.1.100
