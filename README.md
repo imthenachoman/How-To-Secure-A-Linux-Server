@@ -2161,6 +2161,7 @@ By default whilst CrowdSec is installing the Security Engine it will auto-discov
 > If your installation of UFW is not using `iptables` as the backend, you can alternatively install `crowdsec-firewall-bouncer-nftables`. There is no difference in the installed binaries, only the configuration file is different.
 
 By default whilst the Remediation Component is installing it will auto-configure the necessary settings to work with the Security Engine if deployed on the same host (and if the security engine is not within a container environment).
+
 3. Check detection and remediation is working as intended:
 
     CrowdSec package comes with a CLI tool to check the status of the Security Engine and the Remediation Component.
