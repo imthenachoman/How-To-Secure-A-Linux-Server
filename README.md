@@ -2157,6 +2157,7 @@ By default whilst CrowdSec is installing the Security Engine it will auto-discov
     sudo apt install crowdsec-firewall-bouncer-iptables
     ```
 
+
 > ![!TIP]
 > If your installation of UFW is not using `iptables` as the backend, you can alternatively install `crowdsec-firewall-bouncer-nftables`. There is no difference in the installed binaries, only the configuration file is different.
 
