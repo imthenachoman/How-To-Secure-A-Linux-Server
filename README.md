@@ -2152,7 +2152,6 @@ By default whilst CrowdSec is installing the Security Engine it will auto-discov
 2. Install a Remediation Component. (IPS)
 
     CrowdSec by itself is a detection engine, since in most modern infrastructures you may have an upstream firewall or WAF, CrowdSec will not block the IP addresses by itself. You can install a Remediation Component to block the IP addresses detected by CrowdSec.
-
     ```bash
     sudo apt install crowdsec-firewall-bouncer-iptables
     ```
@@ -2237,7 +2236,7 @@ By default whilst the Remediation Component is installing it will auto-configure
     ╭──────────────────────────────────────────────────┬────────────┬────────┬──────╮
     │ Machine                                          │ Route      │ Method │ Hits │
     ├──────────────────────────────────────────────────┼────────────┼────────┼──────┤
-    │ githubciXXXXXXXXXXXXXXXXXXXXXXXXMKwkERgwSCD4NchX │ /v1/alerts │ GET    │ 2    │
+    │ <your_machine_id_will_be_here>                   │ /v1/alerts │ GET    │ 2    │
     ╰──────────────────────────────────────────────────┴────────────┴────────┴──────╯
 
     Parser Metrics:
