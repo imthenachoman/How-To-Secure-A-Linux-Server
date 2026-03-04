@@ -1578,7 +1578,7 @@ You can create rules by explicitly specifying the ports or with application conf
     sudo ufw default deny incoming comment 'deny all incoming traffic'
     ```
 
-1. Obviously we want SSH connections in:
+1. Obviously we want SSH connections. Using limit instead of allow will automatically deny connections from an IP address if it attempts to initiate 6 or more connections within a 30-second window:
 
     ``` bash
     sudo ufw limit in ssh comment 'allow SSH connections in'
