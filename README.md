@@ -1000,6 +1000,7 @@ Many security protocols leverage the time. If your system time is incorrect, it 
 #### How It Works
 
 NTP stands for Network Time Protocol. In the context of this guide, an NTP client on the server is used to update the server time with the official time pulled from official servers. Check https://www.pool.ntp.org/en/ for all of the public NTP servers.
+> **Note:** Starting with **Debian 13 (Trixie)**, the classic `ntp` package has been removed. Running `sudo apt install ntp` will fail with *"Package ntp has no installation candidate"*. Since this guide only uses NTP as a **client** (to sync the server's clock), the recommended approach on Debian 13+ is to use `systemd-timesyncd`, which is already pre-installed and requires no additional packages. See the [Debian 13+ steps](#debian-13-trixie-and-later-systemd-timesyncd) below.
 
 #### Goals
 
@@ -1015,6 +1016,76 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 
 #### Steps
 
+##### Debian 13 (Trixie) and later: systemd-timesyncd
+
+`systemd-timesyncd` is a lightweight SNTP client that is already included in Debian. Unlike the full `ntpd` daemon, it does not listen on any port, which makes it a smaller attack surface. For the purposes of this guide - keeping your server's clock in sync - it is all you need.
+
+1. Enable NTP synchronization:
+
+    ``` bash
+    sudo timedatectl set-ntp true
+    ```
+
+1. Verify it is working:
+
+    ``` bash
+    timedatectl status
+    ```
+
+    You should see `NTP service: active` and `System clock synchronized: yes` in the output.
+
+1. Configure trusted NTP servers. Make a backup of the configuration file and then edit it:
+
+    ``` bash
+    sudo cp --archive /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    ```
+
+    Edit `/etc/systemd/timesyncd.conf` and uncomment/set the `[Time]` section:
+
+    ```
+    [Time]
+    NTP=pool.ntp.org
+    FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org
+    ```
+
+    [For the lazy](#editing-configuration-files---for-the-lazy):
+
+    ``` bash
+    sudo sed -i -r -e "s/^#?NTP=.*$/NTP=pool.ntp.org         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/systemd/timesyncd.conf
+    sudo sed -i -r -e "s/^#?FallbackNTP=.*$/FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/systemd/timesyncd.conf
+    ```
+
+1. Restart the service to apply the changes:
+
+    ``` bash
+    sudo systemctl restart systemd-timesyncd
+    ```
+
+1. Check the synchronization status:
+
+    ``` bash
+    timedatectl timesync-status
+    ```
+
+    > ```
+    >        Server: 108.61.56.35 (pool.ntp.org)
+    > Poll interval: 32s (min: 32s; max: 34min 8s)
+    >          Leap: normal
+    >       Version: 4
+    >       Stratum: 2
+    >     Reference: C342F10A
+    >     Precision: 1us (2^0)
+    >  Root distance: 24.054ms (max: 5s)
+    >        Offset: +2.156ms
+    >         Delay: 48.567ms
+    >        Jitter: 1.452ms
+    >  Packet count: 3
+    > ```
+
+##### Debian 12 (Bookworm) and earlier: ntp package
+
+> **Note:** These steps apply to **Debian 12 and earlier** only. On Debian 13+, the `ntp` package is no longer available -- use the [systemd-timesyncd steps](#debian-13-trixie-and-later-systemd-timesyncd) above instead.
+
 1. Install ntp.
 
     On Debian based systems:
@@ -1026,7 +1097,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 1. Make a backup of the NTP client's configuration file `/etc/ntp.conf`:
 
     ``` bash
-    sudo cp --archive /etc/ntpsec/ntp.conf /etc/ntpsec/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ntp.conf /etc/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
