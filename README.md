@@ -518,6 +518,8 @@ SSH is a door into your server. This is especially true if you are opening ports
 
     **Note**: SSH does not like duplicate contradicting settings. For example, if you have `ChallengeResponseAuthentication no` and then `ChallengeResponseAuthentication yes`, SSH will respect the first one and ignore the second. Your `/etc/ssh/sshd_config` file may already have some of the settings/lines below. To avoid issues you will need to manually go through your `/etc/ssh/sshd_config` file and address any duplicate contradicting settings. 
 
+	**Note:** If you are running OpenSSH 9.1 or later, uncomment the `RequiredRSASize 3072` line in the configuration below. This enforces a minimum RSA key size of 3072 bits and will reject smaller RSA keys during authentication. This only affects RSA keys. If you use ED25519 or ECDSA keys, you are not affected. You can check your key type and size with `ssh-keygen -l -f ~/.ssh/id_rsa`. On older OpenSSH versions, leave the line commented out as it will prevent sshd from starting.
+   
     ```
     ########################################################################################################
     # start settings from https://infosec.mozilla.org/guidelines/openssh#modern-openssh-67 as of 2019-01-01
@@ -585,7 +587,7 @@ SSH is a door into your server. This is especially true if you are opening ports
     # OpenSSH 9.1 and later
     # Enforce a minimum RSA key size of 3072 bits
     # https://www.keylength.com/en/compare/
-    RequiredRSASize 3072
+    # RequiredRSASize 3072
 
     # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/115
     HashKnownHosts yes
