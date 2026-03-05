@@ -3029,11 +3029,12 @@ From [https://cisofy.com/lynis/](https://cisofy.com/lynis/):
     On Debian based systems, using CISOFY's community software repository:
 
     ``` bash
-    sudo apt install apt-transport-https ca-certificates host
-    sudo wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo apt-key add -
-    sudo echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
-    sudo apt update
-    sudo apt install lynis host
+	sudo apt install ca-certificates host
+	sudo mkdir -p /etc/apt/keyrings
+	wget -O - https://packages.cisofy.com/keys/cisofy-software-public.key | sudo gpg --dearmor -o /etc/apt/keyrings/cisofy-lynis.gpg
+	echo "deb [signed-by=/etc/apt/keyrings/cisofy-lynis.gpg] https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
+	sudo apt update
+	sudo apt install lynis
     ```
 
 1. Update it:
