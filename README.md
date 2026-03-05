@@ -1878,7 +1878,7 @@ And, since we're already using [UFW](#ufw-uncomplicated-firewall) so we'll follo
     -A FORWARD -j LOG --log-tcp-options --log-prefix "[IPTABLES] "
     ```
 
-    **Note**: We're adding a log prefix to all the iptables logs. We'll need this for [seperating iptables logs to their own file](#separate-iptables-log-file).
+    **Note**: We're adding a log prefix to all the iptables logs. We'll need this for [separating iptables logs to their own file](#separate-iptables-log-file).
 
     For example:
 
