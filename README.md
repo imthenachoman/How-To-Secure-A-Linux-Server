@@ -1000,6 +1000,7 @@ Many security protocols leverage the time. If your system time is incorrect, it 
 #### How It Works
 
 NTP stands for Network Time Protocol. In the context of this guide, an NTP client on the server is used to update the server time with the official time pulled from official servers. Check https://www.pool.ntp.org/en/ for all of the public NTP servers.
+> **Note:** Starting with **Debian 13 (Trixie)**, the classic `ntp` package has been removed. Running `sudo apt install ntp` will fail with *"Package ntp has no installation candidate"*. Since this guide only uses NTP as a **client** (to sync the server's clock), the recommended approach on Debian 13+ is to use `systemd-timesyncd`, which is already pre-installed and requires no additional packages. See the [Debian 13+ steps](#debian-13-trixie-and-later-systemd-timesyncd) below.
 
 #### Goals
 
@@ -1096,7 +1097,7 @@ NTP stands for Network Time Protocol. In the context of this guide, an NTP clien
 1. Make a backup of the NTP client's configuration file `/etc/ntp.conf`:
 
     ``` bash
-    sudo cp --archive /etc/ntpsec/ntp.conf /etc/ntpsec/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
+    sudo cp --archive /etc/ntp.conf /etc/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
     ```
 
 1. The default configuration, at least on Debian, is already pretty secure. The only thing we'll want to make sure is we're the `pool` directive and not any `server` directives. The `pool` directive allows the NTP client to stop using a server if it is unresponsive or serving bad time. Do this by commenting out all `server` directives and adding the below to `/etc/ntp.conf`.
