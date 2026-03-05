@@ -554,9 +554,6 @@ SSH is a door into your server. This is especially true if you are opening ports
     # Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
     Subsystem sftp  internal-sftp -f AUTHPRIV -l INFO
 
-    # only use the newer, more secure protocol
-    Protocol 2
-
     # disable X11 forwarding as X11 is very insecure
     # you really shouldn't be running X on a server anyway
     X11Forwarding no
