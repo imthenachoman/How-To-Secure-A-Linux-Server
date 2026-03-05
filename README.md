@@ -574,7 +574,11 @@ SSH is a door into your server. This is especially true if you are opening ports
     UseDNS yes
 
     Compression no
+    
+    # TCP keepalive is spoofable (runs outside the encrypted channel)
+	# Use ClientAlive instead (runs inside the encrypted channel)
     TCPKeepAlive no
+    
     AllowAgentForwarding no
     PermitRootLogin no
 
@@ -595,8 +599,8 @@ SSH is a door into your server. This is especially true if you are opening ports
     |Setting|Valid Values|Example|Description|Notes|
     |--|--|--|--|--|
     |<a name="AllowGroups"></a>**AllowGroups**|local UNIX group name|`AllowGroups sshusers`|group to allow SSH access to||
-    |**ClientAliveCountMax**|number|`ClientAliveCountMax 0`|maximum number of client alive messages sent without response||
-    |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 300`|timeout in seconds before a response request||
+    |**ClientAliveCountMax**|number|`ClientAliveCountMax 3`|maximum number of client alive messages sent without response||
+    |**ClientAliveInterval**|number of seconds|`ClientAliveInterval 15`|timeout in seconds before a response request||
     |**ListenAddress**|space separated list of local addresses|<ul><li>`ListenAddress 0.0.0.0`</li><li>`ListenAddress 192.168.1.100`</li></ul>|local addresses `sshd` should listen on|See [Issue #1](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/1) for important details.|
     |**LoginGraceTime**|number of seconds|`LoginGraceTime 30`|time in seconds before login times-out||
     |**MaxAuthTries**|number|`MaxAuthTries 2`|maximum allowed attempts to login||
@@ -635,8 +639,8 @@ SSH is a door into your server. This is especially true if you are opening ports
     > x11displayoffset 10
     > maxauthtries 2
     > maxsessions 2
-    > clientaliveinterval 300
-    > clientalivecountmax 0
+    > clientaliveinterval 15
+    > clientalivecountmax 3
     > streamlocalbindmask 0177
     > permitrootlogin no
     > ignorerhosts yes
