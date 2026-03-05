@@ -3557,8 +3557,6 @@ Well I will SIMPLIFY this method, to only output email using Google Mail account
     #tls_key_file [file]
     #tls_cert_file [file]
     tls_certcheck on
-    tls_force_sslv3 on
-    tls_min_dh_prime_bits 512
     #tls_priorities [priorities]
     #dsn_notify (off|condition)
     #dsn_return (off|amount)
