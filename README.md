@@ -582,6 +582,11 @@ SSH is a door into your server. This is especially true if you are opening ports
     # don't allow .rhosts or /etc/hosts.equiv
     HostbasedAuthentication no
 
+    # OpenSSH 9.1 and later
+    # Enforce a minimum RSA key size of 3072 bits
+    # https://www.keylength.com/en/compare/
+    RequiredRSASize 3072
+
     # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server/issues/115
     HashKnownHosts yes
     ```
