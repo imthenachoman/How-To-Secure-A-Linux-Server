@@ -120,6 +120,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
 - https://securecompliance.co/linux-server-hardening-checklist/
 - [VPS-SECURE](https://github.com/rockballslab/vps-secure) - One-command Ubuntu 24.04 VPS hardening: SSH key-only on 2222, CrowdSec IPS, Endlessh honeypot, UFW with Docker bypass fixed, kernel hardening, AIDE/rkhunter/auditd, Telegram alerts.
+- [Linux Security Labs](https://cybersecurity101.net/labs/linux-security/) - 94 free, step-by-step labs for practising these steps on a throwaway Ubuntu Server VM first: SSH keys and sshd hardening, UFW, Fail2ban, AIDE, auditd, LUKS and automatic updates, each with expected output and a validation step
 
 ([Table of Contents](#table-of-contents))
 
