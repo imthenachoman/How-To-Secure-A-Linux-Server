@@ -120,6 +120,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
 - https://securecompliance.co/linux-server-hardening-checklist/
 - [VPS-SECURE](https://github.com/rockballslab/vps-secure) - One-command Ubuntu 24.04 VPS hardening: SSH key-only on 2222, CrowdSec IPS, Endlessh honeypot, UFW with Docker bypass fixed, kernel hardening, AIDE/rkhunter/auditd, Telegram alerts.
+- [vps-first-boot](https://github.com/bigdomainhost/vps-first-boot) - One bash script for the first minutes on a fresh Ubuntu 22.04/24.04 or Debian 12 VPS: creates a sudo user with your SSH key, UFW allowing only SSH/80/443, fail2ban sshd jail, unattended security upgrades, optional swap; disables root and password SSH login only after confirming the new user can log in. Idempotent, prints every change.
 
 ([Table of Contents](#table-of-contents))
 
