@@ -4083,6 +4083,7 @@ For any questions, comments, concerns, feedback, or issues, submit a [new issue]
 ### Helpful Links
 
 - [https://github.com/pratiktri/server_init_harden](https://github.com/pratiktri/server_init_harden) - Bash script that automates few of the tasks that you need to perform on a new Linux server to give it basic amount security.
+- [https://trythehandle.eu/](https://trythehandle.eu/) - Free online scanner that checks a server or domain from the Internet (TLS, HTTP security headers, DNS, SPF/DKIM/DMARC, exposed files, software versions) and reports each issue with how to fix it.
 
 ([Table of Contents](#table-of-contents))
 
