@@ -120,6 +120,7 @@ There are many guides provided by experts, industry leaders, and the distributio
 - https://wiki.archlinux.org/index.php/Security - many folks have also recommended this one
 - https://securecompliance.co/linux-server-hardening-checklist/
 - [VPS-SECURE](https://github.com/rockballslab/vps-secure) - One-command Ubuntu 24.04 VPS hardening: SSH key-only on 2222, CrowdSec IPS, Endlessh honeypot, UFW with Docker bypass fixed, kernel hardening, AIDE/rkhunter/auditd, Telegram alerts.
+- [How fast a new VPS gets attacked](https://nocthost.com/blog/new-vps-attacked-first-hour) - Measurement of three fresh Ubuntu servers: first SSH password guess about 4.5 to 8 minutes after boot, with a first-five-minutes checklist.
 
 ([Table of Contents](#table-of-contents))
 
